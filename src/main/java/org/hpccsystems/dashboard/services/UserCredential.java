@@ -14,6 +14,15 @@ public class UserCredential  implements Serializable{
 	private String applicationId;
 	
 	private String userId;
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("UserCredential [applicationId=").append(applicationId)
+				.append(", userId=").append(userId).append(", userName=")
+				.append(userName).append(", roles=").append(roles).append("]");
+		return buffer.toString();
+	}
+
 	private String userName;
 	
 	Set<String> roles = new HashSet<String>();
@@ -31,7 +40,7 @@ public class UserCredential  implements Serializable{
 	}
 
 	public boolean isAnonymous() {
-		return hasRole("anonymous") || "anonymous".equals(userId);
+		return "anonymous".equals(userId);
 	}
 
 	public String getUserId() {

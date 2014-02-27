@@ -90,34 +90,10 @@ public class LoginController extends SelectorComposer<Component> {
 		}
 	}
 	
-	@Listen("onClick=#login; onOK=#loginWin")
-	public void doLogin(){
-		Boolean isLoginSuccessful = false;
+	@Listen("onSelect = #apps")
+	public void getApplicationId(){	
+		authenticationService.getUserCredential().setApplicationId(apps.getSelectedItem().getValue().toString());
 		
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Handling 'doLogin' in LoginController");
-		}
-		
-		final String name = account.getValue();
-		final String passWord = password.getValue();
-		
-		try	{
-			isLoginSuccessful = authenticationService.login(name,passWord, apps.getSelectedItem().getValue().toString());
-			LOG.debug("User authenticated sucessfully.." + isLoginSuccessful);
-		} catch(Exception ex) {
-			Clients.showNotification("Your login attempt failed. Please try again", false);
-			LOG.error("Exception while authendicating user in doLogin()", ex);
-		}
-		
-		if(!isLoginSuccessful){
-			message.setValue("Username or Password are not correct.");
-			return;
-		} else {
-			message.setValue("Welcome " + name);
-		}
-		
-		LOG.debug("Loged in. sending redirect...");
-		Executions.sendRedirect("/demo/");		
 	}
 	
 }

@@ -26,8 +26,12 @@ public class AuthenticationInit implements Initiator {
             		LOG.debug("Credentials - Account ->" + cre.getUserId() );
             		LOG.debug("Credentials - Name ->" + cre.getUserName() );
             	}
-                Executions.sendRedirect("/login.zhtml");
+            	//Redirects to login page
+                Executions.sendRedirect("/demo/");
                 return;
+            }else{
+            	//Redirects to previously loaded Dashboard page
+            	 Executions.sendRedirect("/demo/");
             }
     }
 }
