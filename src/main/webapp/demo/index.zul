@@ -1,5 +1,6 @@
-<!-- protect page by the authentication init  -->
-<?init class="org.hpccsystems.dashboard.controller.AuthenticationInit"?>
+<!-- Init object to set LDAP authenticated  user into Session-->
+<?init class="org.hpccsystems.dashboard.controller.LoginInit"?>
+
 <!-- authentication init have to locate before composition -->
 <?init class="org.zkoss.zk.ui.util.Composition" arg0="/demo/layout/template.zul"?>
 
