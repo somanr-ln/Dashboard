@@ -1,7 +1,6 @@
 package org.hpccsystems.dashboard.controller;
 
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.services.AuthenticationService;

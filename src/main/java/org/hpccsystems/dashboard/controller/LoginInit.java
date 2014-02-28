@@ -4,12 +4,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.UserCredential;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
+import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.Initiator;
-import org.zkoss.zkplus.spring.SpringUtil;
+
 
 public class LoginInit implements Initiator {
 	private static final  Log LOG = LogFactory.getLog(LoginInit.class); 
@@ -19,13 +20,12 @@ public class LoginInit implements Initiator {
 		
 		String userName = Executions.getCurrent().getUserPrincipal().getName();
 		LOG.debug("userName in LoginInit -->"+userName);
-		
-		AuthenticationService authenticationService = (AuthenticationService)SpringUtil.getBean("authenticationService");
-		UserCredential cre = authenticationService.getUserCredential();
+		final Session sess = Sessions.getCurrent();
+		UserCredential cre = (UserCredential)sess.getAttribute("userCredential");
 		
 		if(userName != null){
-			cre.setUserName(userName);
-			cre.setUserId(userName);
+			cre = new UserCredential(userName, userName, "A001");
+			sess.setAttribute("userCredential",cre);			
 		}
 		if(LOG.isDebugEnabled()){
 		LOG.debug("UserCredential in LoginInit -->"+cre);
