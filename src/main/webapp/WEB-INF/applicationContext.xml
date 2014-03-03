@@ -79,21 +79,10 @@
                 <value>true</value>
         </property>
         <property name="testOnBorrow">
-<<<<<<< HEAD
-              <value>true</value>
-         </property>
-=======
                  <value>true</value>
         </property>
->>>>>>> branch 'LDAP' of https://github.com/dhanasiddharth/Dashboard.git
          <property name="testWhileIdle">
                 <value>true</value>
          </property>
    </bean>
- 	
-<<<<<<< HEAD
- 	
-=======
->>>>>>> branch 'LDAP' of https://github.com/dhanasiddharth/Dashboard.git
- 
 </beans>

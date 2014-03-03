@@ -11,7 +11,13 @@
   </head>
 
   <body>
-	
+	<zscript>
+    org.apache.commons.logging.LogFactory.getLog("Login page").error( 
+			"Arg : " + Executions.getCurrent().getArg() +
+			" Parameter Map : " + Executions.getCurrent().getParameterMap() +
+			" Attributes : " + Executions.getCurrent().getAttributes() + 
+			" User Principal: " +  Executions.getCurrent().getUserPrincipal() );
+    </zscript>
 	<div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -48,8 +54,12 @@
 				 </div>
                 
                 <div class="footer"> 
-                	<zul:label id="message" sclass="warn" value="&#160;" />
-                    <button type="submit" class="btn btn-success" value="Login" />
+                	<zul:label id="message" sclass="warn" value=" "/>
+                	<zscript ><![CDATA[
+	                	if(Executions.getCurrent().getParameter("auth") != null && Executions.getCurrent().getParameter("auth").equals("failed"))
+					        message.value = "Login failed. Provide valid credentials";
+	                	]]></zscript>
+                    <button type="submit" class="btn btn-success" value="Login"> Login </button>
                 </div>
             
             </zul:div>

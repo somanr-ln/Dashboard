@@ -251,12 +251,8 @@
 		<auth-method>FORM</auth-method>
 		<realm-name>Circuit</realm-name>
 		<form-login-config>
-<<<<<<< HEAD
 	      <form-login-page>/login.zhtml</form-login-page>
-=======
-	      <form-login-page>/login.html</form-login-page>
->>>>>>> branch 'LDAP' of https://github.com/dhanasiddharth/Dashboard.git
-	      <form-error-page>/error.html</form-error-page>
+	      <form-error-page>/login_fail.zul</form-error-page>
 	   	</form-login-config>			
 	</login-config>
 		<security-role>
