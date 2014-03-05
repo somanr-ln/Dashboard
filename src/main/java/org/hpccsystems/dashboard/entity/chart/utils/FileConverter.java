@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.zkoss.util.media.AMedia;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
@@ -39,13 +40,13 @@ public class FileConverter {
 		}
 		catch(Exception ex)
 		{
-			LOG.error("Exception while writing to Excel" , ex);
+			LOG.error(Labels.getLabel("exceptionOnWritingExcel") , ex);
 		}finally{
 			try{
 				outputStream.close();
 			}catch(IOException ex)
 			{
-				LOG.error("Exception while closing OutputStream" , ex);
+				LOG.error(Labels.getLabel("exceptionwhileClosingOutputStream") , ex);
 			}
 		}
 		
@@ -104,7 +105,7 @@ public class FileConverter {
 	}
 	catch(Exception ex)
 	{
-		LOG.error("Exception while writing to Csv" , ex);
+		LOG.error(Labels.getLabel("exceptionONCSV") , ex);
 	}
 	}
 

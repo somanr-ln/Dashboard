@@ -33,7 +33,7 @@
 						<popup id="filterColumnPopup">
 							<listbox width="200px"  multiple="true" checkmark="true" vflex="1" id="commonFilterList" >
 							</listbox>
-						</popup>
+						</popup> 
 						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup"></button>
 					</toolbar>
 				</hbox>

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.zkoss.util.resource.Labels;
 
 /**
  * DashboardServiceImpl is implementaiton class for DashboardService.
@@ -86,7 +87,7 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 		catch(DataAccessException ex)
 		{
-			LOG.error("DataAccessException in addDashboardDetails()",ex);
+			LOG.error(Labels.getLabel("exceptionOnAddDashboard()"),ex);
 			throw ex;
 		}
 	}
@@ -99,7 +100,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try {
 			return dashboardDao.deleteDashboard(dashboardId,userId);
 		} catch (DataAccessException e) {
-			LOG.error("DataAccessException in deleteDashboard()", e);
+			LOG.error(Labels.getLabel("exceptionOnDeleteDashboard"), e);
 			throw e;
 		}		
 	}	
@@ -108,7 +109,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try{
 			dashboardDao.updateSidebarDetails(dashboardIdList);
 		}catch(DataAccessException e) {
-			LOG.error("DataAccessException in updateDashboardDetails()", e);
+			LOG.error(Labels.getLabel("exceptionOnUpdateDashboardDetails()"), e);
 			throw e;
 		}
 		
@@ -119,7 +120,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try {
 			dashboardDao.updateDashboard(dashboard);
 		} catch (DataAccessException e) {
-			LOG.error("DataAccessException in updateDashboard()", e);
+			LOG.error(Labels.getLabel("exceptionOnUpdateDashboard()"), e);
 			throw e;
 		}
 		

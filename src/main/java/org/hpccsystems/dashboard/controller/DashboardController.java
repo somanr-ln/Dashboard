@@ -260,7 +260,8 @@ public class DashboardController extends SelectorComposer<Component>{
 			}
 			
 		}
-	}
+	}	
+	
 	
 	EventListener<SelectEvent<Component, Object>> selectFilterListener = new EventListener<SelectEvent<Component, Object>>() {
 
@@ -323,6 +324,8 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 	};
+
+	
 	
 	@Listen("onClick = #addWidget")
 	public void addWidget() {
@@ -497,7 +500,11 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	/**
+<<<<<<< HEAD
 	 *   When a widget is deleted
+=======
+	 *  When a widget is deleted
+>>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 	 */
 	final EventListener<Event> onPanelClose = new EventListener<Event>() {
 

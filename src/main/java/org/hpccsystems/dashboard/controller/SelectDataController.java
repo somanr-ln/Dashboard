@@ -8,6 +8,7 @@ import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.FileListTreeModel;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -88,7 +89,7 @@ public class SelectDataController extends SelectorComposer<Component>{
 				);
 		} catch (Exception e) {
 			Clients.showNotification("Please check provided HPCC Credentials", "error", username.getParent().getParent(), "after_center", 3000, true);
-			LOG.error("Exception while browsing files for selcted Scope", e);
+			LOG.error(Labels.getLabel("exceptiononBrowingFiles"), e);
 			return;
 		}
 		FileListTreeModel fileListTreeModel = new FileListTreeModel(fileMeta, chartData);

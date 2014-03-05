@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.ScrollEvent;
@@ -88,7 +89,7 @@ public class NumericFilterController extends SelectorComposer<Component>{
 				}else{
 					Clients.showNotification("Unable to fetch column data from HPCC", true);
 				}
-				LOG.error("Exception while fetching data from Hpcc for selected Numeric filter", e);
+				LOG.error(Labels.getLabel("exceptiononNumericFilter"), e);
 				return;
 			}
 			
@@ -151,7 +152,7 @@ public class NumericFilterController extends SelectorComposer<Component>{
 			}else{
 				Clients.showNotification("Unable to fetch column data from HPCC", true);
 			}
-			LOG.error("Exception while fetching column data from Hpcc", ex);
+			LOG.error(Labels.getLabel("unabletoFetchHpccData"), ex);
 			return;
 		}		
 		

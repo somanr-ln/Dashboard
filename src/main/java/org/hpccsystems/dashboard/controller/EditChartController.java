@@ -190,7 +190,9 @@ public class EditChartController extends SelectorComposer<Component> {
 
 			if(chartData.getIsFiltered()) {
 				for (Filter filter : chartData.getFilterList()) {
-					createFilterListItem(filter);
+					if(!filter.getIsCommonFilter()){
+						createFilterListItem(filter);
+					}
 				}
 			}
 			

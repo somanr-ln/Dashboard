@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.util.Clients;
@@ -54,7 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService,Serializ
 		try {
 			user = authendicationDao.authendicateUser(account,passWord);
 		} catch (SQLException e) {
-			LOG.error("Login Authentication error", e);
+			LOG.error(Labels.getLabel("authenticationError"), e);
 			return false;
 		}
 		

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.zkoss.json.JSONArray;
 import org.zkoss.json.JSONObject;
+import org.zkoss.util.resource.Labels;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -92,13 +93,13 @@ public void deleteDashboard(HttpServletRequest request, HttpServletResponse resp
 			response.getWriter().write(jsObj.toJSONString());
 	}catch(DataAccessException ex)
 	{
-		LOG.error("Exception while processing 'Delete Dashboard' request from Circuit",ex);
+		LOG.error(Labels.getLabel("exceptionOnDeleteDashboardfromCircuit"),ex);
 		jsObj.put(Constants.STATUS, Constants.STATUS_FAIL);
 		jsObj.put(Constants.STATUS_MESSAGE, ex.getMessage());
 	}
 	catch(Exception ex) {
-		LOG.error("Exception while processing 'Delete Dashboard' request from Circui",ex);
-		throw new Exception("Unable to process your 'Delete Dashboard' request.Please try again");
+		LOG.error(Labels.getLabel("exceptionOnDeletingDashboardFromCircuit"),ex);
+		throw new Exception(Labels.getLabel("unabletoDeleteDashboard"));
 	}
 	
 }
@@ -127,7 +128,7 @@ public void getChartList(HttpServletRequest request, HttpServletResponse respons
 				response.getWriter().write(result.toString());
 			} 
 		} catch (Exception e) {
-			LOG.error("Exception while processing ChartLsit Request from Circuit", e);
+			LOG.error(Labels.getLabel("exceptionOnChartListFromCircuit"), e);
 			throw new Exception("Unable to process ChartLsit Request");
 		}
 
@@ -166,11 +167,11 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 			response.setContentType(Constants.RES_TEXT_TYPE_JSON);
 			response.getWriter().write(jsonResposeObj.toString());
 		}catch(DataAccessException ex){
-			LOG.error("Exception while fetching dahhboards from DB",ex);
+			LOG.error(Labels.getLabel("exceptiononretrievingDashbaord"),ex);
 			jsonResposeObj.put(Constants.STATUS_FAIL,ex.getMessage());
 		}
 		catch (Exception e) {
-			LOG.error("Exception while processing Search dahhboard request from Circuit", e);
+			LOG.error(Labels.getLabel("exceptionOnSearchDashboardFromCircuit"), e);
 			throw new Exception("Unable to process Search Request");
 		}
 		
@@ -249,12 +250,11 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 			response.setCharacterEncoding(Constants.CHAR_CODE);
 			response.getWriter().write(jsonObject.toString());
 		} catch (DataAccessException ex) {
-				LOG.error("Exception while fetching Widgets from DB", ex);
+				LOG.error(Labels.getLabel("widgetException"), ex);
 				jsonObject.addProperty(Constants.STATUS, Constants.STATUS_FAIL);
 				jsonObject.addProperty(Constants.STATUS_MESSAGE, ex.getMessage());
 		}catch (Exception e) {
-			LOG.error(
-					"Exception while processing Validate dashboard request from Circuit", e);
+			LOG.error(Labels.getLabel("exceptionOnValidateDashboardFromCircuit"), e);
 			throw new Exception("Unable to process Validate Request");
 		}
 	}
