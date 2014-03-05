@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.services.UserCredential;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.GenericRichlet;
 import org.zkoss.zk.ui.Page;
@@ -41,7 +42,7 @@ public class ViewDashboard extends GenericRichlet {
 			
 		} catch (Exception ex) {			
 			Clients.showNotification("Malformated URL string", false);
-			LOG.error("Exception while parsing Request Parameter in ViewDashboard.service()", ex);
+			LOG.error(Labels.getLabel("exceptionOnViewDashboardservice()"), ex);
 			return;			
 			}
 

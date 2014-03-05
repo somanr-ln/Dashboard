@@ -3,7 +3,7 @@
 	width="900px"
 	sclass="panel">
 	<caption iconSclass="glyphicon glyphicon-th-large">
-		<label zclass="h5"> Add Widget</label>
+		<label zclass="h5" value="${labels.addWidget }" />
 	</caption>
 	<div hflex="1" vflex="1" sclass="banner">
 	<custom-attributes org.zkoss.zul.image.preload="true" />

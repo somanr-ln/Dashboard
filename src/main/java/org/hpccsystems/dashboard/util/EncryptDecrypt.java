@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -18,8 +19,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.zkoss.util.resource.Labels;
 
 public class EncryptDecrypt {
 
@@ -57,15 +60,15 @@ public class EncryptDecrypt {
                      dcipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
 
               } catch (InvalidAlgorithmParameterException e) {
-            	  LOG.error("EXCEPTION: InvalidAlgorithmParameterException in EncryptDecrypt",e);
+            	  LOG.error(Labels.getLabel("invalidAlgorithmParameterException"),e);
               } catch (InvalidKeySpecException e) {
-            	  LOG.error("EXCEPTION: InvalidKeySpecException in EncryptDecrypt",e);
+            	  LOG.error(Labels.getLabel("invalidKeySpecException"),e);
               } catch (NoSuchPaddingException e) {
-            	  LOG.error("EXCEPTION: NoSuchPaddingException in EncryptDecrypt",e);
+            	  LOG.error(Labels.getLabel("noSuchPaddingException"),e);
               } catch (NoSuchAlgorithmException e) {
-            	  LOG.error("EXCEPTION: NoSuchAlgorithmException in EncryptDecrypt",e);
+            	  LOG.error(Labels.getLabel("noSuchAlgorithmException"),e);
               } catch (InvalidKeyException e) {
-            	  LOG.error("EXCEPTION: InvalidKeyException in EncryptDecrypt",e);
+            	  LOG.error(Labels.getLabel("invalidKeyException"),e);
               }
        }
 
@@ -107,15 +110,15 @@ public class EncryptDecrypt {
                                          iterationCount);
                            dcipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
                      } catch (InvalidAlgorithmParameterException e) {
-                    	 LOG.error("EXCEPTION: InvalidAlgorithmParameterException in EncryptDecrypt",e);
+                    	 LOG.error(Labels.getLabel("invalidAlgorithmParameterException"),e);
                      } catch (InvalidKeySpecException e) {
-                    	 LOG.error("EXCEPTION: InvalidKeySpecException in EncryptDecrypt",e);
+                    	 LOG.error(Labels.getLabel("invalidKeySpecException"),e);
                      } catch (NoSuchPaddingException e) {
-                    	 LOG.error("EXCEPTION: NoSuchPaddingException in EncryptDecrypt",e);
+                    	 LOG.error(Labels.getLabel("noSuchPaddingException"),e);
                      } catch (NoSuchAlgorithmException e) {
-                    	 LOG.error("EXCEPTION: NoSuchAlgorithmException in EncryptDecrypt",e);
+                    	 LOG.error(Labels.getLabel("noSuchAlgorithmException"),e);
                      } catch (InvalidKeyException e) {
-                    	 LOG.error("EXCEPTION: InvalidKeyException in EncryptDecrypt",e);
+                    	 LOG.error(Labels.getLabel("invalidKeyException"),e);
                      }
                      // Decode base64 to get bytes
                      byte[] dec = new sun.misc.BASE64Decoder().decodeBuffer(str);

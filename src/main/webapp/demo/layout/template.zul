@@ -23,6 +23,6 @@
 		<include src="/demo/layout/edit_portlet.zul"></include>
 	</div>
 	<div if="${sessionScope.userCredential.anonymous}">
-		Redirect to login page.....
+		${labels.redirecttoLoginpage}
 	</div>
 </zk> 

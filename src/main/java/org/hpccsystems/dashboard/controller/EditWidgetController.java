@@ -20,13 +20,12 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
-import org.zkoss.lang.Threads;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
@@ -255,14 +254,14 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					widgetService.updateWidget(portlet);
 				}
 			} catch (DataAccessException e) {
-				Clients.showNotification("Error occured while saving your changes");
+				Clients.showNotification(Labels.getLabel("errorWhileSaving"));
 			}
 			
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error("Logout error", e);
+				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -278,7 +277,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error("Logout error", e);
+				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -315,10 +314,10 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				widgetService.updateWidget(portlet);
 
 			}catch(DataAccessException e){
-				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
+				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), e);
 			}catch(Exception ex) {
 				Clients.showNotification("Unable to fetch column data from HPCC to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
-				LOG.error("Exception in closeEditWindow()", ex);
+				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), ex);
 				return;
 			}
 			editPortletWindow.detach();
@@ -344,7 +343,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
     			              		   editPortletWindow.detach();
     			              		   Clients.evalJavaScript("window.open('','_self',''); window.close();");
     			              	   } catch (Exception ex) {
-    			              		   LOG.error("Error while Log out", ex);
+    			              		   LOG.error(Labels.getLabel("logoutError"), ex);
     			              	   }
     			                }
     			            }

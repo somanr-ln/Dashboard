@@ -9,8 +9,8 @@
 		</vbox>
 		
 		<vbox align="center" pack="center" style="margin-top: 50px;">
-			<label zclass="h2" style="color:white">${requestScope['javax.servlet.error.status_code']} : Error occurred</label>
-			<label zclass="h4" style="color:white">Sorry, We are unable to process your request. Please try again.</label>
+			<label zclass="h2" style="color:white">${requestScope['javax.servlet.error.status_code']} : ${labels.errorOccurred}</label>
+			<label zclass="h4" style="color:white">${labels.unbaletoProcessYourRequest}</label>
 		</vbox>
 	</vbox>
 	

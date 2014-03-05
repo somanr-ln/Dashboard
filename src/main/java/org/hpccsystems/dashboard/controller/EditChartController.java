@@ -21,6 +21,7 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.hpccsystems.dashboard.util.DashboardUtil;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
@@ -133,7 +134,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				columnSchemaMap = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 			}catch(Exception e) {
 				Clients.showNotification("Unable to fetch columns from HPCC", "error", comp, "middle_center", 3000, true);
-				LOG.error(Constants.ERROR_RETRIEVE_COLUMNS, e);
+				LOG.error(Labels.getLabel("retrieveColumnError"), e);
 				return;
 			}			
 		}
@@ -414,7 +415,7 @@ public class EditChartController extends SelectorComposer<Component> {
 					chartRenderer.drawChart(chartData,	Constants.EDIT_WINDOW_CHART_DIV, portlet);
 				} catch(Exception e) {
 					Clients.showNotification("Couldn't retrive data to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
-					LOG.error("Chart Rendering failed", e);
+					LOG.error(Labels.getLabel("chartRenderingFailed"), e);
 				}
 			} else {
 				Clients.showBusy(chart, "Retriving data");
@@ -426,7 +427,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			Clients.showNotification(
 					"Unable to fetch column data from Hpcc", "error",
 					this.getSelf(), "middle_center", 3000, true);
-			LOG.error("Exception while fetching column data from Hpcc",ex);
+			LOG.error(Labels.getLabel("exceptionfromHPCC"),ex);
 			return;
 		}	
 
@@ -675,7 +676,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);
 			} catch(Exception ex) {
 				Clients.showNotification("Unable to fetch column data from HPCC", "error", EditChartController.this.getSelf() , "middle_center", 3000, true);
-				LOG.error("Exception while fetching column data from Hpcc", ex);
+				LOG.error(Labels.getLabel("exceptionfromHPCC"), ex);
 			}
 						
 			if(xAxisDropped && yAxisDropped){

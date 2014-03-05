@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:zul="http://www.zkoss.org/2005/zul">
   <head>
     <meta charset="utf-8" />
-    <title>Dashboard</title>
+    <title>${labels.dashboard}</title>
 
     <!-- styles -->
     <link href="demo/css/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
@@ -26,10 +26,10 @@
             <zul:div
             	apply="org.hpccsystems.dashboard.controller.LoginController" 
             	class="login-form">
-                <legend>Sign in to <span class="blue">Dashboard</span></legend>
+                <legend>Sign in to <span class="blue">${labels.dashboard}</span></legend>
 	            
 	            <div class="form-group">
-				   <label for="apps">Application</label >
+				   <label for="apps">${labels.appl}</label >
 				   <zul:listbox sclass="form-control" id="apps" mold="select" width="200px" style="display:inline">
 						<template name="model">
 							<zul:listitem label="${each.appName}" value="${each.appId}" />
@@ -38,12 +38,12 @@
 				 </div>
 	            
 	            <div class="form-group">
-				   <label for="account">Username</label >
+				   <label for="account">${labels.userName}</label >
 				   <zul:textbox type="text" sclass="form-control" id="account" style="display:inline"/> 
 				 </div>
 				 
 				 <div class="form-group">
-				   <label for="password">Password</label >
+				   <label for="password">${labels.password}</label >
 				   <zul:textbox type="password" class="form-control" id="password" style="display:inline"/>
 				 </div>
                 
@@ -58,7 +58,7 @@
     </div>
     
     <footer class="white navbar-fixed-bottom">
-      Don't have an account yet? <a href="#" class="btn btn-black">Register</a>
+      Don't have an account yet? <a href="#" class="btn btn-black">${labels.register}</a>
     </footer>
   </body>
 </html>

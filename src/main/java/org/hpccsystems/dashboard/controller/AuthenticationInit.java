@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.UserCredential;
 import org.hpccsystems.dashboard.services.impl.AuthenticationServiceImpl;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.util.Initiator;
@@ -21,10 +22,10 @@ public class AuthenticationInit implements Initiator {
             UserCredential cre = authService.getUserCredential();
             if(cre==null || cre.isAnonymous()){
             	if(LOG.isDebugEnabled()){
-            		LOG.debug("User Authentication failed.." );
-            		LOG.debug("Annonimity of user.." + cre.isAnonymous());
-            		LOG.debug("Credentials - Account ->" + cre.getUserId() );
-            		LOG.debug("Credentials - Name ->" + cre.getUserName() );
+            		LOG.debug(Labels.getLabel("authenticationFailed"));
+            		LOG.debug(Labels.getLabel("isAnonymous") + cre.isAnonymous());
+            		LOG.debug(Labels.getLabel("credentialAccount") + cre.getUserId());
+            		LOG.debug(Labels.getLabel("credentialName") + cre.getUserName());
             	}
                 Executions.sendRedirect("/login.zhtml");
                 return;
