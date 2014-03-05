@@ -1,27 +1,13 @@
 package org.hpccsystems.dashboard.entity;
 
-import java.util.ArrayList;
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 /**
  * This class is model for Dashboard.
  *
  */
 public class Dashboard {
-	@Override
-	public String toString() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Dashboard [layout=").append(layout).append( ", name=" )
-		.append(name).append(", columnCount=").append(columnCount)
-		.append(", dashboardId=").append(dashboardId).append(", applicationId=" )
-		.append(applicationId).append(", dashboardState=").append(dashboardState)
-		.append(", isPersisted=").append(isPersisted).append(", portletList=").append(portletList)
-		.append(", lastupdatedDate=").append(lastupdatedDate)
-		.append("]");
-		return buffer.toString();
-	}
-	
 	private String sourceId;
 	private String layout;
 	private String name = "Dashboard Name";
@@ -32,6 +18,8 @@ public class Dashboard {
 	private String dashboardState;
 	private Timestamp lastupdatedDate;
 	private Integer sequence;
+	
+	private boolean showFiltersPanel = false;
 	
 	public String getDashboardState() {
 		return dashboardState;
@@ -153,6 +141,14 @@ public class Dashboard {
 
 	public void setLastupdatedDate(Timestamp lastupdatedDate) {
 		this.lastupdatedDate = lastupdatedDate;
+	}
+
+	public boolean isShowFiltersPanel() {
+		return showFiltersPanel;
+	}
+
+	public void setShowFiltersPanel(boolean showFilterPanel) {
+		this.showFiltersPanel = showFilterPanel;
 	}
 
 
