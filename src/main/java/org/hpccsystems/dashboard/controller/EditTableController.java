@@ -15,7 +15,6 @@ import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
-import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.DropEvent;
@@ -185,7 +184,7 @@ public class EditTableController extends SelectorComposer<Component> {
 						);
 			} catch (Exception e) {
 				Clients.showNotification("Table Creation failed. Please try again.", "error", tableHolder, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("tableCreationFailed"), e);
+				LOG.error("Table creation failed", e);
 				return;
 			}
 			
