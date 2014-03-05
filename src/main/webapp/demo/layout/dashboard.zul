@@ -45,7 +45,7 @@
 					<column width="120px"></column>
 					<column></column>
 				</columns>
-				<rows>
+				<rows id="filterRows">
 					<row>
 						<div>
 							<label sclass="h5"> Country </label>
