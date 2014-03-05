@@ -44,6 +44,7 @@ import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Messagebox.ClickEvent;
+import org.zkoss.zul.Panel;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Window;
 
@@ -71,12 +72,15 @@ public class DashboardController extends SelectorComposer<Component>{
     
     @Wire
     Toolbar dashboardToolbar;
-    
+        
     @Wire("portallayout")
 	Portallayout portalLayout;
     
 	@Wire("portalchildren")
     List<Portalchildren> portalChildren;
+	
+	@Wire
+	Panel commonFiltersPanel;
 	
     Integer panelCount = 0;
     
@@ -179,6 +183,8 @@ public class DashboardController extends SelectorComposer<Component>{
 								LOG.error(Labels.getLabel("exceptionfromHPCC"), e);
 							}
 						} else {
+						portlet.setChartData(chartData);
+						if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
 							//For chart widgets
 							try	{
 								chartRenderer.constructChartJSON(chartData, portlet, false);
@@ -215,40 +221,43 @@ public class DashboardController extends SelectorComposer<Component>{
 			LOG.debug("Created Dashboard");
 			LOG.debug("Panel Count - " + dashboard.getColumnCount());
 		}
+		
+		if(dashboard.isShowFiltersPanel()){
+			commonFiltersPanel.setVisible(true);
+		}
 	}	
 	
 	@Listen("onClick = #addWidget")
 	public void addWidget() {
 		ChartPanel chartPanel=null;
 		try{
-		final Portlet portlet = new Portlet();
-		
-		portlet.setWidgetState(Constants.STATE_EMPTY);
-		portlet.setPersisted(false);
-		dashboard.getPortletList().add(portlet);
-		
-		// Adding new Widget to the column with lowest number of widgets
-		Integer count = 0, childCount = 0, column = 0;
-		for (Portalchildren portalchildren : portalChildren) {
-			if(! (count < dashboard.getColumnCount())) {
-				break;
+			final Portlet portlet = new Portlet();
+			
+			portlet.setWidgetState(Constants.STATE_EMPTY);
+			dashboard.getPortletList().add(portlet);
+			
+			// Adding new Widget to the column with lowest number of widgets
+			Integer count = 0, childCount = 0, column = 0;
+			for (Portalchildren portalchildren : portalChildren) {
+				if(! (count < dashboard.getColumnCount())) {
+					break;
+				}
+				if(portalchildren.getChildren().size() < childCount) {
+					column = count;
+				}
+				childCount = portalchildren.getChildren().size();
+				count ++;
 			}
-			if(portalchildren.getChildren().size() < childCount) {
-				column = count;
-			}
-			childCount = portalchildren.getChildren().size();
-			count ++;
-		}
-		portlet.setColumn(column);
-		chartPanel = new ChartPanel(portlet);
-		portalChildren.get(portlet.getColumn()).appendChild(chartPanel);
-		chartPanel.focus();
-		
-		manipulatePortletObjects(Constants.ReorderPotletPanels);
-		
-		portlet.setId(widgetService.addWidget(dashboardId, portlet, dashboard.getPortletList().indexOf(portlet)));
-		//Updating new widget sequence to DB
-		widgetService.updateWidgetSequence(dashboard);
+			portlet.setColumn(column);
+			chartPanel = new ChartPanel(portlet);
+			portalChildren.get(portlet.getColumn()).appendChild(chartPanel);
+			chartPanel.focus();
+			
+			manipulatePortletObjects(Constants.ReorderPotletPanels);
+			
+			portlet.setId(widgetService.addWidget(dashboardId, portlet, dashboard.getPortletList().indexOf(portlet)));
+			//Updating new widget sequence to DB
+			widgetService.updateWidgetSequence(dashboard);
 		}catch (DataAccessException e) {
 			LOG.error(Labels.getLabel("newWidgetError"), e);
 			Clients.showNotification("This widget may not have been saved", "error", chartPanel, "middle_center", 5000, true);
@@ -364,20 +373,27 @@ public class DashboardController extends SelectorComposer<Component>{
 			//To update Dashboard Name
 			onNameChange();
 			
+			//Showing Common filters panel
+			if(dashboard.isShowFiltersPanel()){
+				commonFiltersPanel.setVisible(true);
+			} else {
+				//TODO: Remove all global filters logic
+				commonFiltersPanel.setVisible(false);
+			}
+			
 			manipulatePortletObjects(Constants.ReorderPotletPanels);
 			manipulatePortletObjects(Constants.ResizePotletPanels);
 			try{
-			//updating Dashboard details
-			dashboard.setLastupdatedDate(new Timestamp(Calendar.getInstance().getTime().getTime()));
-			dashboardService.updateDashboard(dashboard);
-			
-			//updating Widget sequence
-			widgetService.updateWidgetSequence(dashboard);
+				//updating Dashboard details
+				dashboard.setLastupdatedDate(new Timestamp(Calendar.getInstance().getTime().getTime()));
+				dashboardService.updateDashboard(dashboard);
+				
+				//updating Widget sequence
+				widgetService.updateWidgetSequence(dashboard);
 			}catch(DataAccessException ex){
 				LOG.error(Labels.getLabel("exceptiononLayoutChange"), ex);
 			}
 			}		
-		
 	};
 
 	
@@ -467,7 +483,6 @@ public class DashboardController extends SelectorComposer<Component>{
 				 if(Messagebox.Button.YES.equals(event.getButton())) {
 	            	final Navbar navBar  = (Navbar) Selectors.iterable(DashboardController.this.getSelf().getPage(), "navbar").iterator().next();
 	           		
-	            	//TODO: Use detach instead of visible
 	            	navBar.getSelectedItem().setVisible(false);
 	           		
 	           		final Include include = (Include) Selectors.iterable(DashboardController.this.getSelf().getPage(), "#mainInclude")
