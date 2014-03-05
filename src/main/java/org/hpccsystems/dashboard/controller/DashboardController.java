@@ -43,6 +43,7 @@ import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Messagebox.ClickEvent;
+import org.zkoss.zul.Panel;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Window;
 
@@ -70,12 +71,15 @@ public class DashboardController extends SelectorComposer<Component>{
     
     @Wire
     Toolbar dashboardToolbar;
-    
+        
     @Wire("portallayout")
 	Portallayout portalLayout;
     
 	@Wire("portalchildren")
     List<Portalchildren> portalChildren;
+	
+	@Wire
+	Panel commonFiltersPanel;
 	
     Integer panelCount = 0;
     
@@ -204,6 +208,10 @@ public class DashboardController extends SelectorComposer<Component>{
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Created Dashboard");
 			LOG.debug("Panel Count - " + dashboard.getColumnCount());
+		}
+		
+		if(dashboard.isShowFiltersPanel()){
+			commonFiltersPanel.setVisible(true);
 		}
 	}	
 	
@@ -353,20 +361,27 @@ public class DashboardController extends SelectorComposer<Component>{
 			//To update Dashboard Name
 			onNameChange();
 			
+			//Showing Common filters panel
+			if(dashboard.isShowFiltersPanel()){
+				commonFiltersPanel.setVisible(true);
+			} else {
+				//TODO: Remove all global filters logic
+				commonFiltersPanel.setVisible(false);
+			}
+			
 			manipulatePortletObjects(Constants.ReorderPotletPanels);
 			manipulatePortletObjects(Constants.ResizePotletPanels);
 			try{
-			//updating Dashboard details
-			dashboard.setLastupdatedDate(new Timestamp(Calendar.getInstance().getTime().getTime()));
-			dashboardService.updateDashboard(dashboard);
-			
-			//updating Widget sequence
-			widgetService.updateWidgetSequence(dashboard);
+				//updating Dashboard details
+				dashboard.setLastupdatedDate(new Timestamp(Calendar.getInstance().getTime().getTime()));
+				dashboardService.updateDashboard(dashboard);
+				
+				//updating Widget sequence
+				widgetService.updateWidgetSequence(dashboard);
 			}catch(DataAccessException ex){
 				LOG.error("Exception while configuring Dashboard in onLayoutChange()", ex);
 			}
 			}		
-		
 	};
 
 	
@@ -456,7 +471,6 @@ public class DashboardController extends SelectorComposer<Component>{
 				 if(Messagebox.Button.YES.equals(event.getButton())) {
 	            	final Navbar navBar  = (Navbar) Selectors.iterable(DashboardController.this.getSelf().getPage(), "navbar").iterator().next();
 	           		
-	            	//TODO: Use detach instead of visible
 	            	navBar.getSelectedItem().setVisible(false);
 	           		
 	           		final Include include = (Include) Selectors.iterable(DashboardController.this.getSelf().getPage(), "#mainInclude")

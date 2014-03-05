@@ -21,7 +21,7 @@ public class Filter {
 	private Double StartValue;
 	private Double EndValue;
 	
-	private boolean isGlobalFilter = false;
+	private boolean isCommonFilter = false;
 	
 	
 	@XmlAttribute
@@ -70,12 +70,12 @@ public class Filter {
 	}
 	
 	@XmlElement
-	public boolean getIsGlobalFilter() {
-		return isGlobalFilter;
+	public boolean getIsCommonFilter() {
+		return isCommonFilter;
 	}
 	
-	public void setIsGlobalFilter(boolean isGlobalFilter) {
-		this.isGlobalFilter = isGlobalFilter;
+	public void setIsCommonFilter(boolean isGlobalFilter) {
+		this.isCommonFilter = isGlobalFilter;
 	}
 	
 	@Override
@@ -101,7 +101,7 @@ public class Filter {
 	public String toString() {
 		return "Filter [type=" + type + ", column=" + column + ", values="
 				+ values + ", StartValue=" + StartValue + ", EndValue="
-				+ EndValue + ", isGlobalFilter=" + isGlobalFilter + "]";
+				+ EndValue + ", isGlobalFilter=" + isCommonFilter + "]";
 	}
 	
 	

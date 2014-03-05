@@ -21,12 +21,12 @@
 </caption>
 
 <vlayout vflex="1" hflex="1" zclass="dashboard-body" style="overflow:auto; margin-top: 30px; margin-left: 5px;">
-	<panel zclass="panel" border="normal" style="margin-bottom: 0px;" visible="false">
+	<panel id="commonFiltersPanel" zclass="panel" border="normal" style="margin-bottom: 0px;" visible="false">
 		<caption>
 			<div hflex="1">
 				<hbox align="center" pack="stretch" hflex="1">
 					<div>
-						<label sclass="h5"> Global Filters </label>
+						<label sclass="h5"> Common Filters </label>
 					</div>
 					
 					<toolbar align="end" style="float:right; border-style: none;">
