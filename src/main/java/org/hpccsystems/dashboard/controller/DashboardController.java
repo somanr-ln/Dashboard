@@ -21,7 +21,6 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
-import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
@@ -129,7 +128,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				Clients.showNotification(
 						"Unable to retrieve selected Dashboard details from DB ",
 						"error", comp, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("widgetException"), ex);
+				LOG.error("Exception while fetching widget details from DB", ex);
 			}			
 			
 			if(dashboardList != null && dashboardList.size() > 0){
@@ -158,7 +157,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				Clients.showNotification(
 						"Unable to retrieve Widget details from DB for the Dashboard",
 						"error", comp, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("widgetException"), ex);
+				LOG.error("Exception while fetching widget details from DB", ex);
 			}
 			
 			if(LOG.isDebugEnabled()){
@@ -172,17 +171,6 @@ public class DashboardController extends SelectorComposer<Component>{
 					//Constructing chart data only when live chart is drawn
 					if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 						chartData = chartRenderer.parseXML(portlet.getChartDataXML());
-						if(portlet.getChartType().equals(Constants.TABLE_WIDGET)){
-							//Fetching data and setting into portlet to construct Table Widget
-							try{
-								portlet.setTableDataMap(hpccService.fetchTableData(chartData));
-							}catch(Exception e){
-								Clients.showNotification(
-										"Unable to fetch table data from Hpcc ",
-										"error", comp, "middle_center", 3000,true);
-								LOG.error(Labels.getLabel("exceptionfromHPCC"), e);
-							}
-						} else {
 						portlet.setChartData(chartData);
 						if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
 							//For chart widgets
@@ -191,7 +179,7 @@ public class DashboardController extends SelectorComposer<Component>{
 							}catch(Exception ex) {
 								Clients.showNotification("Unable to fetch column data from Hpcc", 
 										"error", comp, "middle_center", 3000, true);
-								LOG.error(Labels.getLabel("exceptionfromHPCC"), ex);
+								LOG.error("Exception while fetching column data from Hpcc", ex);
 							}
 						}
 					}
@@ -259,11 +247,11 @@ public class DashboardController extends SelectorComposer<Component>{
 			//Updating new widget sequence to DB
 			widgetService.updateWidgetSequence(dashboard);
 		}catch (DataAccessException e) {
-			LOG.error(Labels.getLabel("newWidgetError"), e);
+			LOG.error("Error while adding new Widget", e);
 			Clients.showNotification("This widget may not have been saved", "error", chartPanel, "middle_center", 5000, true);
 		}
 		catch (Exception e) {
-			LOG.error(Labels.getLabel("newWidgetError"), e);
+			LOG.error("Error while adding new Widget", e);
 			Clients.showNotification("This widget may not have been saved", "error", chartPanel, "middle_center", 5000, true);
 		}
 		
@@ -391,7 +379,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				//updating Widget sequence
 				widgetService.updateWidgetSequence(dashboard);
 			}catch(DataAccessException ex){
-				LOG.error(Labels.getLabel("exceptiononLayoutChange"), ex);
+				LOG.error("Exception while configuring Dashboard in onLayoutChange()", ex);
 			}
 			}		
 	};
@@ -423,7 +411,7 @@ public class DashboardController extends SelectorComposer<Component>{
 					widgetService.updateWidgetSequence(dashboard);
 				}
 			}catch(DataAccessException e){
-				LOG.error(Labels.getLabel("exceptionOnPanelclose()"), e);
+				LOG.error("Exception in onPanelClose()", e);
 			}
 			
 		}
@@ -446,7 +434,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			widgetService.updateWidgetSequence(dashboard);
 		} catch (Exception e) {
 			Clients.showNotification("Error occured while updating widget details", "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononPanelMove"), e);
+			LOG.error("Exception in onPanelMove()", e);
 		}
 	}
 	
@@ -531,11 +519,11 @@ public class DashboardController extends SelectorComposer<Component>{
                Messagebox.Button.YES, Messagebox.Button.NO }, Messagebox.QUESTION, clickListener);
 		}catch(DataAccessException ex){
 			Clients.showNotification("Unable to delete the Dashboard.", "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononDeletingDashboard"), ex);
+			LOG.error("Exception while deleting Dashboard in DashboardController", ex);
 			return;
 		}catch(Exception ex){
 			Clients.showNotification("Unable to delete the Dashboard.", "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononDeletingDashboard"), ex);
+			LOG.error("Exception while deleting Dashboard in DashboardController", ex);
 			return;			
 		}
   }
