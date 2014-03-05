@@ -20,7 +20,6 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
-import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
@@ -254,14 +253,14 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					widgetService.updateWidget(portlet);
 				}
 			} catch (DataAccessException e) {
-				Clients.showNotification(Labels.getLabel("errorWhileSaving"));
+				Clients.showNotification("Error occured while saving your changes");
 			}
 			
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error(Labels.getLabel("logoutError"), e);
+				LOG.error("Logout error", e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -277,7 +276,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error(Labels.getLabel("logoutError"), e);
+				LOG.error("Logout error", e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -286,6 +285,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			
 		} else {
 			//General flow
+			portlet.setChartData(chartData);
 			try {
 				Div div = chartPanel.removeStaticImage();
 
@@ -294,7 +294,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					div.getChildren().clear();
 					div.appendChild(
 							tableRenderer.constructTableWidget(
-									portlet.getTableDataMap(), false,portlet.getName())
+									portlet, false)
 							);
 				} else {
 					//For Chart Widgets
@@ -314,10 +314,10 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				widgetService.updateWidget(portlet);
 
 			}catch(DataAccessException e){
-				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), e);
+				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
 			}catch(Exception ex) {
 				Clients.showNotification("Unable to fetch column data from HPCC to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), ex);
+				LOG.error("Exception in closeEditWindow()", ex);
 				return;
 			}
 			editPortletWindow.detach();
@@ -343,7 +343,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
     			              		   editPortletWindow.detach();
     			              		   Clients.evalJavaScript("window.open('','_self',''); window.close();");
     			              	   } catch (Exception ex) {
-    			              		   LOG.error(Labels.getLabel("logoutError"), ex);
+    			              		   LOG.error("Error while Log out", ex);
     			              	   }
     			                }
     			            }
