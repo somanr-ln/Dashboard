@@ -14,6 +14,7 @@ import org.hpccsystems.dashboard.rowmapper.UserRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 
 /**
@@ -67,7 +68,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao{
 		}
 		}
 		catch(EmptyResultDataAccessException ex) {
-			LOG.error("authendicateUser failed to execute the query due to invalid user! Return an empty string", ex);
+			LOG.error(Labels.getLabel("exceptionOnAuthendicateUserFailed"), ex);
 			return null;
 		}
 		

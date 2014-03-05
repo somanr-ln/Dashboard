@@ -6,7 +6,6 @@ import org.hpccsystems.dashboard.entity.FileMeta;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.impl.HPCCServiceImpl;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.AbstractTreeModel;
 
 public class FileListTreeModel extends AbstractTreeModel<FileMeta> {

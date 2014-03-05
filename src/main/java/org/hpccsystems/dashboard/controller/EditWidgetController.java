@@ -20,6 +20,7 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
@@ -260,7 +261,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error("Logout error", e);
+				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -276,7 +277,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification("Error occured while logging out");
-				LOG.error("Logout error", e);
+				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -317,7 +318,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
 			}catch(Exception ex) {
 				Clients.showNotification("Unable to fetch column data from HPCC to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
-				LOG.error("Exception in closeEditWindow()", ex);
+				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), ex);
 				return;
 			}
 			editPortletWindow.detach();
@@ -343,7 +344,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
     			              		   editPortletWindow.detach();
     			              		   Clients.evalJavaScript("window.open('','_self',''); window.close();");
     			              	   } catch (Exception ex) {
-    			              		   LOG.error("Error while Log out", ex);
+    			              		   LOG.error(Labels.getLabel("logoutError"), ex);
     			              	   }
     			                }
     			            }

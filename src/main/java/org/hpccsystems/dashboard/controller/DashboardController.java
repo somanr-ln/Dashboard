@@ -233,34 +233,35 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 		if(dashboard.isShowFiltersPanel()){
-			Map<String,String> columnMap = new HashMap<String,String>();
+			Set<Field> columnSet = new HashSet<Field>();
 			Set<Field> fieldSet = null;
 			XYChartData chartData  = null;
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(portlet.getChartData() != null){
 					chartData = portlet.getChartData();
-					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
+					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
 					for(Field field :fieldSet){
-						if(!columnMap.containsKey(field.getColumnName())){
-							columnMap.put(field.getColumnName(), field.getDataType());
+						if(!columnSet.contains(field)){
+							columnSet.add(field);
 						}
 					}
 				}				
 			}
 			if(LOG.isDebugEnabled()){
-				LOG.debug("common columnMap in --->" + columnMap);
+				LOG.debug("common columnSet in --->" + columnSet);
 			}
 			commonFiltersPanel.setVisible(true);
 			Listitem filterItem = null;
-			for(Entry<String, String> entry : columnMap.entrySet()){
+			for(Field entry : columnSet){
 				filterItem = new Listitem();
-				filterItem.setLabel(entry.getKey());
-				filterItem.setAttribute("filterDataType", entry.getValue());
+				filterItem.setLabel(entry.getColumnName());
+				filterItem.setAttribute("filterDataType", entry.getDataType());
 				filterItem.setParent(commonFilterList);
 			}
 			
 		}
-	}
+	}	
+	
 	
 	EventListener<SelectEvent<Component, Object>> selectFilterListener = new EventListener<SelectEvent<Component, Object>>() {
 
@@ -323,6 +324,8 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 	};
+
+	
 	
 	@Listen("onClick = #addWidget")
 	public void addWidget() {
@@ -497,7 +500,11 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	/**
+<<<<<<< HEAD
 	 *   When a widget is deleted
+=======
+	 *  When a widget is deleted
+>>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 	 */
 	final EventListener<Event> onPanelClose = new EventListener<Event>() {
 

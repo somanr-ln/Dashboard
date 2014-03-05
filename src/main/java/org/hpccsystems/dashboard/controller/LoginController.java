@@ -17,6 +17,7 @@ import org.hpccsystems.dashboard.entity.Application;
 import org.hpccsystems.dashboard.services.ApplicationService;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -86,7 +87,7 @@ public class LoginController extends SelectorComposer<Component> {
 			apps.setModel(appModel);
 		} catch(Exception ex) {
 			Clients.showNotification("Unable to retrieve applications from DB. Please try reloading the page", false);
-			LOG.error("Exception while fetching applications from DB", ex);
+			LOG.error(Labels.getLabel("exceptionfromDB"), ex);
 		}
 	}
 	
@@ -106,7 +107,7 @@ public class LoginController extends SelectorComposer<Component> {
 			LOG.debug("User authenticated sucessfully.." + isLoginSuccessful);
 		} catch(Exception ex) {
 			Clients.showNotification("Your login attempt failed. Please try again", false);
-			LOG.error("Exception while authendicating user in doLogin()", ex);
+			LOG.error(Labels.getLabel("exceptionondoLogin()"), ex);
 		}
 		
 		if(!isLoginSuccessful){

@@ -30,6 +30,7 @@ import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.EncryptDecrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.util.Clients;
 
@@ -141,7 +142,7 @@ public class ChartRenderer {
 			}
 			iterator = list.iterator();	
 		}catch(Exception e)	{
-			LOG.error("Error while retriving data", e);
+			LOG.error(Labels.getLabel("exceptionWhileRetrievingData"), e);
 			throw e;
 		}
 		
@@ -385,9 +386,9 @@ public class ChartRenderer {
 			decryptedPassword = decrypter.decrypt(encryptedpassWord);
 			chartData.getHpccConnection().setPassword(decryptedPassword);
 		} catch (JAXBException e) {
-			LOG.error("EXCEPTION: JAXBException in ChartRenderer",e);
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
 		} catch (Exception e) {
-			LOG.error("EXCEPTION in parseXML()",e);
+			LOG.error(Labels.getLabel("exceptioninParseXML()"),e);
 		}		
 		return chartData;
 	}
@@ -411,7 +412,7 @@ public class ChartRenderer {
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 			marshaller.marshal(chartData, sw);
 		} catch (JAXBException e) {
-			LOG.error("EXCEPTION: JAXBException in ChartRenderer",e);
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
 		}
 	    return sw.toString();
 	}

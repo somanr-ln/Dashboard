@@ -15,6 +15,7 @@ import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
@@ -98,7 +99,7 @@ public class SidebarController extends GenericForwardComposer<Component>{
 			}
 		} catch(DataAccessException ex) {
 			Clients.showNotification("Unable to retrieve available Dashboards. Please try reloading the page.", true);
-			LOG.error("Exception while retrieving dashboards from DB", ex);
+			LOG.error(Labels.getLabel("exceptiononretrievingDashbaord"), ex);
 		}
 		
 		Navitem firstNavitem = null; 
@@ -282,12 +283,12 @@ public class SidebarController extends GenericForwardComposer<Component>{
 			navitem.setSelected(true);
 		} catch (DataAccessException exception) {
 			Clients.showNotification("Adding new Dashboard failed. Please try again", true);
-			LOG.error("Exception while adding new dashboard to DB", exception);
+			LOG.error(Labels.getLabel("exceptionwhileAddingDashboard"), exception);
 			return;
 		}
 		catch (Exception exception) {
 			Clients.showNotification("Adding new Dashboard failed. Please try again", true);
-			LOG.error("Exception while adding new dashboard to DB", exception);
+			LOG.error(Labels.getLabel("exceptionwhileAddingDashboard"), exception);
 			return;
 		}
 	}
@@ -334,7 +335,7 @@ public class SidebarController extends GenericForwardComposer<Component>{
 		dashboardService.updateSidebarDetails(dashboardList);
 		}catch(DataAccessException ex){
 			Clients.showNotification("Unable to update order of the Dashboards", true);
-			LOG.error("Exception while updating sequence of Dashboards in updateDashboardSequence()", ex);
+			LOG.error(Labels.getLabel("exceptiononupdateDashboardSequence()"), ex);
 			return;
 		}
 	}

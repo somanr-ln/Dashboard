@@ -17,6 +17,7 @@ import javax.net.ssl.SSLSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.zkoss.util.resource.Labels;
 
 import sun.misc.BASE64Encoder;
         
@@ -177,7 +178,7 @@ public class ECLSoap {
 	        	try{
 	        		Thread.sleep(3500);
 	        	}catch (Exception e){
-						LOG.error("couldn't sleep thread", e);
+						LOG.error(Labels.getLabel("exceptionOnThreadSleep"), e);
 	        	}
 	        }
        }

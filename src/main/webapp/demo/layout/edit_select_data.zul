@@ -17,7 +17,7 @@
 			<textbox id="URL" constraint="no empty : Please enter valid HPCCSystems ip." value="216.19.105.2" zclass="form-control"></textbox>
 		</hlayout>
 		<hlayout zclass="form-group" hflex="0">
-			<label zclass="label" value="Connection Type"></label>
+			<label zclass="label" value="${labels.connectionType}"></label>
 			<checkbox style="margin-top: 4px; margin-left: 10px;" id="sslCheckbox" label="SSL" checked="true" ></checkbox>
 		</hlayout>
 		<hlayout zclass="form-group" >

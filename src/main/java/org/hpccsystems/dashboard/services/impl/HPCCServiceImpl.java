@@ -119,10 +119,10 @@ public class HPCCServiceImpl implements HPCCService{
 				throw new Exception(Constants.ERROR_RETRIEVE_COLUMNS);
 			}
 		} catch (ServiceException e) {
-			LOG.error("ServiceException in getColumnSchema()", e);
+			LOG.error(Labels.getLabel("serviceExceptionOnGetColumnSchema()"), e);
 			throw e;
 		} catch (RemoteException e) {
-			LOG.error("RemoteException in getColumnSchema()", e);
+			LOG.error(Labels.getLabel("remoteExceptionOnGetColumnSchema()"), e);
 			throw e;
 		}		
 		if(LOG.isDebugEnabled()){
@@ -222,10 +222,10 @@ public class HPCCServiceImpl implements HPCCService{
 					  }
 				}
 		} catch (ServiceException e) {
-			LOG.error("ServiceException in getChartData()", e);
+			LOG.error(Labels.getLabel("serviceExceptionOnGetChartData"), e);
 			throw e;
 		} catch (RemoteException e) {
-			LOG.error("RemoteException in getChartData()", e);
+			LOG.error(Labels.getLabel("remoteExceptionOnGetChartData"), e);
 			throw e;
 		}
 		return dataList;
@@ -305,7 +305,7 @@ public class HPCCServiceImpl implements HPCCService{
 		}
 		}
 		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
-			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			LOG.error(Labels.getLabel("exceptioninFetchFilterData()"), ex);
 			throw ex;
 		} 
 		return filterDataList;
@@ -369,7 +369,7 @@ public class HPCCServiceImpl implements HPCCService{
 		resultMap.put(Constants.FILTER_MAXIMUM, 
 				new BigDecimal(nodeList.item(0).getChildNodes().item(1).getTextContent()) );
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
-			LOG.error("Exception occurred while fetching Numeric filter data in fetchFilterMinMax()", ex);
+			LOG.error(Labels.getLabel("exceptioninFetchFilterMinMax()"), ex);
 			throw ex;
 		}
 		return resultMap;
@@ -430,7 +430,6 @@ public class HPCCServiceImpl implements HPCCService{
 				}
 			}
 		}
-		
 		return queryTxt.toString();
 	}
 	
@@ -479,7 +478,7 @@ public class HPCCServiceImpl implements HPCCService{
 			queryTxt.append(" order by ");
 			queryTxt.append(chartData.getXColumnNames().get(0));
 		}catch(Exception e)	{
-			LOG.error("Exception while constructing query in constructQuery()", e);
+			LOG.error(Labels.getLabel("exceptionOnConstructQuery()"), e);
 		}
 		return queryTxt.toString();
 	}
@@ -563,7 +562,7 @@ public class HPCCServiceImpl implements HPCCService{
 			LOG.debug(("filterDataList -->" + tableDataMap));
 		}
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
-			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);
+			LOG.error(Labels.getLabel("exceptionOnFetchTableData()"), ex);
 			throw ex;
 		}			
 		return tableDataMap;
@@ -650,7 +649,7 @@ public class HPCCServiceImpl implements HPCCService{
 				}
 			}
 		  }catch (ParserConfigurationException | SAXException | IOException ex) {
-			  LOG.error(Labels.getLabel("exceptionOnGetFileList()"), ex);
+				LOG.error(Labels.getLabel("exceptionOnGetFileList()"), ex);
 				throw ex;
 			} 
 		return results;

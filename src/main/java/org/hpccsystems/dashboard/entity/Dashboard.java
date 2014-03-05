@@ -1,7 +1,7 @@
 package org.hpccsystems.dashboard.entity;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.ArrayList; 
 
 /**
  * This class is model for Dashboard.

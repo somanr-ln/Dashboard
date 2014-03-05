@@ -1,7 +1,6 @@
 package org.hpccsystems.dashboard.util;
 
 public class DashboardUtil {
-	private static final long serialVersionUID = 1L;	
 	/**
 	 * Checks whether a column is numeric
 	 * @param column

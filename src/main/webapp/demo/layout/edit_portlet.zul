@@ -3,7 +3,7 @@
 	closable="true" width="1000px" height="575px"
 	sclass="panel z-window-modal">
 	<caption iconSclass="glyphicon glyphicon-cog">
-		<label zclass="h5">Edit Chart</label>
+		<label value="${labels.editChart}" zclass="h5" />
 		<toolbar style="float: left; left: 820px;">
 			<button id="doneButton" disabled="true" tooltip="Add Chart to Dashboard" zclass="glyphicon glyphicon-ok btn btn-link img-btn z-button" /> 
 		</toolbar>	

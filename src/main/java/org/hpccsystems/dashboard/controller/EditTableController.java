@@ -123,7 +123,7 @@ public class EditTableController extends SelectorComposer<Component> {
 			tableHolder.appendChild(
 						tableRenderer.constructTableWidget(portlet, true)
 					);
-		} else {
+		} else { 
 			for (Field field : columnSet) {
 				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");

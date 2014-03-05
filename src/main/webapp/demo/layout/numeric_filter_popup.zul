@@ -10,14 +10,14 @@
 	    </listhead>
 	    <listitem>
 	    	<listcell>
-	    		<label>From - </label>
+	    		<label value="${labels.from-}" />
 	    		<label id="minimumLabel"></label>
 				<slider id="minimumSlider" />
 	    	</listcell>
 	    </listitem>
 	    <listitem>
 	    	<listcell>
-	    		<label>To - </label>
+	    		<label value="${labels.to-}" />
 	    		<label id="maximumLabel"></label>
 				<slider id="maximumSlider" />	
 	    	</listcell>
