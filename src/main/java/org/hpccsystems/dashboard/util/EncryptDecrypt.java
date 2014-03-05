@@ -70,7 +70,6 @@ public class EncryptDecrypt {
        }
 
        // Encrpt Password
-       @SuppressWarnings("unused")
        public String encrypt(String str) {
               try {
                      // Encode the string into bytes using utf-8

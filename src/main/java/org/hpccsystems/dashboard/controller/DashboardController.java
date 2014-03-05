@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.controller.component.ChartPanel;
 import org.hpccsystems.dashboard.entity.Dashboard;
@@ -20,6 +23,7 @@ import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
+import org.hpccsystems.dashboard.util.DashboardUtil;
 import org.springframework.dao.DataAccessException;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -27,6 +31,7 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.Listen;
@@ -39,11 +44,19 @@ import org.zkoss.zkmax.zul.Navbar;
 import org.zkoss.zkmax.zul.Navitem;
 import org.zkoss.zkmax.zul.Portalchildren;
 import org.zkoss.zkmax.zul.Portallayout;
+import org.zkoss.zul.Button;
+import org.zkoss.zul.Checkbox;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Messagebox.ClickEvent;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Panel;
+import org.zkoss.zul.Popup;
+import org.zkoss.zul.Row;
+import org.zkoss.zul.Rows;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Window;
 
@@ -80,6 +93,8 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	@Wire
 	Panel commonFiltersPanel;
+	@Wire
+	Rows filterRows;
 	
     Integer panelCount = 0;
     
@@ -213,7 +228,67 @@ public class DashboardController extends SelectorComposer<Component>{
 		if(dashboard.isShowFiltersPanel()){
 			commonFiltersPanel.setVisible(true);
 		}
-	}	
+	}
+	
+	EventListener<SelectEvent<Component, Object>> selectFilterListener = new EventListener<SelectEvent<Component, Object>>() {
+
+		@Override
+		public void onEvent(SelectEvent<Component, Object> event) throws Exception {
+			Listitem selectedListitem = (Listitem) event.getTarget();
+			Field field = (Field) selectedListitem.getAttribute(Constants.FIELD);
+			
+			Popup popup = (Popup) selectedListitem.getParent().getParent();
+			popup.close();
+			
+			if(DashboardUtil.checkNumeric(field.getColumnName())){
+				Clients.showNotification("Operation Not supported yet. Choose a String field");
+			} else {
+				Row row = new Row();
+				
+				Div div = new Div();
+				Label label = new Label(field.getColumnName());
+				label.setSclass("h5");
+				div.appendChild(label);
+				Button button = new Button();
+				button.setSclass("glyphicon glyphicon-remove-circle btn btn-link img-btn");
+				button.setStyle("float: left;");
+				div.appendChild(button);
+				
+				Hbox hbox = new Hbox();
+				Set<String> values = new LinkedHashSet<String>();
+				// Getting distinct values from all live Portlets
+				for (Portlet portlet : dashboard.getPortletList()) {
+					if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)){
+						if(portlet.getChartData().getFields().contains(field)){
+							Iterator<String> iterator = hpccService.getDistinctValues(field.getColumnName(), portlet.getChartData(), false).iterator();
+							while (iterator.hasNext()) {
+								values.add(iterator.next());
+							}
+						}
+					}
+				}
+				//Generating Checkboxes
+				Checkbox checkbox;
+				for (String value : values) {
+					checkbox = new Checkbox(value);
+					checkbox.setZclass("checkbox");
+					checkbox.setStyle("margin: 0px; padding-right: 5px;");
+					hbox.appendChild(checkbox);
+				}
+				
+				row.appendChild(div);
+				row.appendChild(hbox);
+				
+				filterRows.appendChild(row);
+			}
+			
+			selectedListitem.detach();
+			//TODO: Remove field from Class level set
+		}
+		
+	};
+
+	
 	
 	@Listen("onClick = #addWidget")
 	public void addWidget() {
@@ -244,6 +319,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			manipulatePortletObjects(Constants.ReorderPotletPanels);
 			
 			portlet.setId(widgetService.addWidget(dashboardId, portlet, dashboard.getPortletList().indexOf(portlet)));
+			
 			//Updating new widget sequence to DB
 			widgetService.updateWidgetSequence(dashboard);
 		}catch (DataAccessException e) {
@@ -387,7 +463,7 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	/**
-	 *  Hides empty Portletchildren
+	 *  When a widget is deleted
 	 */
 	final EventListener<Event> onPanelClose = new EventListener<Event>() {
 
