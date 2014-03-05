@@ -38,6 +38,11 @@
 			</radiogroup>
 		</hlayout>
 		
+		<hlayout zclass="form-group">
+			<label zclass="label" value="Dashboard Options"></label>
+			<checkbox zclass="checkbox" label="Common Filters" id="commonFiltersCheckbox"></checkbox>
+		</hlayout>
+		
 	</vbox>
 	
 </window>
