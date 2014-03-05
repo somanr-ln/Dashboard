@@ -16,6 +16,7 @@ import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Radio;
 import org.zkoss.zul.Radiogroup;
 import org.zkoss.zul.Textbox;
@@ -33,6 +34,8 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	Radiogroup layoutRadiogroup;
 	@Wire
 	Textbox nameTextbox;
+    @Wire
+    Checkbox commonFiltersCheckbox;
 	
 	private Component parent;
 	private Dashboard dashboard; 
@@ -49,6 +52,10 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 			dashboard = (Dashboard) Executions.getCurrent().getArg().get(Constants.DASHBOARD);
 			
 			nameTextbox.setValue(dashboard.getName());
+			
+			if(dashboard.isShowFiltersPanel()){
+				commonFiltersCheckbox.setChecked(true);
+			}
 			
 			try {
 				radioList.get(dashboard.getColumnCount() - 1).setSelected(true);
@@ -67,10 +74,13 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	@Listen("onClick = #dashConfigDoneButton")
 	public void done() {
 		if(parent instanceof Window) {
-			dashboard.setName(nameTextbox.getValue());		
+			//Changing configuration of existing board
+			dashboard.setName(nameTextbox.getValue());
+			dashboard.setShowFiltersPanel(commonFiltersCheckbox.isChecked());
 			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));
 			Events.sendEvent("onLayoutChange", parent, null);
 		} else {
+			//Creating new Board
 			Dashboard dashboard = new Dashboard();
 			dashboard.setName(nameTextbox.getValue());
 			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));

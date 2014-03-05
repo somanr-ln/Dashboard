@@ -1,6 +1,13 @@
 package org.hpccsystems.dashboard.api.entity;
 
 public class Field {
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Field [columnName=").append(columnName)
+				.append(", dataType=").append(dataType).append("]");
+		return builder.toString() ;
+	}
 	String columnName;
 	String dataType;
 	
