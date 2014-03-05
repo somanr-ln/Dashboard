@@ -25,12 +25,12 @@
 	
 	<vbox spacing="0px" hflex="1">
 		<hlayout zclass="form-group">
-			<label zclass="label" value="${labels.dashBoardName}"></label>
+			<label zclass="label" value="Dashboard Name"></label>
 			<textbox id="nameTextbox" constraint="no empty : Please enter a valid Name." zclass="form-control"></textbox>
 		</hlayout>
 		
 		<hlayout zclass="form-group">
-			<label zclass="label" value="${labels.dashboardLayout}"></label>
+			<label zclass="label" value="Dashboard Layout"></label>
 			<radiogroup id="layoutRadiogroup">
 				<radio image="images/one_col.png" value="1">	</radio>
 				<radio image="images/two_col.png" value="2">	</radio>
