@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;
@@ -269,7 +270,7 @@ public class ChartPanel extends Panel {
     		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidget(portlet);
         	}catch(DataAccessException ex){
-        		LOG.error("Exception in resetListener()", ex);
+        		LOG.error(Labels.getLabel("exceptioninResetListener()"), ex);
         	}
         } 
 	};
@@ -294,7 +295,7 @@ public class ChartPanel extends Panel {
 				}
 			}
 			}catch(DataAccessException ex){
-				LOG.error("Exception while deleting widget", ex);
+				LOG.error(Labels.getLabel("deleteWidgetException"), ex);
 			}
 		} 
 	};
@@ -324,7 +325,7 @@ public class ChartPanel extends Panel {
 			WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidgetTitle(portlet);
 			}catch(DataAccessException ex){
-				LOG.error("Exception while updating chart title", ex);
+				LOG.error(Labels.getLabel("updateChartTitleException"), ex);
 			}
 		}
 	};

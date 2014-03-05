@@ -13,6 +13,7 @@ import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -75,7 +76,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		} catch(Exception e) {
 			Clients.showNotification("Unable to fetch data for the Filter column", "error", 
 					doneButton.getParent().getParent().getParent(), "top_left", 3000, true);
-			LOG.error("Exception while fetching data from Hpcc for selected String filter", e);
+			LOG.error(Labels.getLabel("exceptionforSelectedStringFilter"), e);
 		}
 		
 		List<String> filteredList = null;
@@ -138,7 +139,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		} catch(Exception ex) {
 			Clients.showNotification("Unable to fetch column data from HPCC", "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
-			LOG.error("Exception while fetching column data from Hpcc", ex);
+			LOG.error(Labels.getLabel("fetchingExceptionfromHpcc"), ex);
 			return;
 		}
 		if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
