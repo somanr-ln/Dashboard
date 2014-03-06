@@ -5,22 +5,26 @@ public class Field {
 	public int hashCode() {		
 		return (columnName == null) ? 0 : columnName.hashCode();
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Field other = (Field) obj;
-		if (columnName == null) {
-			if (other.columnName != null)
+		
+		if(obj instanceof Field) {
+			Field other = (Field) obj;
+			if (columnName == null) {
+				if (other.columnName != null)
+					return false;
+			} else if (!columnName.equals(other.columnName)){
 				return false;
-		} else if (!columnName.equals(other.columnName)){
-			return false;
+			}
+			return true;
+		} else {
+			return obj.equals(this.columnName);
 		}
-		return true;
 	}
 	@Override
 	public String toString() {
