@@ -99,7 +99,7 @@ public class SidebarController extends GenericForwardComposer<Component>{
 			}
 		} catch(DataAccessException ex) {
 			Clients.showNotification(Labels.getLabel("unableToRetrieveDashboards"), true);
-			LOG.error(Labels.getLabel("exceptiononretrievingDashbaord"), ex);
+			LOG.error("Exception while retrieving dashboards from DB", ex);
 		}
 		
 		Navitem firstNavitem = null; 
@@ -283,12 +283,12 @@ public class SidebarController extends GenericForwardComposer<Component>{
 			navitem.setSelected(true);
 		} catch (DataAccessException exception) {
 			Clients.showNotification(Labels.getLabel("addDashboardError"), true);
-			LOG.error(Labels.getLabel("exceptionwhileAddingDashboard"), exception);
+			LOG.error("Exception while adding new dashboard to DB", exception);
 			return;
 		}
 		catch (Exception exception) {
 			Clients.showNotification(Labels.getLabel("addDashboardError"),true);
-			LOG.error(Labels.getLabel("exceptionwhileAddingDashboard"), exception);
+			LOG.error("Exception while adding new dashboard to DB", exception);
 			return;
 		}
 	}
@@ -335,7 +335,7 @@ public class SidebarController extends GenericForwardComposer<Component>{
 		dashboardService.updateSidebarDetails(dashboardList);
 		}catch(DataAccessException ex){
 			Clients.showNotification(Labels.getLabel("unableToUpdateOrderOfDashboard"), true);
-			LOG.error(Labels.getLabel("exceptiononupdateDashboardSequence()"), ex);
+			LOG.error("Exception while updating sequence of Dashboards in updateDashboardSequence()", ex);
 			return;
 		}
 	}

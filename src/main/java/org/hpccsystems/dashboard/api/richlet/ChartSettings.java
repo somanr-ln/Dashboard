@@ -59,7 +59,7 @@ public class ChartSettings extends GenericRichlet{
 				}
 			}catch(Exception ex){
 				Clients.showNotification(Labels.getLabel("malFormedUrlString"), false);
-				LOG.error(Labels.getLabel("exceptionOnChartSettingsservice()"), ex);
+				LOG.error("Exception while parsing Request Parameter in ChartSettings.service()", ex);
 				return;			
 			}
 			

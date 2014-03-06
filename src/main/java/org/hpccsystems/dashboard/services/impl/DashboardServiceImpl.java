@@ -87,7 +87,7 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 		catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnAddDashboard()"),ex);
+			LOG.error("DataAccessException in addDashboardDetails()",ex);
 			throw ex;
 		}
 	}
@@ -100,7 +100,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try {
 			return dashboardDao.deleteDashboard(dashboardId,userId);
 		} catch (DataAccessException e) {
-			LOG.error(Labels.getLabel("exceptionOnDeleteDashboard"), e);
+			LOG.error("DataAccessException in deleteDashboard()", e);
 			throw e;
 		}		
 	}	
@@ -109,7 +109,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try{
 			dashboardDao.updateSidebarDetails(dashboardIdList);
 		}catch(DataAccessException e) {
-			LOG.error(Labels.getLabel("exceptionOnUpdateDashboardDetails()"), e);
+			LOG.error("DataAccessException in updateDashboardDetails()", e);
 			throw e;
 		}
 		
@@ -120,7 +120,7 @@ public class DashboardServiceImpl implements DashboardService {
 		try {
 			dashboardDao.updateDashboard(dashboard);
 		} catch (DataAccessException e) {
-			LOG.error(Labels.getLabel("exceptionOnUpdateDashboard()"), e);
+			LOG.error("DataAccessException in updateDashboard()", e);
 			throw e;
 		}
 		

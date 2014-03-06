@@ -178,7 +178,7 @@ public class ECLSoap {
 	        	try{
 	        		Thread.sleep(3500);
 	        	}catch (Exception e){
-						LOG.error(Labels.getLabel("exceptionOnThreadSleep"), e);
+	        		LOG.error("couldn't sleep thread", e);
 	        	}
 	        }
        }

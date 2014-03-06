@@ -152,7 +152,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				Clients.showNotification(
 						Labels.getLabel("unabletoRetrieveDB"),
 						"error", comp, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("widgetException"), ex);
+				LOG.error("Exception while fetching widget details from DB", ex);
 			}			
 			
 			if(dashboardList != null && dashboardList.size() > 0){
@@ -181,7 +181,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				Clients.showNotification(
 						Labels.getLabel("unableToRetrieveWidget"),
 						"error", comp, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("widgetException"), ex);
+				LOG.error("Exception while fetching widget details from DB", ex);
 			}
 			
 			if(LOG.isDebugEnabled()){
@@ -210,7 +210,7 @@ public class DashboardController extends SelectorComposer<Component>{
 							}catch(Exception ex) {
 								Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
 										"error", comp, "middle_center", 3000, true);
-								LOG.error(Labels.getLabel("fetchingExceptionfromHpcc"), ex);
+								LOG.error("Exception while fetching column data from Hpcc", ex);
 							}
 						}
 					}
@@ -532,11 +532,11 @@ public class DashboardController extends SelectorComposer<Component>{
 			//Updating new widget sequence to DB
 			widgetService.updateWidgetSequence(dashboard);
 		}catch (DataAccessException e) {
-			LOG.error(Labels.getLabel("newWidgetError"), e);
+			LOG.error("Error while adding new Widget", e);
 			Clients.showNotification(Labels.getLabel("widgetHaventSaved"), "error", chartPanel, "middle_center", 5000, true);
 		}
 		catch (Exception e) {
-			LOG.error(Labels.getLabel("newWidgetError"), e);
+			LOG.error("Error while adding new Widget", e);
 			Clients.showNotification(Labels.getLabel("widgetHaventSaved"), "error", chartPanel, "middle_center", 5000, true);
 		}
 		
@@ -683,7 +683,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				//updating Widget sequence
 				widgetService.updateWidgetSequence(dashboard);
 			}catch(DataAccessException ex){
-				LOG.error(Labels.getLabel("exceptioninonLayoutChange()"), ex);
+				LOG.error("Exception while configuring Dashboard in onLayoutChange()", ex);
 			}
 			}		
 	};
@@ -719,7 +719,7 @@ public class DashboardController extends SelectorComposer<Component>{
 					widgetService.updateWidgetSequence(dashboard);
 				}
 			}catch(DataAccessException e){
-				LOG.error(Labels.getLabel("exceptionOnPanelclose()"), e);
+				LOG.error("Exception in onPanelClose()", e);
 			}
 			
 		}
@@ -742,7 +742,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			widgetService.updateWidgetSequence(dashboard);
 		} catch (Exception e) {
 			Clients.showNotification(Labels.getLabel("errorOnUpdatingWidgetDetails"), "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononPanelMove()"), e);
+			LOG.error("Exception in onPanelMove()", e);
 		}
 	}
 	
@@ -827,11 +827,11 @@ public class DashboardController extends SelectorComposer<Component>{
                Messagebox.Button.YES, Messagebox.Button.NO }, Messagebox.QUESTION, clickListener);
 		}catch(DataAccessException ex){
 			Clients.showNotification(Labels.getLabel("unableToDeleteDashboard"), "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononDeletingDashboard"), ex);
+			LOG.error("Exception while deleting Dashboard in DashboardController", ex);
 			return;
 		}catch(Exception ex){
 			Clients.showNotification(Labels.getLabel("unableToDeleteDashboard"), "error", this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononDeletingDashboard"), ex);
+			LOG.error("Exception while deleting Dashboard in DashboardController", ex);
 			return;			
 		}
   }

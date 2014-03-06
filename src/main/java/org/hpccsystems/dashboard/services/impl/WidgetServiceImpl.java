@@ -39,7 +39,7 @@ public class WidgetServiceImpl implements WidgetService {
 		widgetDao.addWidgetDetails(dashboardId,portlets);
 		}catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnAddWidgetDetails()"), ex);
+			LOG.error("DataAccessException in addWidgetDetails() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 		
@@ -51,7 +51,7 @@ public class WidgetServiceImpl implements WidgetService {
 		return widgetDao.retriveWidgetDetails(dashboardId);
 		}catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnRetrieveWidgetDetails()"), ex);
+			LOG.error("DataAccessException in retriveWidgetDetails() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 	}
@@ -61,7 +61,7 @@ public class WidgetServiceImpl implements WidgetService {
 		try	{
 			widgetDao.deleteWidget(portletId);
 		}catch(DataAccessException ex)	{
-			LOG.error(Labels.getLabel("exceptionOnDeleteWidgets()"), ex);
+			LOG.error("DataAccessException in deleteWidgets() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 	}
@@ -73,7 +73,7 @@ public class WidgetServiceImpl implements WidgetService {
 			widgetDao.updateWidgetSequence(dashboard.getDashboardId(),dashboard.getPortletList());
 		}catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnUpdateWidgetSequence()"), ex);
+			LOG.error("DataAccessException in updateWidgetSequence() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 		
@@ -86,7 +86,7 @@ public class WidgetServiceImpl implements WidgetService {
 			widgetDao.updateWidget(portlet);
 		}catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnUpdateWidget()"), ex);
+			LOG.error("DataAccessException in updateWidget() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 		
@@ -99,7 +99,7 @@ public class WidgetServiceImpl implements WidgetService {
 			widgetDao.updateWidgetTitle(portlet);
 		}catch(DataAccessException ex)
 		{
-			LOG.error(Labels.getLabel("exceptionOnUpdateWidgetTitle()"), ex);
+			LOG.error("DataAccessException in updateWidgetTitle() in WidgetServiceImpl", ex);
 			throw ex;
 		}		
 	}
@@ -110,7 +110,7 @@ public class WidgetServiceImpl implements WidgetService {
 		try {
 			return widgetDao.addWidget(dashboardId, portlet, sequence);
 		} catch(DataAccessException ex) {
-			LOG.error(Labels.getLabel("exceptionOnAddWidget"), ex);
+			LOG.error("DataAccessException in addWidgetDetails() in WidgetServiceImpl", ex);
 			throw ex;
 		}
 	}

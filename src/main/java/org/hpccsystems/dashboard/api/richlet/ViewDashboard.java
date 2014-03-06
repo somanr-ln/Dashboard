@@ -42,7 +42,7 @@ public class ViewDashboard extends GenericRichlet {
 			
 		} catch (Exception ex) {			
 			Clients.showNotification(Labels.getLabel("malFormedUrlString"), false);
-			LOG.error(Labels.getLabel("exceptionOnViewDashboardservice()"), ex);
+			LOG.error("Exception while parsing Request Parameter in ViewDashboard.service()", ex);
 			return;			
 			}
 

@@ -89,7 +89,7 @@ public class SelectDataController extends SelectorComposer<Component>{
 				);
 		} catch (Exception e) {
 			Clients.showNotification(Labels.getLabel("plzCheckProvidedHPCCCrendentials"), "error", username.getParent().getParent(), "after_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptiononBrowingFiles"), e);
+			LOG.error("Exception while browsing files for selcted Scope", e);
 			return;
 		}
 		FileListTreeModel fileListTreeModel = new FileListTreeModel(fileMeta, chartData);

@@ -137,7 +137,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 			}catch(Exception e) {
 				Clients.showNotification(Labels.getLabel("unableToFetchColumns"), "error", comp, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("retrieveColumnError"), e);
+				LOG.error(Constants.ERROR_RETRIEVE_COLUMNS, e);
 				return;
 			}			
 		}
@@ -452,7 +452,7 @@ public class EditChartController extends SelectorComposer<Component> {
 					chartRenderer.drawChart(chartData,	Constants.EDIT_WINDOW_CHART_DIV, portlet);
 				} catch(Exception e) {
 					Clients.showNotification(Labels.getLabel("couldntRetrieveData"), "error", this.getSelf(), "middle_center", 3000, true);
-					LOG.error(Labels.getLabel("chartRenderingFailed"), e);
+					LOG.error("Chart Rendering failed", e);
 				}
 			} else {
 				Clients.showBusy(chart, "Retriving data");
@@ -464,7 +464,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			Clients.showNotification(
 					Labels.getLabel("unableToFetchHpccData"), "error",
 					this.getSelf(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("exceptionfromHPCC"),ex);
+			LOG.error("Exception while fetching column data from Hpcc",ex);
 			return;
 		}	
 
@@ -713,7 +713,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);
 			} catch(Exception ex) {
 				Clients.showNotification(Labels.getLabel("unableToFetchHpccData"), "error", EditChartController.this.getSelf() , "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("exceptionfromHPCC"), ex);
+				LOG.error("Exception while fetching column data from Hpcc", ex);
 			}
 						
 			if(xAxisDropped && yAxisDropped){
