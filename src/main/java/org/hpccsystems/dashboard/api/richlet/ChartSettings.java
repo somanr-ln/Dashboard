@@ -58,7 +58,7 @@ public class ChartSettings extends GenericRichlet{
 					credential.addRole(Constants.CIRCUIT_ROLE_VIEW_CHART);
 				}
 			}catch(Exception ex){
-				Clients.showNotification("Malformated URL string", false);
+				Clients.showNotification(Labels.getLabel("malFormedUrlString"), false);
 				LOG.error(Labels.getLabel("exceptionOnChartSettingsservice()"), ex);
 				return;			
 			}

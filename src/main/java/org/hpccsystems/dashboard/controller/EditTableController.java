@@ -191,14 +191,14 @@ public class EditTableController extends SelectorComposer<Component> {
 						tableRenderer.constructTableWidget(portlet, true)
 						);
 			} catch (Exception e) {
-				Clients.showNotification("Table Creation failed. Please try again.", "error", tableHolder, "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("tableCreationFailed"), "error", tableHolder, "middle_center", 3000, true);
 				LOG.error(Labels.getLabel("tableCreationFailed"), e);
 				return;
 			}
 			
 			doneButton.setDisabled(false);
 		} else {
-			Clients.showNotification("Move some columns over here to draw a Table", "error", targetList, "middle_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("moveSomeColumn"), "error", targetList, "middle_center", 3000, true);
 		}
 	}
 

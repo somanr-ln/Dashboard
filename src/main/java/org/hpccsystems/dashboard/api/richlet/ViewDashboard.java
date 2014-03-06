@@ -41,7 +41,7 @@ public class ViewDashboard extends GenericRichlet {
 			Executions.sendRedirect(url.toString());
 			
 		} catch (Exception ex) {			
-			Clients.showNotification("Malformated URL string", false);
+			Clients.showNotification(Labels.getLabel("malFormedUrlString"), false);
 			LOG.error(Labels.getLabel("exceptionOnViewDashboardservice()"), ex);
 			return;			
 			}
