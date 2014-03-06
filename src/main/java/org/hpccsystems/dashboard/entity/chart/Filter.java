@@ -1,6 +1,6 @@
 package org.hpccsystems.dashboard.entity.chart;
 
-import java.util.List;
+import java.util.List; 
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

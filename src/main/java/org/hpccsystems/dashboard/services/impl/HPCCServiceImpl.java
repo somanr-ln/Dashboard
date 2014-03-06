@@ -7,10 +7,12 @@ import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,6 +21,7 @@ import javax.xml.rpc.ServiceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.FileMeta;
 import org.hpccsystems.dashboard.entity.chart.Filter;
@@ -60,11 +63,10 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return Map<String,String>
 	 */
 	
-	public Map<String,String> getColumnSchema(final String Sql, final HpccConnection hpccConnection) throws Exception
+	public Set<Field> getColumnSchema(final String Sql, final HpccConnection hpccConnection) throws Exception
 	{
-		final HashMap<String, String> schemaMap=new HashMap<String, String>();
-		
-		String[] rowObj=null,columnObj=null;
+		final Set<Field> columnSet = new HashSet<Field>();
+		String[] rowObj=null,columnObj=null;Field fieldObj=null;
 		try 
 		{
 			final WsDfuLocator locator = new WsDfuLocator();
@@ -103,10 +105,12 @@ public class HPCCServiceImpl implements HPCCService{
 					rowString=rowString.trim();
 					if(rowString!=null && rowString.length()>0)
 					{
+						fieldObj = new Field();
 						columnObj=rowString.split(" ");
 						if(columnObj!=null && columnObj.length>1){
-						//put columnName as map 'key' and column datatype as map 'value'
-						schemaMap.put(columnObj[1], columnObj[0]);
+						fieldObj.setColumnName(columnObj[1]);
+						fieldObj.setDataType(columnObj[0]);
+						columnSet.add(fieldObj);
 						}
 					}
 				}
@@ -116,17 +120,15 @@ public class HPCCServiceImpl implements HPCCService{
 			}
 		} catch (ServiceException e) {
 			LOG.error(Labels.getLabel("serviceExceptionOnGetColumnSchema()"), e);
-			schemaMap.put(Constants.ERROR,Constants.ERROR_HPCC_SERVER);
 			throw e;
 		} catch (RemoteException e) {
 			LOG.error(Labels.getLabel("remoteExceptionOnGetColumnSchema()"), e);
-			schemaMap.put(Constants.ERROR,Constants.ERROR_HPCC_SERVER);
 			throw e;
 		}		
 		if(LOG.isDebugEnabled()){
-			LOG.debug(schemaMap);
+			LOG.debug("columnSet -->"+columnSet);
 		}	
-		return schemaMap;
+		return columnSet;
 	}
 	
 

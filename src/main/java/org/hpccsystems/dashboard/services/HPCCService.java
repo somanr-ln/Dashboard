@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.entity.FileMeta;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
@@ -21,7 +23,7 @@ public interface HPCCService {
 	 * 	Map with Column name as Key and Data type as result
 	 * @throws Exception
 	 */
-	Map<String,String> getColumnSchema(final String fileName, final HpccConnection hpccConnection) throws Exception;
+	Set<Field> getColumnSchema(final String fileName, final HpccConnection hpccConnection) throws Exception;
 	
 	 /**
 	  * getChartData() is used the retrieve the ChartData details and render the D3 charts.

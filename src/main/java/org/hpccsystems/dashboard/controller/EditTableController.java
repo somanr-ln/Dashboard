@@ -1,8 +1,8 @@
 package org.hpccsystems.dashboard.controller;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,22 +71,29 @@ public class EditTableController extends SelectorComposer<Component> {
 		sourceList.addEventListener(Events.ON_DROP, dropListener);
 		targetList.addEventListener(Events.ON_DROP, dropListener);
 		
-		Map<String,String> columnSchemaMap;
+		Set<Field> columnSet ;
 		if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) Executions.getCurrent().getAttribute(Constants.CIRCUIT_CONFIG);
-			columnSchemaMap = new HashMap<String, String>();
+			columnSet = new HashSet<Field>();
 			for (Field field : configuration.getFields()) {
-				columnSchemaMap.put(field.getColumnName(), field.getDataType());
+				columnSet.add(field);
 			}
 		} else {
-			columnSchemaMap = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
+			columnSet = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
 		}
 		
 		if(Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())) {
 			try {
-				Map<String,String> schemaMap = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
+				Set<Field> schemaSet = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
 				for (String column : tableData.getTableColumns()) {
-					if(!schemaMap.containsKey(column)){
+					boolean columnExist = false;
+					for(Field field : schemaSet){
+						if(column.trim().equals(field.getColumnName().trim())){
+							columnExist =true;
+							break;
+						}
+					}
+					if(!columnExist){
 						throw new Exception("Column doesn't exist");
 					}
 				}
@@ -99,13 +106,13 @@ public class EditTableController extends SelectorComposer<Component> {
 		
 		Listitem listItem;
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
-			for (Map.Entry<String, String> entry : columnSchemaMap.entrySet()) {
-				listItem = new Listitem(entry.getKey());
+			for (Field field : columnSet) {
+				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
 				listItem.addEventListener(Events.ON_DROP, dropListener);
 				
-				if(tableData.getTableColumns().contains(entry.getKey())) {
+				if(tableData.getTableColumns().contains(field.getColumnName())) {
 					listItem.setParent(targetList);
 				} else {
 					listItem.setParent(sourceList);
@@ -116,9 +123,9 @@ public class EditTableController extends SelectorComposer<Component> {
 			tableHolder.appendChild(
 						tableRenderer.constructTableWidget(portlet, true)
 					);
-		} else {
-			for (Map.Entry<String, String> entry : columnSchemaMap.entrySet()) {
-				listItem = new Listitem(entry.getKey());
+		} else { 
+			for (Field field : columnSet) {
+				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
 				listItem.addEventListener(Events.ON_DROP, dropListener);

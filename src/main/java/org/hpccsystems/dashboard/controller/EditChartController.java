@@ -2,8 +2,10 @@ package org.hpccsystems.dashboard.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,7 +114,7 @@ public class EditChartController extends SelectorComposer<Component> {
 	public void doAfterCompose(final Component comp) throws Exception {
 		super.doAfterCompose(comp);
 		Execution execution = Executions.getCurrent();
-		Map<String,String> columnSchemaMap = null;
+		Set<Field> columnSet = null;
 		
 		chartData = (XYChartData) execution.getAttribute(Constants.CHART_DATA);
 		portlet = (Portlet) execution.getAttribute(Constants.PORTLET);
@@ -123,15 +125,15 @@ public class EditChartController extends SelectorComposer<Component> {
 		//API chart config flow without chart
 		if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) execution.getAttribute(Constants.CIRCUIT_CONFIG);
-			columnSchemaMap = new HashMap<String, String>();
+			columnSet = new HashSet<Field>();
 			for (Field field : configuration.getFields()) {
-				columnSchemaMap.put(field.getColumnName(), field.getDataType());
+				columnSet.add(field);
 			}
 			
 			filterListBox.setDroppable("false");			
 		} else {
 			try{
-				columnSchemaMap = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
+				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 			}catch(Exception e) {
 				Clients.showNotification("Unable to fetch columns from HPCC", "error", comp, "middle_center", 3000, true);
 				LOG.error(Labels.getLabel("retrieveColumnError"), e);
@@ -144,20 +146,36 @@ public class EditChartController extends SelectorComposer<Component> {
 			List<String> columnList = new ArrayList<String>();
 			
 			for (String colName : chartData.getXColumnNames()) {
-				if(columnSchemaMap.containsKey(colName)){
+				boolean xColumnExist = false;
+				for(Field field : columnSet){
+					if(colName.trim().equals(field.getColumnName().trim())){
+						xColumnExist =true;
+						break;
+					}
+				}
+					
+				if(xColumnExist){
 					createXListChild(colName);
 					xAxisDropped = true;
 				} else {
 					columnList.add(colName);
 				}
 			}
+				
 			for (String column : columnList) {
 				chartData.getXColumnNames().remove(column);
 			}
 			
 			columnList = new ArrayList<String>();
 			for (Measure measure : chartData.getYColumns()) {
-				if(columnSchemaMap.containsKey(measure.getColumn())){
+				boolean yColumnExist = false;
+				for(Field field : columnSet){
+					if(measure.getColumn().trim().equals(field.getColumnName().trim())){
+						yColumnExist =true;
+						break;
+					}
+				}
+				if(yColumnExist){
 					createYListChild(measure);
 					yAxisDropped = true;
 				} else {
@@ -187,15 +205,15 @@ public class EditChartController extends SelectorComposer<Component> {
 
 		Listitem listItem;
 		Listcell listcell;
-		if(columnSchemaMap != null){
-		for (Map.Entry<String, String> entry : columnSchemaMap.entrySet()) {
+		if(columnSet != null){
+		for (Field field :columnSet ) {
 			listItem = new Listitem();
-			listcell = new Listcell(entry.getKey());
+			listcell = new Listcell(field.getColumnName());
 			listItem.appendChild(listcell);
 			listItem.setDraggable("true");
-			if(DashboardUtil.checkNumeric(entry.getValue())){
+			if(DashboardUtil.checkNumeric(field.getDataType())){
 				listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.NUMERIC_DATA);
-				final Measure measure = new Measure(entry.getKey(), "sum");
+				final Measure measure = new Measure(field.getColumnName(), "sum");
 				listItem.setAttribute(Constants.MEASURE, measure);
 				
 				final Popup popup = new Popup();
@@ -222,7 +240,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				
 				listItem.setParent(measureListBox);
 			} else {
-				final String columnName = entry.getKey();
+				final String columnName = field.getColumnName();
 				final Popup popup1 = new Popup();
 				popup1.setWidth("200px");
 				popup1.setZclass("popup");
@@ -400,17 +418,32 @@ public class EditChartController extends SelectorComposer<Component> {
 			//Drawing chart except in API chart configuration flow
 			if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)){
 				try {
-					Map<String, String> columnSchemaMap = new HashMap<String, String>();
-					columnSchemaMap = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
+					Set<Field> columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 					for (String column : chartData.getXColumnNames()) {
-						if(!columnSchemaMap.containsKey(column)){
+						boolean xColumnExist = false;
+						for(Field field : columnSet){
+							if(column.trim().equals(field.getColumnName().trim())){
+								xColumnExist =true;
+								break;
+							}
+						}
+							
+						if(!xColumnExist){
 							throw new Exception("X Column " + column + " not present in Dataset");
 						}
+					
 					}
 					for (Measure measure : chartData.getYColumns()) {
-						if(!columnSchemaMap.containsKey(measure.getColumn())){
-							throw new Exception("Y Column " + measure.getColumn() + " not present in Dataset");
+						boolean yColumnExist = false;
+						for(Field field : columnSet){
+							if(measure.getColumn().trim().equals(field.getColumnName().trim())){
+								yColumnExist =true;
+								break;
+							}
 						}
+						if(!yColumnExist){
+							throw new Exception("Y Column " + measure.getColumn() + " not present in Dataset");
+						} 					
 					}
 					
 					chartRenderer.constructChartJSON(chartData, portlet, true);
