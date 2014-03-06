@@ -195,9 +195,16 @@ public class DashboardController extends SelectorComposer<Component>{
 					//Constructing chart data only when live chart is drawn
 					if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 						chartData = chartRenderer.parseXML(portlet.getChartDataXML());
+						
 						portlet.setChartData(chartData);
 						if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
 							//For chart widgets
+
+							//Getting fields
+							List<Field> fields = new ArrayList<Field>();
+							fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
+							chartData.setFields(fields);
+							
 							try	{
 								chartRenderer.constructChartJSON(chartData, portlet, false);
 							}catch(Exception ex) {
@@ -297,7 +304,6 @@ public class DashboardController extends SelectorComposer<Component>{
 				filterItem = new Listitem();
 				filterItem.setLabel(field.getColumnName());
 				filterItem.setAttribute(Constants.FIELD, field);
-				filterItem.addEventListener(Events.ON_SELECT, selectFilterListener);
 				filterItem.setParent(commonFilterList);
 			}
 			
@@ -306,30 +312,30 @@ public class DashboardController extends SelectorComposer<Component>{
 	}	
 	
 	
-	EventListener<SelectEvent<Component, Object>> selectFilterListener = new EventListener<SelectEvent<Component, Object>>() {
-
-		@Override
-		public void onEvent(SelectEvent<Component, Object> event) throws Exception {
-			Listitem selectedListitem = (Listitem) event.getTarget();
-			Field field = (Field) selectedListitem.getAttribute(Constants.FIELD);
+	@Listen("onSelect = #commonFilterList")
+	public void onEvent(SelectEvent<Component, Object> event) throws Exception {
+		Listitem selectedItem = (Listitem) event.getSelectedItems().iterator().next();
+		
+		Field field = (Field) selectedItem.getAttribute(Constants.FIELD);
+		
+		Popup popup = (Popup) selectedItem.getParent().getParent();
+		popup.close();
+		
+		if(DashboardUtil.checkNumeric(field.getColumnName())){
+			Clients.showNotification(Labels.getLabel("operationNotSupported"));
+		} else {
+			Filter filter = new Filter();
+			filter.setIsCommonFilter(true);
+			filter.setType(Constants.STRING_DATA);
+			filter.setColumn(field.getColumnName());
 			
-			Popup popup = (Popup) selectedListitem.getParent().getParent();
-			popup.close();
-			
-			if(DashboardUtil.checkNumeric(field.getColumnName())){
-				Clients.showNotification(Labels.getLabel("operationNotSupported"));
-			} else {
-				Filter filter = new Filter();
-				filter.setIsCommonFilter(true);
-				filter.setType(Constants.STRING_DATA);
-				filter.setColumn(field.getColumnName());
-				
-				filterRows.appendChild(createStringFilterRow(field, filter));
-			}
-			
-			selectedListitem.detach();
-			ChartPanel oldPanel =null;
-			for (Portlet portlet : dashboard.getPortletList()) {
+			filterRows.appendChild(createStringFilterRow(field, filter));
+		}
+		
+		selectedItem.detach();
+		for (Portlet portlet : dashboard.getPortletList()) {
+			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
+					portlet.getChartData().getIsFiltered()){
 				for (Filter filter : portlet.getChartData().getFilterList()) {
 					// overriding the portlet specific filter by selected global/dashboard filter
 					if (!filter.getIsCommonFilter()
@@ -338,34 +344,36 @@ public class DashboardController extends SelectorComposer<Component>{
 						if(portlet.getChartData().getFilterList().size() < 1){
 							portlet.getChartData().setIsFiltered(false);
 						}
-						//Updating widget with latest filter details into DB
-						portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
-						widgetService.updateWidget(portlet);
-						//Refreshing chart with updated filter values
-						try	{
-							chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);
-						}catch(Exception ex) {
-							Clients.showNotification("Unable to fetch column data from Hpcc to redraw the chart", true);
-							LOG.error(Labels.getLabel("fetchingExceptionfromHpcc"), ex);
-						}
-						Portalchildren children = portalChildren.get(portlet.getColumn());
-						LOG.debug("portalchildren in selectFilterListener Event -->"+children);
-						for (Component comp : children.getChildren()) {
-							oldPanel = (ChartPanel) comp;
-							if (oldPanel.getPortlet().getId() == portlet
-									.getId()) {
-								if (oldPanel.drawD3Graph() != null) {
-									Clients.evalJavaScript(oldPanel
-											.drawD3Graph());
-								}
-							}
-						}
+						
+						updateWidgets(portlet);
 					}
 				}
 			}
 		}
+	}
+	
+	
+	
+	private void updateWidgets(Portlet portlet) throws Exception{
+		//Updating widget with latest filter details into DB
+		portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
+		widgetService.updateWidget(portlet);
 		
-	};
+		//Refreshing chart with updated filter values
+		chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);
+		
+		Portalchildren children = portalChildren.get(portlet.getColumn());
+		LOG.debug("portalchildren in selectFilterListener Event -->"+children);
+		ChartPanel panel =null;
+		for (Component comp : children.getChildren()) {
+			panel = (ChartPanel) comp;
+			if (panel.getPortlet().getId() == portlet.getId()) {
+				if (panel.drawD3Graph() != null) {
+					Clients.evalJavaScript(panel.drawD3Graph());
+				}
+			}
+		}
+	}
 	
 	private Row createStringFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
@@ -388,7 +396,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)){
+			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)) {
 				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
 						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
@@ -405,9 +413,10 @@ public class DashboardController extends SelectorComposer<Component>{
 			checkbox = new Checkbox(value);
 			checkbox.setZclass("checkbox");
 			checkbox.setStyle("margin: 0px; padding-right: 5px;");
+			checkbox.addEventListener(Events.ON_CHECK, stringFilterCheckListener);
 			hbox.appendChild(checkbox);
 			//To display previously selected filter values
-			if(filter != null && filter.getValues().contains(value)){
+			if(filter != null && filter.getValues() != null && filter.getValues().contains(value)){
 				checkbox.setChecked(true);
 			}
 		}
@@ -421,66 +430,74 @@ public class DashboardController extends SelectorComposer<Component>{
 	 * Event to be triggered when any filter value is checked or Unchecked
 	 * @param event
 	 */
-	@Listen("onCheck = checkbox")
-	public void onStringFilterValueChange(CheckEvent event) {
-		Hbox hbox = (Hbox) event.getTarget().getParent();
-		Row row = (Row) hbox.getParent();
-		Filter filter = (Filter) row.getAttribute(Constants.FILTER);
-		Field field = (Field) row.getAttribute(Constants.FIELD);
+	EventListener<CheckEvent> stringFilterCheckListener = new EventListener<CheckEvent>() {
 		
-		//Instantiating Value list if empty
-		if(filter.getValues() == null){
-			List<String> values = new ArrayList<String>();
-			filter.setValues(values);
-		}
-		
-		//Updating change to filter object
-		for (Component component : hbox.getChildren()) {
-			if(component instanceof Checkbox){
-				Checkbox checkbox = (Checkbox) component;
-				String value = checkbox.getLabel();
-				if(checkbox.isChecked()){
-					if(!filter.getValues().contains(value))
-						filter.getValues().add(value);
-				} else {
-					filter.getValues().remove(value);
-				}
-			}
-		}
-		
-		for (Portlet portlet : dashboard.getPortletList()) {
-			if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()))
-				continue;
+		@Override
+		public void onEvent(CheckEvent event) throws Exception {
+			Hbox hbox = (Hbox) event.getTarget().getParent();
+			Row row = (Row) hbox.getParent();
+			Filter filter = (Filter) row.getAttribute(Constants.FILTER);
+			Field field = (Field) row.getAttribute(Constants.FIELD);
 			
-			XYChartData chartData = portlet.getChartData();
-			if(filter.getValues().size() < 1) {
-				//Removing Filter if no values selected
-				if(chartData.getIsFiltered()){
-					chartData.getFilterList().remove(filter);
-					if(chartData.getFilterList().size() < 1)
-						chartData.setIsFiltered(false);
-				}
-			} else {
-				// Adding Filter to Portlets
-				if(portlet.getChartData().getFields().contains(field)) {
-					//Overriding filter if applied already
-					if(chartData.getIsFiltered() && chartData.getFilterList().contains(filter)){
-						chartData.getFilterList().remove(filter);
-						chartData.getFilterList().add(filter);
+			//Instantiating Value list if empty
+			if(filter.getValues() == null){
+				List<String> values = new ArrayList<String>();
+				filter.setValues(values);
+			}
+			
+			//Updating change to filter object
+			for (Component component : hbox.getChildren()) {
+				if(component instanceof Checkbox){
+					Checkbox checkbox = (Checkbox) component;
+					String value = checkbox.getLabel();
+					if(checkbox.isChecked()){
+						if(!filter.getValues().contains(value))
+							filter.getValues().add(value);
 					} else {
-						chartData.setIsFiltered(true);
-						chartData.getFilterList().add(filter);
+						filter.getValues().remove(value);
 					}
-					
 				}
 			}
 			
-			if(chartData.getFields().contains(field)){
-				//TODO: redraw charts
+			for (Portlet portlet : dashboard.getPortletList()) {
+				if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()))
+					continue;
+				
+				XYChartData chartData = portlet.getChartData();
+				if(filter.getValues().size() < 1) {
+					//Removing Filter if no values selected
+					if(chartData.getIsFiltered()){
+						chartData.getFilterList().remove(filter);
+						if(chartData.getFilterList().size() < 1)
+							chartData.setIsFiltered(false);
+					}
+				} else {
+					// Adding Filter to Portlets
+					if(portlet.getChartData().getFields().contains(field)) {
+						//Overriding filter if applied already
+						if(chartData.getIsFiltered() && chartData.getFilterList().contains(filter)){
+							chartData.getFilterList().remove(filter);
+							chartData.getFilterList().add(filter);
+						} else {
+							chartData.setIsFiltered(true);
+							chartData.getFilterList().add(filter);
+						}
+						
+					}
+				}
+				
+				if(chartData.getFields().contains(field)){
+					try {
+						updateWidgets(portlet);
+					} catch (Exception e) {
+						LOG.error("Error Updating Charts", e);
+						//TODO: Show Notification
+					}
+				}
 			}
 		}
-		
-	}
+	};
+	
 	
 	@Listen("onClick = #addWidget")
 	public void addWidget() {
@@ -631,6 +648,25 @@ public class DashboardController extends SelectorComposer<Component>{
 			
 			//Showing Common filters panel
 			if(dashboard.isShowFiltersPanel()){
+				// Getting All filter columns
+				Set<Field> fieldSet = null;
+				XYChartData chartData  = null;
+				for (Portlet portlet : dashboard.getPortletList()) {
+					if(portlet.getChartData() != null){
+						chartData = portlet.getChartData();
+						fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
+					}				
+				}
+				
+				// Generating popup
+				Listitem filterItem = null;
+				for(Field field : fieldSet){
+					filterItem = new Listitem();
+					filterItem.setLabel(field.getColumnName());
+					filterItem.setAttribute(Constants.FIELD, field);
+					filterItem.setParent(commonFilterList);
+				}
+				
 				commonFiltersPanel.setVisible(true);
 			} else {
 				//TODO: 'Remove all global filters' logic

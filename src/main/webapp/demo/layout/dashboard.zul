@@ -30,13 +30,9 @@
 					</div>
 					
 					<toolbar align="end" style="float:right; border-style: none;">
-						<popup id="filterColumnPopup">
-							<listbox width="200px"  multiple="true" checkmark="true" vflex="1" id="commonFilterList" >
-							<listhead>
-								<listheader label="Select Values">
-									<button sclass="glyphicon glyphicon-new-window btn btn-link img-btn" style="float:right" id="filtersSelectedBtn" />
-								</listheader>
-							</listhead>
+						<popup id="filterColumnPopup" zclass="popup">
+							<listbox width="200px"  multiple="false" id="commonFilterList" >
+								
 							</listbox>
 						</popup> 
 						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup"></button>

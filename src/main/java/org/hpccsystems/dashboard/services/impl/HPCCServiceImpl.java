@@ -73,6 +73,11 @@ public class HPCCServiceImpl implements HPCCService{
 			final DFUInfoRequest req = new DFUInfoRequest();
 			req.setName(Sql);
 			req.setCluster("mythor");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Fetching Column Schema --> FileName: " + Sql );
+			}
+			
 			final DFUInfoResponse result = soap.DFUInfo(req);	
 			
 			//Two types of column schema results been parsed here to 
