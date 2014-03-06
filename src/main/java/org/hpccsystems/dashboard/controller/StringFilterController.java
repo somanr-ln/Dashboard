@@ -74,7 +74,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 				valueList = hpccService.getDistinctValues(filter.getColumn(), chartData, false);
 			}
 		} catch(Exception e) {
-			Clients.showNotification("Unable to fetch data for the Filter column", "error", 
+			Clients.showNotification(Labels.getLabel("unableToFetchFilterColumn"), "error", 
 					doneButton.getParent().getParent().getParent(), "top_left", 3000, true);
 			LOG.error(Labels.getLabel("exceptionforSelectedStringFilter"), e);
 		}
@@ -121,7 +121,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		
 		// Check for no values selected
 		if(selectedValues.size() < 1) {
-			Clients.showNotification("No filter values are selected. Please select some Values to filter", "error", 
+			Clients.showNotification(Labels.getLabel("noFilterareSelected"), "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
 			return;
 		}
@@ -137,7 +137,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 			chartRenderer.constructChartJSON(chartData, portlet, true);
 			chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);
 		} catch(Exception ex) {
-			Clients.showNotification("Unable to fetch column data from HPCC", "error", 
+			Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
 			LOG.error(Labels.getLabel("fetchingExceptionfromHpcc"), ex);
 			return;

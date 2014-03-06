@@ -254,13 +254,13 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					widgetService.updateWidget(portlet);
 				}
 			} catch (DataAccessException e) {
-				Clients.showNotification("Error occured while saving your changes");
+				Clients.showNotification(Labels.getLabel("errorOnSavingChanges"));
 			}
 			
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
-				Clients.showNotification("Error occured while logging out");
+				Clients.showNotification(Labels.getLabel("logoutError"));
 				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
@@ -276,7 +276,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
-				Clients.showNotification("Error occured while logging out");
+				Clients.showNotification(Labels.getLabel("logoutError"));
 				LOG.error(Labels.getLabel("logoutError"), e);
 			}
 			
@@ -317,7 +317,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			}catch(DataAccessException e){
 				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
 			}catch(Exception ex) {
-				Clients.showNotification("Unable to fetch column data from HPCC to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("unableToFetchHpccData"), "error", this.getSelf(), "middle_center", 3000, true);
 				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), ex);
 				return;
 			}

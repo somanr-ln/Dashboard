@@ -8,6 +8,7 @@ import org.hpccsystems.dashboard.services.CommonInfoService;
 import org.hpccsystems.dashboard.services.UserCredential;
 import org.hpccsystems.dashboard.services.UserInfoService;
 import org.hpccsystems.dashboard.services.impl.AuthenticationServiceImpl;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
@@ -83,7 +84,7 @@ public class ProfileViewController extends SelectorComposer<Component>{
 		
 		userInfoService.updateUser(user);
 		
-		Clients.showNotification("Your profile is updated");
+		Clients.showNotification(Labels.getLabel("profileUpdated"));
 	}
 	
 	@Listen("onClick=#reloadProfile")

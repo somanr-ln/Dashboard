@@ -1,4 +1,4 @@
-package org.hpccsystems.dashboard.api.entity; 
+package org.hpccsystems.dashboard.api.entity;
 
 public class Field {
 	@Override

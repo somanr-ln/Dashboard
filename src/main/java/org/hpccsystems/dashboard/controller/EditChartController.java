@@ -113,6 +113,7 @@ public class EditChartController extends SelectorComposer<Component> {
 	@Override
 	public void doAfterCompose(final Component comp) throws Exception {
 		super.doAfterCompose(comp);
+		String application = Labels.getLabel("application");
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
 		
@@ -135,7 +136,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			try{
 				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 			}catch(Exception e) {
-				Clients.showNotification("Unable to fetch columns from HPCC", "error", comp, "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("unableToFetchColumns"), "error", comp, "middle_center", 3000, true);
 				LOG.error(Labels.getLabel("retrieveColumnError"), e);
 				return;
 			}			
@@ -362,10 +363,11 @@ public class EditChartController extends SelectorComposer<Component> {
 	public void onDropToYAxisTabBox(final DropEvent dropEvent) {
 
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
-		
+		String str =Labels.getLabel("dropMeasureOnly");
+		System.out.println("str==" +str);
 		//Validations
 		if(!Constants.NUMERIC_DATA.equals(draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE))){
-			Clients.showNotification("You can only drop Measures here", "error", YAxisListBox, "end_center", 3000, true);
+			Clients.showNotification(str, "error", YAxisListBox, "end_center", 3000, true);
 			return;
 		}
 		
@@ -376,11 +378,11 @@ public class EditChartController extends SelectorComposer<Component> {
 		//Validations
 		if(chartData.getYColumns().contains(newMeasure) || 
 				chartData.getXColumnNames().contains(newMeasure.getColumn())) {
-			Clients.showNotification("Dropped column is already used in plotting this Chart. Please drop another Column", "error", YAxisListBox, "end_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("droppedColumnAlreadyUsed"), "error", YAxisListBox, "end_center", 3000, true);
 			return;
 		}
 		if(chartData.getXColumnNames().size() > 1 && chartData.getYColumns().size() >0) {
-			Clients.showNotification("The chart is already groped with multiple attributes.\nGrouping is aloowed in only one of Measures and Attributes.", "error", YAxisListBox, "end_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("chartAlreadyGrouped"), "error", YAxisListBox, "end_center", 3000, true);
 			return;
 		}
 		
@@ -449,7 +451,7 @@ public class EditChartController extends SelectorComposer<Component> {
 					chartRenderer.constructChartJSON(chartData, portlet, true);
 					chartRenderer.drawChart(chartData,	Constants.EDIT_WINDOW_CHART_DIV, portlet);
 				} catch(Exception e) {
-					Clients.showNotification("Couldn't retrive data to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
+					Clients.showNotification(Labels.getLabel("couldntRetrieveData"), "error", this.getSelf(), "middle_center", 3000, true);
 					LOG.error(Labels.getLabel("chartRenderingFailed"), e);
 				}
 			} else {
@@ -460,7 +462,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			doneButton.setDisabled(false);				
 		}catch (Exception ex) {
 			Clients.showNotification(
-					"Unable to fetch column data from Hpcc", "error",
+					Labels.getLabel("unableToFetchHpccData"), "error",
 					this.getSelf(), "middle_center", 3000, true);
 			LOG.error(Labels.getLabel("exceptionfromHPCC"),ex);
 			return;
@@ -557,14 +559,14 @@ public class EditChartController extends SelectorComposer<Component> {
 		//Validations
 		if(chartData.getYColumns().contains(draggedListitem.getLabel()) || 
 				chartData.getXColumnNames().contains(draggedListitem.getLabel())) {
-			Clients.showNotification("A column can only be used once while plotting the graph", "error", XAxisListBox, "end_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("columnOnlyUsedWhilePlottingGraph"), "error", XAxisListBox, "end_center", 3000, true);
 			return;
 		}
 		if(!Constants.STRING_DATA.equals(draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE))){
-			Clients.showNotification( "\""+ draggedListitem.getLabel() +"\" is a Measure. It will only be treated as descrete values", "warning", XAxisListBox, "end_center", 5000, true);
+			Clients.showNotification( "\""+ draggedListitem.getLabel() +Labels.getLabel("discreteValueError"), "warning", XAxisListBox, "end_center", 5000, true);
 		}
 		if(chartData.getYColumns().size() > 1 && chartData.getXColumnNames().size() >0){
-			Clients.showNotification("The chart is already groped with multiple measures.\nGrouping is aloowed in only one of Measures and Attributes.", "error", XAxisListBox, "end_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("chartAlreadyGrouped"), "error", XAxisListBox, "end_center", 3000, true);
 			return;
 		}
 		
@@ -639,7 +641,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
 		
 		if(chartData.getFilterList().contains(draggedListitem.getLabel())) {
-			Clients.showNotification("This column is already added to filters.", "error", filterListBox, "end_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
 			return;
 		}
 		
@@ -710,7 +712,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				chartRenderer.constructChartJSON(chartData, portlet, true);
 				chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);
 			} catch(Exception ex) {
-				Clients.showNotification("Unable to fetch column data from HPCC", "error", EditChartController.this.getSelf() , "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("unableToFetchHpccData"), "error", EditChartController.this.getSelf() , "middle_center", 3000, true);
 				LOG.error(Labels.getLabel("exceptionfromHPCC"), ex);
 			}
 						

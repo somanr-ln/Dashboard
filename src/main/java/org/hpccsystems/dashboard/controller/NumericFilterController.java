@@ -84,10 +84,10 @@ public class NumericFilterController extends SelectorComposer<Component>{
 			} catch(Exception e) {
 				if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
 						authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_VIEW_DASHBOARD)){
-					Clients.showNotification("Unable to fetch data to Filter for the column dropped", 
+					Clients.showNotification(Labels.getLabel("unableToFetchDataForFilterColumn"), 
 							"error", doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
 				}else{
-					Clients.showNotification("Unable to fetch column data from HPCC", true);
+					Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
 				}
 				LOG.error(Labels.getLabel("exceptiononNumericFilter"), e);
 				return;
@@ -147,10 +147,10 @@ public class NumericFilterController extends SelectorComposer<Component>{
 		} catch(Exception ex) {
 			if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
 					authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_VIEW_DASHBOARD)){
-				Clients.showNotification("Unable to fetch column data from HPCC", "error", 
+				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), "error", 
 						doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);			
 			}else{
-				Clients.showNotification("Unable to fetch column data from HPCC", true);
+				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
 			}
 			LOG.error(Labels.getLabel("unabletoFetchHpccData"), ex);
 			return;

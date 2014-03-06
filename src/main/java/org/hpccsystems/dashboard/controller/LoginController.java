@@ -86,7 +86,7 @@ public class LoginController extends SelectorComposer<Component> {
 			final ListModelList<Application> appModel = new ListModelList<Application>(applicationList);
 			apps.setModel(appModel);
 		} catch(Exception ex) {
-			Clients.showNotification("Unable to retrieve applications from DB. Please try reloading the page", false);
+			Clients.showNotification(Labels.getLabel("unableToRetrieveApplications"), false);
 			LOG.error(Labels.getLabel("exceptionfromDB"), ex);
 		}
 	}
@@ -106,7 +106,7 @@ public class LoginController extends SelectorComposer<Component> {
 			isLoginSuccessful = authenticationService.login(name,passWord, apps.getSelectedItem().getValue().toString());
 			LOG.debug("User authenticated sucessfully.." + isLoginSuccessful);
 		} catch(Exception ex) {
-			Clients.showNotification("Your login attempt failed. Please try again", false);
+			Clients.showNotification(Labels.getLabel("loginFailed"), false);
 			LOG.error(Labels.getLabel("exceptionondoLogin()"), ex);
 		}
 		
