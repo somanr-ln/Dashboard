@@ -114,7 +114,6 @@ public class EditChartController extends SelectorComposer<Component> {
 	public void doAfterCompose(final Component comp) throws Exception {
 		super.doAfterCompose(comp);
 		String application = Labels.getLabel("application");
-		System.out.println("application=====" +application);
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
 		
