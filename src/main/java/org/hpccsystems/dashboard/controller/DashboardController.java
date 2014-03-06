@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -51,6 +52,7 @@ import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Messagebox.ClickEvent;
@@ -98,7 +100,11 @@ public class DashboardController extends SelectorComposer<Component>{
 	@Wire
 	Rows filterRows;
 	
+	@Wire
+	Listbox commonFilterList;
+	
     Integer panelCount = 0;
+    Set<String> commonFilters;
     
     private static final String PERCENTAGE_SIGN = "%";
     
@@ -228,9 +234,35 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 		if(dashboard.isShowFiltersPanel()){
+			Set<Field> columnSet = new HashSet<Field>();
+			Set<Field> fieldSet = null;
+			XYChartData chartData  = null;
+			for (Portlet portlet : dashboard.getPortletList()) {
+				if(portlet.getChartData() != null){
+					chartData = portlet.getChartData();
+					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
+					for(Field field :fieldSet){
+						if(!columnSet.contains(field)){
+							columnSet.add(field);
+						}
+					}
+				}				
+			}
+			if(LOG.isDebugEnabled()){
+				LOG.debug("common columnSet in --->" + columnSet);
+			}
 			commonFiltersPanel.setVisible(true);
+			Listitem filterItem = null;
+			for(Field entry : columnSet){
+				filterItem = new Listitem();
+				filterItem.setLabel(entry.getColumnName());
+				filterItem.setAttribute("filterDataType", entry.getDataType());
+				filterItem.setParent(commonFilterList);
+			}
+			
 		}
-	}
+	}	
+	
 	
 	EventListener<SelectEvent<Component, Object>> selectFilterListener = new EventListener<SelectEvent<Component, Object>>() {
 
@@ -245,47 +277,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			if(DashboardUtil.checkNumeric(field.getColumnName())){
 				Clients.showNotification("Operation Not supported yet. Choose a String field");
 			} else {
-				Row row = new Row();
-				
-				Div div = new Div();
-				Label label = new Label(field.getColumnName());
-				label.setSclass("h5");
-				div.appendChild(label);
-				Button button = new Button();
-				button.setSclass("glyphicon glyphicon-remove-circle btn btn-link img-btn");
-				button.setStyle("float: left;");
-				div.appendChild(button);
-				
-				Hbox hbox = new Hbox();
-				Set<String> values = new LinkedHashSet<String>();
-				//A set of Datasets used in dahboard, for avoiding multiple fetches to the same dataset
-				Set<String> dataFiles = new HashSet<String>();
-				// Getting distinct values from all live Portlets
-				for (Portlet portlet : dashboard.getPortletList()) {
-					if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)){
-						if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
-								portlet.getChartData().getFields().contains(field)) {
-							dataFiles.add(portlet.getChartData().getFileName());
-							Iterator<String> iterator = hpccService.getDistinctValues(field.getColumnName(), portlet.getChartData(), false).iterator();
-							while (iterator.hasNext()) {
-								values.add(iterator.next());
-							}
-						}
-					}
-				}
-				//Generating Checkboxes
-				Checkbox checkbox;
-				for (String value : values) {
-					checkbox = new Checkbox(value);
-					checkbox.setZclass("checkbox");
-					checkbox.setStyle("margin: 0px; padding-right: 5px;");
-					hbox.appendChild(checkbox);
-				}
-				
-				row.appendChild(div);
-				row.appendChild(hbox);
-				
-				filterRows.appendChild(row);
+				filterRows.appendChild(createStringFilterRow(field));
 			}
 			
 			selectedListitem.detach();
@@ -293,6 +285,49 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 	};
+	
+	private Row createStringFilterRow(Field field) throws Exception {
+		Row row = new Row();
+		
+		Div div = new Div();
+		Label label = new Label(field.getColumnName());
+		label.setSclass("h5");
+		div.appendChild(label);
+		Button button = new Button();
+		button.setSclass("glyphicon glyphicon-remove-circle btn btn-link img-btn");
+		button.setStyle("float: left;");
+		div.appendChild(button);
+		
+		Hbox hbox = new Hbox();
+		Set<String> values = new LinkedHashSet<String>();
+		//A set of Datasets used in dahboard, for avoiding multiple fetches to the same dataset
+		Set<String> dataFiles = new HashSet<String>();
+		// Getting distinct values from all live Portlets
+		for (Portlet portlet : dashboard.getPortletList()) {
+			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)){
+				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
+						portlet.getChartData().getFields().contains(field)) {
+					dataFiles.add(portlet.getChartData().getFileName());
+					Iterator<String> iterator = hpccService.getDistinctValues(field.getColumnName(), portlet.getChartData(), false).iterator();
+					while (iterator.hasNext()) {
+						values.add(iterator.next());
+					}
+				}
+			}
+		}
+		//Generating Checkboxes
+		Checkbox checkbox;
+		for (String value : values) {
+			checkbox = new Checkbox(value);
+			checkbox.setZclass("checkbox");
+			checkbox.setStyle("margin: 0px; padding-right: 5px;");
+			hbox.appendChild(checkbox);
+		}
+		
+		row.appendChild(div);
+		row.appendChild(hbox);
+		return row;
+	}
 
 	
 	
@@ -469,7 +504,11 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	/**
+<<<<<<< HEAD
+	 *   When a widget is deleted
+=======
 	 *  When a widget is deleted
+>>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 	 */
 	final EventListener<Event> onPanelClose = new EventListener<Event>() {
 
