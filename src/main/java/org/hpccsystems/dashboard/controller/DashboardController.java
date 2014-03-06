@@ -244,7 +244,7 @@ public class DashboardController extends SelectorComposer<Component>{
 						filterField = new Field();
 						filterField.setColumnName(filter.getColumn());
 						persistedFilters.add(filterField);
-						createStringFilterRow(filterField);
+						createStringFilterRow(filterField,filter);
 					}
 					//TODO: Else part for Numeric filters
 				}
@@ -299,7 +299,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			if(DashboardUtil.checkNumeric(field.getColumnName())){
 				Clients.showNotification(Labels.getLabel("operationNotSupported"));
 			} else {
-				filterRows.appendChild(createStringFilterRow(field));
+				filterRows.appendChild(createStringFilterRow(field,null));
 			}
 			
 			selectedListitem.detach();
@@ -342,7 +342,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		
 	};
 	
-	private Row createStringFilterRow(Field field) throws Exception {
+	private Row createStringFilterRow(Field field,Filter filter) throws Exception {
 		Row row = new Row();
 		
 		Div div = new Div();
@@ -378,6 +378,10 @@ public class DashboardController extends SelectorComposer<Component>{
 			checkbox.setZclass("checkbox");
 			checkbox.setStyle("margin: 0px; padding-right: 5px;");
 			hbox.appendChild(checkbox);
+			//To display previously selected filter values
+			if(filter != null && filter.getValues().contains(value)){
+				checkbox.setChecked(true);
+			}
 		}
 		
 		row.appendChild(div);
