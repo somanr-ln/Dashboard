@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Iterator; 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +105,7 @@ public class DashboardController extends SelectorComposer<Component>{
 	Listbox commonFilterList;
 	
     Integer panelCount = 0;
+    Set<String> commonFilters;
     
     private static final String PERCENTAGE_SIGN = "%";
     
@@ -405,6 +406,10 @@ public class DashboardController extends SelectorComposer<Component>{
 			checkbox.setZclass("checkbox");
 			checkbox.setStyle("margin: 0px; padding-right: 5px;");
 			hbox.appendChild(checkbox);
+			//To display previously selected filter values
+			if(filter != null && filter.getValues().contains(value)){
+				checkbox.setChecked(true);
+			}
 		}
 		
 		row.appendChild(div);

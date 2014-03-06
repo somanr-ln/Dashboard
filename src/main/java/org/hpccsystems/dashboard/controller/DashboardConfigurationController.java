@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
@@ -59,7 +60,7 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 			try {
 				radioList.get(dashboard.getColumnCount() - 1).setSelected(true);
 			} catch (ArrayIndexOutOfBoundsException e) {
-				Clients.showNotification("No widgets are present in Dashboard. Choose a layout.", "info", getSelf(), "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("noWidgetException"), "info", getSelf(), "middle_center", 3000, true);
 			}
 		} else {
 			//Creating a new Dashboard 
