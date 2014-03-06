@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -19,6 +18,7 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.controller.component.ChartPanel;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
@@ -50,13 +50,13 @@ import org.zkoss.zkmax.zul.Portallayout;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Div;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Include;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Messagebox.ClickEvent;
-import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Popup;
 import org.zkoss.zul.Row;
@@ -104,7 +104,6 @@ public class DashboardController extends SelectorComposer<Component>{
 	Listbox commonFilterList;
 	
     Integer panelCount = 0;
-    Set<String> commonFilters;
     
     private static final String PERCENTAGE_SIGN = "%";
     
@@ -234,6 +233,22 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 		if(dashboard.isShowFiltersPanel()){
+			//Generating applied filter rows, with values
+			Set<Field> persistedFilters = new LinkedHashSet<Field>();
+			for (Portlet portlet : dashboard.getPortletList()) {
+				for (Filter filter : portlet.getChartData().getFilterList()) {
+					// Considering only String filters now
+					if(filter.getIsCommonFilter() && filter.getType().equals(Constants.STRING_DATA)) {
+						Field field = new Field();
+						field.setColumnName(filter.getColumn());
+						persistedFilters.add(field);
+						createStringFilterRow(field);
+					}
+					//TODO: Else part for Numeric filters
+				}
+			}
+			
+			// Getting All filter columns
 			Set<Field> columnSet = new HashSet<Field>();
 			Set<Field> fieldSet = null;
 			XYChartData chartData  = null;
@@ -242,24 +257,29 @@ public class DashboardController extends SelectorComposer<Component>{
 					chartData = portlet.getChartData();
 					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
 					for(Field field :fieldSet){
-						if(!columnSet.contains(field)){
+						// Excluding persisted 
+						if(!columnSet.contains(field) && !persistedFilters.contains(field)){
 							columnSet.add(field);
 						}
 					}
 				}				
 			}
+			
+			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("common columnSet in --->" + columnSet);
 			}
-			commonFiltersPanel.setVisible(true);
+			// Generating popup
 			Listitem filterItem = null;
-			for(Field entry : columnSet){
+			for(Field field : columnSet){
 				filterItem = new Listitem();
-				filterItem.setLabel(entry.getColumnName());
-				filterItem.setAttribute("filterDataType", entry.getDataType());
+				filterItem.setLabel(field.getColumnName());
+				filterItem.setAttribute(Constants.FIELD, field);
+				filterItem.addEventListener(Events.ON_SELECT, selectFilterListener);
 				filterItem.setParent(commonFilterList);
 			}
 			
+			commonFiltersPanel.setVisible(true);
 		}
 	}	
 	
@@ -281,7 +301,6 @@ public class DashboardController extends SelectorComposer<Component>{
 			}
 			
 			selectedListitem.detach();
-			//TODO: Remove field from Class level set
 		}
 		
 	};
@@ -482,7 +501,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			if(dashboard.isShowFiltersPanel()){
 				commonFiltersPanel.setVisible(true);
 			} else {
-				//TODO: Remove all global filters logic
+				//TODO: 'Remove all global filters' logic
 				commonFiltersPanel.setVisible(false);
 			}
 			
