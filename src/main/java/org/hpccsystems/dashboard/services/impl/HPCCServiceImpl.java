@@ -53,15 +53,6 @@ public class HPCCServiceImpl implements HPCCService{
 		
 	final static String WS_SQL_ENDPOINT = "8009/ws_sql?ver_=1";
 	final static String DFU_ENDPOINT = "8010/WsDfu?ver_=1.2";
-	 /**
-	  * getColumnSchema() is used to retrieve the ColumnSchema details from HPCC systems 
-	  * to pass column data details to Edit Chart page to generate the D3 charts. 
-	 * @param sql
-	 * @param userName
-	 * @param password
-	 * @param url
-	 * @return Map<String,String>
-	 */
 	
 	public Set<Field> getColumnSchema(final String Sql, final HpccConnection hpccConnection) throws Exception
 	{
@@ -138,9 +129,7 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return List<BarChart>
 	 * 
 	 */
-	
-	public List<XYModel> getChartData(XYChartData chartData) throws Exception
-	{
+	public List<XYModel> getChartData(XYChartData chartData) throws Exception {
 		final List<XYModel> dataList=new ArrayList<XYModel>();
 		XYModel dataObj=null;
 		try {
@@ -232,7 +221,7 @@ public class HPCCServiceImpl implements HPCCService{
 	}
 	
 	@Override
-	public List<String> getDistinctValues(String fieldName, XYChartData chartData, Boolean applyFilter) throws Exception{
+	public List<String> getDistinctValues(String fieldName, XYChartData chartData, Boolean applyFilter) throws Exception {
 		List<String> filterDataList = new ArrayList<String>();
 		
 		final Ws_sqlLocator locator = new Ws_sqlLocator();
