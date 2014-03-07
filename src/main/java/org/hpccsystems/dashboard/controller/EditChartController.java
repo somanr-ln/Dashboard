@@ -134,6 +134,11 @@ public class EditChartController extends SelectorComposer<Component> {
 			filterListBox.setDroppable("false");			
 		} else {
 			try{
+				if(LOG.isDebugEnabled()) {
+					LOG.debug("Querying Coloumn Schema \n File -> " + chartData.getFileName() + 
+							" \nHpcc Connection -> " + chartData.getHpccConnection());
+				}
+				
 				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
 			}catch(Exception e) {
 				Clients.showNotification(Labels.getLabel("unableToFetchColumns"), "error", comp, "middle_center", 3000, true);
@@ -640,14 +645,14 @@ public class EditChartController extends SelectorComposer<Component> {
 	public void onDropToFilterItem(final DropEvent dropEvent) {
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
 		
-		if(chartData.getFilterList().contains(draggedListitem.getLabel())) {
-			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
-			return;
-		}
-		
 		Filter filter = new Filter();
 		filter.setColumn(draggedListitem.getLabel());
 		filter.setType((Integer) draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE));
+		
+		if(chartData.getFilterList().contains(filter)) {
+			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
+			return;
+		}
 		
 		createFilterListItem(filter);
 	}
