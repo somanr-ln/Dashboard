@@ -35,6 +35,7 @@ import org.zkoss.zk.ui.event.CheckEvent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.event.SelectEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.Selectors;
@@ -393,7 +394,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);
 		
 		Portalchildren children = portalChildren.get(portlet.getColumn());
-		LOG.debug("portalchildren in selectFilterListener Event -->"+children);
+		LOG.debug("portalchildren in updateWidgets()-->"+children);
 		ChartPanel panel =null;
 		for (Component comp : children.getChildren()) {
 			panel = (ChartPanel) comp;
@@ -424,6 +425,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		Button button = new Button();
 		button.setSclass("glyphicon glyphicon-remove-circle btn btn-link img-btn");
 		button.setStyle("float: right;");
+		button.addEventListener(Events.ON_CLICK, removeGlobalFilter);
 		div.appendChild(button);
 		
 		Hbox hbox = new Hbox();
@@ -461,6 +463,37 @@ public class DashboardController extends SelectorComposer<Component>{
 		row.appendChild(hbox);
 		return row;
 	}
+	
+	
+	/**
+	 * Listener to remove global filters
+	 */
+	EventListener<MouseEvent> removeGlobalFilter = new EventListener<MouseEvent>() {
+
+		@Override
+		public void onEvent(MouseEvent event) throws Exception {
+			Row removedRow = (Row) event.getTarget().getParent().getParent();
+			Filter filter = (Filter) removedRow.getAttribute(Constants.FILTER);
+			Field field = (Field) removedRow.getAttribute(Constants.FIELD);
+			for (Portlet portlet : dashboard.getPortletList()) {
+				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+						&& portlet.getChartData().getIsFiltered()) {
+					// removing global filter object from filter list
+					if (portlet.getChartData().getFilterList().contains(filter)) {
+						portlet.getChartData().getFilterList().remove(filter);
+					}
+					if (portlet.getChartData().getFilterList().size() < 1) {
+						portlet.getChartData().setIsFiltered(false);
+					}
+					// refreshing the chart && updating DB
+					updateWidgets(portlet);
+
+				}
+			}
+			event.getTarget().getParent().getParent().detach();
+
+		}
+	};
 
 	/**
 	 * Event to be triggered when any filter value is checked or Unchecked
