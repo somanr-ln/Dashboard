@@ -280,14 +280,16 @@ public class DashboardController extends SelectorComposer<Component>{
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 						portlet.getChartData().getIsFiltered()) {
-				for (Filter filter : portlet.getChartData().getFilterList()) {
-					// Considering only String filters now
-					if(filter.getIsCommonFilter() && filter.getType().equals(Constants.STRING_DATA)) {
-						Field field = null;
-						field = new Field();
-						field.setColumnName(filter.getColumn());
-						persistedFilters.add(field);
-						filterRows.appendChild(createStringFilterRow(field, filter));
+					for (Filter filter : portlet.getChartData().getFilterList()) {
+						// Considering only String filters now
+						if(filter.getIsCommonFilter() && 
+								filter.getType().equals(Constants.STRING_DATA)) {
+							Field field = null;
+							field = new Field();
+							field.setColumnName(filter.getColumn());
+							
+							if(persistedFilters.add(field))
+								filterRows.appendChild(createStringFilterRow(field, filter));
 						}
 						//TODO: Else part for Numeric filters
 					}
@@ -414,7 +416,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		div.appendChild(label);
 		Button button = new Button();
 		button.setSclass("glyphicon glyphicon-remove-circle btn btn-link img-btn");
-		button.setStyle("float: left;");
+		button.setStyle("float: right;");
 		div.appendChild(button);
 		
 		Hbox hbox = new Hbox();
@@ -424,10 +426,8 @@ public class DashboardController extends SelectorComposer<Component>{
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)) {
-				//System.out.println("test -->"+portlet.getChartData());
-				//System.out.println(portlet.getChartData().getFields());
-				if(portlet.getChartData() != null &&!dataFiles.contains(portlet.getChartData().getFileName()) && 
-						portlet.getChartData().getFields() != null && portlet.getChartData().getFields().contains(field)) {
+				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
+						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
 					Iterator<String> iterator = hpccService.getDistinctValues(field.getColumnName(), portlet.getChartData(), false).iterator();
 					while (iterator.hasNext()) {
@@ -486,16 +486,6 @@ public class DashboardController extends SelectorComposer<Component>{
 						filter.getValues().remove(value);
 					}
 				}
-			}
-			
-			if(LOG.isDebugEnabled()){
-				LOG.debug("Selected Filter Column -> " + field.getColumnName());
-				LOG.debug("Selected Filter Values -> " + filter.getValues());
-			}
-			
-			if(LOG.isDebugEnabled()){
-				LOG.debug("Selected Filter Column -> " + field.getColumnName());
-				LOG.debug("Selected Filter Values -> " + filter.getValues());
 			}
 			
 			if(LOG.isDebugEnabled()){

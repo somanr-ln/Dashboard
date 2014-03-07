@@ -171,7 +171,6 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			}
 		}
 		
-		
 		holderInclude.setDynamicProperty(Constants.CHART_DATA, chartData);
 		holderInclude.setDynamicProperty(Constants.PORTLET, portlet);
 		holderInclude.setDynamicProperty(Constants.EDIT_WINDOW_DONE_BUTTON, doneButton);

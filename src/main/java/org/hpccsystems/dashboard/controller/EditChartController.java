@@ -113,7 +113,6 @@ public class EditChartController extends SelectorComposer<Component> {
 	@Override
 	public void doAfterCompose(final Component comp) throws Exception {
 		super.doAfterCompose(comp);
-		String application = Labels.getLabel("application");
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
 		
@@ -140,12 +139,20 @@ public class EditChartController extends SelectorComposer<Component> {
 				}
 				
 				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
+				
 			}catch(Exception e) {
 				Clients.showNotification(Labels.getLabel("unableToFetchColumns"), "error", comp, "middle_center", 3000, true);
 				LOG.error(Constants.ERROR_RETRIEVE_COLUMNS, e);
 				return;
 			}			
 		}
+		
+		//Setting fields to ChartData
+		List<Field> fields = new ArrayList<Field>();
+		for (Field field : columnSet) {
+			fields.add(field);
+		}
+		chartData.setFields(fields);
 		
 		// When live chart is present in ChartPanel
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
@@ -369,7 +376,6 @@ public class EditChartController extends SelectorComposer<Component> {
 
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
 		String str =Labels.getLabel("dropMeasureOnly");
-		System.out.println("str==" +str);
 		//Validations
 		if(!Constants.NUMERIC_DATA.equals(draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE))){
 			Clients.showNotification(str, "error", YAxisListBox, "end_center", 3000, true);
