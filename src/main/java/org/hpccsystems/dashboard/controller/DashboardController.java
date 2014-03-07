@@ -213,14 +213,13 @@ public class DashboardController extends SelectorComposer<Component>{
 								LOG.error("Exception while fetching column data from Hpcc", ex);
 							}
 							
-						//Checking for Common filters
-						if(chartData.getIsFiltered()){
-							for (Filter filter : chartData.getFilterList()) {
-								if(filter.getIsCommonFilter())
-									dashboard.setShowFiltersPanel(true);
+							//Checking for Common filters
+							if(chartData.getIsFiltered()){
+								for (Filter filter : chartData.getFilterList()) {
+									if(filter.getIsCommonFilter())
+										dashboard.setShowFiltersPanel(true);
+								}
 							}
-						}
-						
 						}
 					}
 					
@@ -233,7 +232,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				}
 			}
 			
-			if(! authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID)){
+			if(! authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID)) {
 				dashboardToolbar.setVisible(true);
 			}
 			
@@ -288,12 +287,17 @@ public class DashboardController extends SelectorComposer<Component>{
 							field = new Field();
 							field.setColumnName(filter.getColumn());
 							persistedFilters.add(field);
-							createStringFilterRow(field, filter);
+							filterRows.appendChild(createStringFilterRow(field, filter));
 						}
 						//TODO: Else part for Numeric filters
 					}
 				}
 			}
+			
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
+			}
+			
 			
 			// Getting All filter columns
 			Set<Field> columnSet = new HashSet<Field>();
@@ -373,6 +377,11 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	private void updateWidgets(Portlet portlet) throws Exception{
+		
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Updating charts in portlet - " + portlet);
+		}
+		
 		//Updating widget with latest filter details into DB
 		portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
 		widgetService.updateWidget(portlet);

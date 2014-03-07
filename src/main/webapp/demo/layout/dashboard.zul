@@ -47,18 +47,7 @@
 					<column></column>
 				</columns>
 				<rows id="filterRows">
-					<row>
-						<div>
-							<label sclass="h5"> Country </label>
-							<button sclass="glyphicon glyphicon-remove-circle btn btn-link img-btn" style="float: right;"></button>
-						</div>
-						<hbox>
-							<checkbox zclass="checkbox" value="" label="India" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Italy" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Germany" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Australia" style="margin: 0px; padding-right: 5px;"></checkbox>
-						</hbox>
-					</row>
+					
 				</rows>
 			</grid>
 		</panelchildren>
