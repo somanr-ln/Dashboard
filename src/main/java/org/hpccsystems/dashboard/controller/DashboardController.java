@@ -345,7 +345,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		Popup popup = (Popup) selectedItem.getParent().getParent();
 		popup.close();
 		
-		if(DashboardUtil.checkNumeric(field.getColumnName())){
+		if(DashboardUtil.checkNumeric(field.getDataType())){
 			Clients.showNotification(Labels.getLabel("operationNotSupported"));
 		} else {
 			Filter filter = new Filter();
@@ -726,11 +726,7 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	
 	/**
-<<<<<<< HEAD
-	 *   When a widget is deleted
-=======
 	 *  When a widget is deleted
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 	 */
 	final EventListener<Event> onPanelClose = new EventListener<Event>() {
 
