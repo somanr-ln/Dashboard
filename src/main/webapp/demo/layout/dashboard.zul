@@ -43,7 +43,7 @@
 		<panelchildren>
 			<grid style="border:none;">
 				<columns>
-					<column width="120px"></column>
+					<column width="150px"></column>
 					<column></column>
 				</columns>
 				<rows id="filterRows">
