@@ -3,6 +3,7 @@ package org.hpccsystems.dashboard.controller;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
@@ -44,7 +45,7 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	public void doAfterCompose(Component comp) throws Exception {
 		super.doAfterCompose(comp);
 		   
-		parent = (Component) Executions.getCurrent().getArg().get(Constants.PARENT);
+		parent = (Component) Executions.getCurrent().getArg().get(Constants.PARENT);		
 		
 		if(parent instanceof Window) {
 			//Dashboard already created
@@ -63,8 +64,7 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 				Clients.showNotification(Labels.getLabel("noWidgetException"), "info", getSelf(), "middle_center", 3000, true);
 			}
 		} else {
-			//Creating a new Dashboard 
-			
+			//Creating a new Dashboard 			
 			//Setting two column layout as default
 			radioList.get(1).setSelected(true);
 		}
@@ -77,7 +77,7 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 			//Changing configuration of existing board
 			dashboard.setName(nameTextbox.getValue());
 			dashboard.setShowFiltersPanel(commonFiltersCheckbox.isChecked());
-			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));
+			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));			
 			Events.sendEvent("onLayoutChange", parent, null);
 		} else {
 			//Creating new Board
@@ -116,4 +116,5 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 		
 		this.getSelf().detach();
 	}
+	
 }
