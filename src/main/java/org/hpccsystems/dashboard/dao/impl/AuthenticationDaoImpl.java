@@ -68,7 +68,7 @@ public class AuthenticationDaoImpl implements AuthenticationDao{
 		}
 		}
 		catch(EmptyResultDataAccessException ex) {
-			LOG.error(Labels.getLabel("exceptionOnAuthendicateUserFailed"), ex);
+			LOG.error("authendicateUser failed to execute the query due to invalid user! Return an empty string", ex);
 			return null;
 		}
 		

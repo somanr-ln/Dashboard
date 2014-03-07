@@ -76,7 +76,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		} catch(Exception e) {
 			Clients.showNotification(Labels.getLabel("unableToFetchFilterColumn"), "error", 
 					doneButton.getParent().getParent().getParent(), "top_left", 3000, true);
-			LOG.error(Labels.getLabel("exceptionforSelectedStringFilter"), e);
+			LOG.error("Exception while fetching data from Hpcc for selected String filter", e);
 		}
 		
 		List<String> filteredList = null;
@@ -139,7 +139,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		} catch(Exception ex) {
 			Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
-			LOG.error(Labels.getLabel("fetchingExceptionfromHpcc"), ex);
+			LOG.error("Exception while fetching column data from Hpcc", ex);
 			return;
 		}
 		if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 

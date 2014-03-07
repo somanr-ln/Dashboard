@@ -89,7 +89,7 @@ public class NumericFilterController extends SelectorComposer<Component>{
 				}else{
 					Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
 				}
-				LOG.error(Labels.getLabel("exceptiononNumericFilter"), e);
+				LOG.error("Exception while fetching data from Hpcc for selected Numeric filter", e);
 				return;
 			}
 			
@@ -152,7 +152,7 @@ public class NumericFilterController extends SelectorComposer<Component>{
 			}else{
 				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
 			}
-			LOG.error(Labels.getLabel("unabletoFetchHpccData"), ex);
+			LOG.error("Exception while fetching column data from Hpcc", ex);
 			return;
 		}		
 		

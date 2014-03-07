@@ -192,7 +192,7 @@ public class EditTableController extends SelectorComposer<Component> {
 						);
 			} catch (Exception e) {
 				Clients.showNotification(Labels.getLabel("tableCreationFailed"), "error", tableHolder, "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("tableCreationFailed"), e);
+				LOG.error("Table creation failed", e);
 				return;
 			}
 			

@@ -270,7 +270,7 @@ public class ChartPanel extends Panel {
     		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidget(portlet);
         	}catch(DataAccessException ex){
-        		LOG.error(Labels.getLabel("exceptioninResetListener()"), ex);
+        		LOG.error("Exception in resetListener()", ex);
         	}
         } 
 	};
@@ -295,7 +295,7 @@ public class ChartPanel extends Panel {
 				}
 			}
 			}catch(DataAccessException ex){
-				LOG.error(Labels.getLabel("deleteWidgetException"), ex);
+				LOG.error("Exception while deleting widget", ex);
 			}
 		} 
 	};
@@ -325,7 +325,7 @@ public class ChartPanel extends Panel {
 			WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidgetTitle(portlet);
 			}catch(DataAccessException ex){
-				LOG.error(Labels.getLabel("updateChartTitleException"), ex);
+				LOG.error("Exception while updating chart title", ex);
 			}
 		}
 	};

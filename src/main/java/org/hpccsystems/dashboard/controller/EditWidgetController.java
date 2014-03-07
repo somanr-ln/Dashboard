@@ -261,7 +261,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification(Labels.getLabel("logoutError"));
-				LOG.error(Labels.getLabel("logoutError"), e);
+				LOG.error("Logout error", e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -277,7 +277,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				authenticationService.logout(null);
 			} catch (Exception e) {
 				Clients.showNotification(Labels.getLabel("logoutError"));
-				LOG.error(Labels.getLabel("logoutError"), e);
+				LOG.error("Logout error", e);
 			}
 			
 			Messagebox.show("Chart details are Updated Successfuly. This window will be closed", new Messagebox.Button[0], null);
@@ -318,7 +318,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
 			}catch(Exception ex) {
 				Clients.showNotification(Labels.getLabel("unableToFetchHpccData"), "error", this.getSelf(), "middle_center", 3000, true);
-				LOG.error(Labels.getLabel("exceptiononcloseEditWindow()"), ex);
+				LOG.error("Exception in closeEditWindow()", ex);
 				return;
 			}
 			editPortletWindow.detach();
@@ -344,7 +344,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
     			              		   editPortletWindow.detach();
     			              		   Clients.evalJavaScript("window.open('','_self',''); window.close();");
     			              	   } catch (Exception ex) {
-    			              		   LOG.error(Labels.getLabel("logoutError"), ex);
+    			              		 LOG.error("Error while Log out", ex);
     			              	   }
     			                }
     			            }

@@ -27,9 +27,16 @@
             	apply="org.hpccsystems.dashboard.controller.LoginController" 
             	class="login-form">
                 <legend>Sign in to <span class="blue">${labels.dashboard}</span></legend>
+	            <div class="form-group">
+				     <zul:label id="lblLanguage">${labels.lblLanguage}</zul:label>
+				   <zul:listbox sclass="form-control" id="language" mold="select" width="200px" style="display:inline">
+							<zul:listitem label="English" value="English" selected="true"/>
+							<zul:listitem label="中文" value="Chinese"/>
+					</zul:listbox> 
+				 </div>
 	            
 	            <div class="form-group">
-				   <label for="apps">${labels.appl}</label >
+				  <zul:label id="lblApplication">${labels.lblApplication}</zul:label>
 				   <zul:listbox sclass="form-control" id="apps" mold="select" width="200px" style="display:inline">
 						<template name="model">
 							<zul:listitem label="${each.appName}" value="${each.appId}" />
@@ -38,12 +45,12 @@
 				 </div>
 	            
 	            <div class="form-group">
-				   <label for="account">${labels.userName}</label >
+				    <zul:label id="lblUserName">${labels.lblUserName}</zul:label>
 				   <zul:textbox type="text" sclass="form-control" id="account" style="display:inline"/> 
 				 </div>
 				 
 				 <div class="form-group">
-				   <label for="password">${labels.password}</label >
+				     <zul:label id="lblPassword">${labels.lblPassword}</zul:label>
 				   <zul:textbox type="password" class="form-control" id="password" style="display:inline"/>
 				 </div>
                 

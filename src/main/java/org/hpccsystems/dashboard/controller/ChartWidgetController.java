@@ -76,7 +76,7 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 				WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
 				widgetService.updateWidget(portlet);
 				}catch(Exception ex){
-					LOG.error(Labels.getLabel("grayChartException"), ex);
+					LOG.error("Exception while adding 'Gray' chart", ex);
 				}
 				
 				Events.sendEvent(new Event("onCloseDialog", parentDiv, 

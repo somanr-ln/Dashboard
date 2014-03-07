@@ -55,7 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService,Serializ
 		try {
 			user = authendicationDao.authendicateUser(account,passWord);
 		} catch (SQLException e) {
-			LOG.error(Labels.getLabel("authenticationError"), e);
+			LOG.error("Login Authentication error", e);
 			return false;
 		}
 		
