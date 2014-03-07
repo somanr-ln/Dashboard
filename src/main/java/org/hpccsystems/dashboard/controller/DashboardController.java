@@ -105,7 +105,7 @@ public class DashboardController extends SelectorComposer<Component>{
 	Listbox commonFilterList;
 	
     Integer panelCount = 0;
-    Set<String> commonFilters;
+    Set<Filter> commonFilterSet;
     
     private static final String PERCENTAGE_SIGN = "%";
     
@@ -276,7 +276,8 @@ public class DashboardController extends SelectorComposer<Component>{
 			}
 			
 			//Generating applied filter rows, with values
-			Set<Field> persistedFilters = new LinkedHashSet<Field>();
+			Set<Field> commonFilters;
+			commonFilters = new LinkedHashSet<Field>();
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 						portlet.getChartData().getIsFiltered()) {
@@ -288,7 +289,7 @@ public class DashboardController extends SelectorComposer<Component>{
 							field = new Field();
 							field.setColumnName(filter.getColumn());
 							
-							if(persistedFilters.add(field))
+							if(commonFilters.add(field))
 								filterRows.appendChild(createStringFilterRow(field, filter));
 						}
 						//TODO: Else part for Numeric filters
@@ -311,13 +312,12 @@ public class DashboardController extends SelectorComposer<Component>{
 					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
 					for(Field field :fieldSet){
 						// Excluding persisted 
-						if(!columnSet.contains(field) && !persistedFilters.contains(field)){
+						if(!columnSet.contains(field) && !commonFilters.contains(field)){
 							columnSet.add(field);
 						}
 					}
 				}				
 			}
-			
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("common columnSet in --->" + columnSet);
@@ -357,6 +357,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 		
 		selectedItem.detach();
+		
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 					portlet.getChartData().getIsFiltered()){
@@ -406,6 +407,12 @@ public class DashboardController extends SelectorComposer<Component>{
 	
 	private Row createStringFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
+		
+		if(commonFilterSet == null ){
+			commonFilterSet = new HashSet<Filter>();
+		}
+		Sessions.getCurrent().setAttribute(Constants.COMMON_FILTERS, commonFilterSet);
+		commonFilterSet.add(filter);
 		
 		row.setAttribute(Constants.FILTER, filter);
 		row.setAttribute(Constants.FIELD, field);

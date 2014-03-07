@@ -140,5 +140,7 @@ public class Constants {
 	public static final String LAST_UPDATED_DATE = "lastUpdatedDate";
 	public static final String CHART_TITLE = "Chart Title";
 	public static final String DASHBOARD_NOT_EXISTS = "The Provided Dashboard doesn't exists";
+
+	public static final String COMMON_FILTERS = "commonFilters";
 	
 }

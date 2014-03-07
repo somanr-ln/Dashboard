@@ -27,6 +27,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.DropEvent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -146,13 +147,25 @@ public class EditChartController extends SelectorComposer<Component> {
 				return;
 			}			
 		}
-		
-		//Setting fields to ChartData
+
 		List<Field> fields = new ArrayList<Field>();
 		for (Field field : columnSet) {
 			fields.add(field);
 		}
 		chartData.setFields(fields);
+		
+		//Setting fields to ChartData
+		if(Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
+			Set<Filter> filterSet = (Set<Filter>) Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS);
+			for (Filter filter : filterSet) {
+				for (Field field : chartData.getFields()) {
+					if(filter.getColumn().equals(field.getColumnName())) {
+						chartData.setIsFiltered(true);
+						chartData.getFilterList().add(filter);
+					}
+				}
+			}
+		}
 		
 		// When live chart is present in ChartPanel
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
