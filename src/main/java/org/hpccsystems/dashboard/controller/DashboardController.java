@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.HashSet; 
 import java.util.Iterator; 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -280,14 +280,14 @@ public class DashboardController extends SelectorComposer<Component>{
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 						portlet.getChartData().getIsFiltered()) {
-					for (Filter filter : portlet.getChartData().getFilterList()) {
-						// Considering only String filters now
-						if(filter.getIsCommonFilter() && filter.getType().equals(Constants.STRING_DATA)) {
-							Field field = null;
-							field = new Field();
-							field.setColumnName(filter.getColumn());
-							persistedFilters.add(field);
-							filterRows.appendChild(createStringFilterRow(field, filter));
+				for (Filter filter : portlet.getChartData().getFilterList()) {
+					// Considering only String filters now
+					if(filter.getIsCommonFilter() && filter.getType().equals(Constants.STRING_DATA)) {
+						Field field = null;
+						field = new Field();
+						field.setColumnName(filter.getColumn());
+						persistedFilters.add(field);
+						filterRows.appendChild(createStringFilterRow(field, filter));
 						}
 						//TODO: Else part for Numeric filters
 					}
@@ -298,7 +298,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
 			}
 			
-			
+
 			// Getting All filter columns
 			Set<Field> columnSet = new HashSet<Field>();
 			Set<Field> fieldSet = null;
@@ -424,8 +424,10 @@ public class DashboardController extends SelectorComposer<Component>{
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)) {
-				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
-						portlet.getChartData().getFields().contains(field)) {
+				//System.out.println("test -->"+portlet.getChartData());
+				//System.out.println(portlet.getChartData().getFields());
+				if(portlet.getChartData() != null &&!dataFiles.contains(portlet.getChartData().getFileName()) && 
+						portlet.getChartData().getFields() != null && portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
 					Iterator<String> iterator = hpccService.getDistinctValues(field.getColumnName(), portlet.getChartData(), false).iterator();
 					while (iterator.hasNext()) {
@@ -484,6 +486,11 @@ public class DashboardController extends SelectorComposer<Component>{
 						filter.getValues().remove(value);
 					}
 				}
+			}
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Selected Filter Column -> " + field.getColumnName());
+				LOG.debug("Selected Filter Values -> " + filter.getValues());
 			}
 			
 			if(LOG.isDebugEnabled()){
@@ -690,19 +697,20 @@ public class DashboardController extends SelectorComposer<Component>{
 				XYChartData chartData  = null;
 				for (Portlet portlet : dashboard.getPortletList()) {
 					if(portlet.getChartData() != null){
-						chartData = portlet.getChartData();
+						chartData = chartRenderer.parseXML(portlet.getChartDataXML());
 						fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
 					}				
 				}
 				
 				// Generating popup
 				Listitem filterItem = null;
+				if(fieldSet != null){
 				for(Field field : fieldSet){
 					filterItem = new Listitem();
 					filterItem.setLabel(field.getColumnName());
 					filterItem.setAttribute(Constants.FIELD, field);
 					filterItem.setParent(commonFilterList);
-				}
+				}}
 				
 				commonFiltersPanel.setVisible(true);
 			} else {

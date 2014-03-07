@@ -1,5 +1,5 @@
 <window 
-	border="none"
+	border="none" 
 	id="dashboardWin"
 	apply="org.hpccsystems.dashboard.controller.DashboardController"
 	zclass="dashboard-container"

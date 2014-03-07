@@ -41,5 +41,6 @@
  <system-config>
     <label-location>/WEB-INF/zk-errors.properties</label-location>
     <label-location>/WEB-INF/i3-label_en.properties</label-location>
+     <label-location>/WEB-INF/i3-label_zh.properties</label-location> 
 </system-config>
 </zk>
