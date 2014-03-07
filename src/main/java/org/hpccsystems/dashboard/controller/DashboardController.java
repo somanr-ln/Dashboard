@@ -491,6 +491,11 @@ public class DashboardController extends SelectorComposer<Component>{
 				LOG.debug("Selected Filter Values -> " + filter.getValues());
 			}
 			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Selected Filter Column -> " + field.getColumnName());
+				LOG.debug("Selected Filter Values -> " + filter.getValues());
+			}
+			
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()))
 					continue;
