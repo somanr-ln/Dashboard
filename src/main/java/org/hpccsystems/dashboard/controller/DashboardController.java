@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.HashSet; 
 import java.util.Iterator; 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -232,7 +232,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				}
 			}
 			
-			if(! authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID)){
+			if(! authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID)) {
 				dashboardToolbar.setVisible(true);
 			}
 			
@@ -288,15 +288,17 @@ public class DashboardController extends SelectorComposer<Component>{
 						field.setColumnName(filter.getColumn());
 						persistedFilters.add(field);
 						filterRows.appendChild(createStringFilterRow(field, filter));
+						}
+						//TODO: Else part for Numeric filters
 					}
-					//TODO: Else part for Numeric filters
 				}
 			}
-		}
 			
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
-		}
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
+			}
+			
+
 			// Getting All filter columns
 			Set<Field> columnSet = new HashSet<Field>();
 			Set<Field> fieldSet = null;
@@ -484,6 +486,11 @@ public class DashboardController extends SelectorComposer<Component>{
 						filter.getValues().remove(value);
 					}
 				}
+			}
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Selected Filter Column -> " + field.getColumnName());
+				LOG.debug("Selected Filter Values -> " + filter.getValues());
 			}
 			
 			if(LOG.isDebugEnabled()){
