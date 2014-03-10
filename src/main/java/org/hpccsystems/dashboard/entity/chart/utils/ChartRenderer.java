@@ -401,8 +401,10 @@ public class ChartRenderer {
 	public String convertToXML(XYChartData chartData) {
 		
 		//encrypt password
+		String rawPassword = chartData.getHpccConnection().getPassword();
+		
 		EncryptDecrypt encrypter = new EncryptDecrypt("");
-		String encrypted = encrypter.encrypt(chartData.getHpccConnection().getPassword());
+		String encrypted = encrypter.encrypt(rawPassword);
 		chartData.getHpccConnection().setPassword(encrypted);
 		java.io.StringWriter sw = new StringWriter();
 		JAXBContext jaxbContext;
@@ -414,6 +416,10 @@ public class ChartRenderer {
 		} catch (JAXBException e) {
 			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
 		}
+		
+		//reset raw password again to the object
+		chartData.getHpccConnection().setPassword(rawPassword);
+		
 	    return sw.toString();
 	}
 }
