@@ -3,7 +3,7 @@
 	apply="org.hpccsystems.dashboard.controller.DashboardConfigurationController"
 	closable="true" sclass="panel">
 	<caption iconSclass="glyphicon glyphicon-cog">
-		<label zclass="h5">Configure Dashboard</label>
+		<label zclass="h5">${labels.configureDashboard}</label>
 		<toolbar style="position: absolute; right: 40px;">
 			<button id="dashConfigDoneButton" zclass="glyphicon glyphicon-ok btn btn-link img-btn z-button" /> 
 		</toolbar>
@@ -39,8 +39,8 @@
 		</hlayout>
 		
 		<hlayout zclass="form-group">
-			<label zclass="label" value="Dashboard Options"></label>
-			<checkbox zclass="checkbox" label="Common Filters" id="commonFiltersCheckbox"></checkbox>
+			<label zclass="label" value="${labels.dashboardOptions}"></label>
+			<checkbox zclass="checkbox" label="${labels.commonFilters}" id="commonFiltersCheckbox"></checkbox>
 		</hlayout>
 		
 	</vbox>

@@ -26,17 +26,17 @@
             <zul:div
             	apply="org.hpccsystems.dashboard.controller.LoginController" 
             	class="login-form">
-                <legend>Sign in to <span class="blue">${labels.dashboard}</span></legend>
+                <legend>${labels.signinto} <span class="blue">${labels.dashboard}</span></legend>
 	            <div class="form-group">
-				     <zul:label id="lblLanguage">${labels.lblLanguage}</zul:label>
+				      <label for="language">${labels.lblLanguage}</label >
 				   <zul:listbox sclass="form-control" id="language" mold="select" width="200px" style="display:inline">
-							<zul:listitem label="English" value="English" selected="true"/>
-							<zul:listitem label="中文" value="Chinese"/>
+							<zul:listitem id="listItemEnglish" label="English" value="English" />
+							<zul:listitem id="listItemChinese" label="中文" value="Chinese"/>
 					</zul:listbox> 
 				 </div>
 	            
 	            <div class="form-group">
-				  <zul:label id="lblApplication">${labels.lblApplication}</zul:label>
+				  <label for="apps">${labels.lblApplication}</label >
 				   <zul:listbox sclass="form-control" id="apps" mold="select" width="200px" style="display:inline">
 						<template name="model">
 							<zul:listitem label="${each.appName}" value="${each.appId}" />
@@ -45,18 +45,18 @@
 				 </div>
 	            
 	            <div class="form-group">
-				    <zul:label id="lblUserName">${labels.lblUserName}</zul:label>
+				     <label for="account">${labels.lblUserName}</label >
 				   <zul:textbox type="text" sclass="form-control" id="account" style="display:inline"/> 
 				 </div>
 				 
 				 <div class="form-group">
-				     <zul:label id="lblPassword">${labels.lblPassword}</zul:label>
+				     <label for="password">${labels.lblPassword}</label >
 				   <zul:textbox type="password" class="form-control" id="password" style="display:inline"/>
 				 </div>
                 
                 <div class="footer"> 
-                	<zul:label id="message" sclass="warn" value="&#160;" />
-                    <zul:button type="button" id="login" sclass="btn btn-success" label="Login" />
+                	<zul:label zclass="label" id="message" sclass="warn" value="&#160;" />
+                    <zul:button type="button" id="login" sclass="btn btn-success" label="${labels.login}" />
                 </div>
             
             </zul:div>
@@ -65,7 +65,7 @@
     </div>
     
     <footer class="white navbar-fixed-bottom">
-      Don't have an account yet? <a href="#" class="btn btn-black">${labels.register}</a>
+      ${labels.donthaveanAccountYet} <a href="#" class="btn btn-black">${labels.register}</a>
     </footer>
   </body>
 </html>
