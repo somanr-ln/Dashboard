@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;
@@ -89,7 +90,7 @@ public class ChartPanel extends Panel {
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
-			textbox.setValue("Chart Title");
+			textbox.setValue(Labels.getLabel("chartTitle"));
 		}
 		textbox.setWidth("300px");
 		textbox.setMaxlength(30);
@@ -278,22 +279,21 @@ public class ChartPanel extends Panel {
 	EventListener<Event> deleteListener = new EventListener<Event>() {
 
 		public void onEvent(final Event event)throws Exception  {
-			try{
-			portlet.setWidgetState(Constants.STATE_DELETE);
-			WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
-			widgetService.deleteWidget(portlet.getId());
-			ChartPanel.this.detach();
-			
-			Window window =  null;
-			Session session = Sessions.getCurrent();
-			final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
-			for (final Component component : list) {
-				if(component instanceof Window){
-					window = (Window) component;
-					Events.sendEvent(new Event("onPortalClose", window, portlet));
+			try {
+				WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
+				widgetService.deleteWidget(portlet.getId());
+				ChartPanel.this.detach();
+				
+				Window window =  null;
+				Session session = Sessions.getCurrent();
+				final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
+				for (final Component component : list) {
+					if(component instanceof Window){
+						window = (Window) component;
+						Events.sendEvent(new Event("onPortalClose", window, portlet));
+					}
 				}
-			}
-			}catch(DataAccessException ex){
+			} catch(DataAccessException ex){
 				LOG.error("Exception while deleting widget", ex);
 			}
 		} 
