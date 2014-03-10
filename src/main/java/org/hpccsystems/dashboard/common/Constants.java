@@ -99,6 +99,8 @@ public class Constants {
 	public static final String SOURCEID="sourceid"; 
 	public static final String NAME_SMALL = "name";
 	public static final String DASHBOARDS =  "dashboards";
+	public static final String REMOVE_GLOBAL_FILTERS = "Are you sure,Want to remove Dashboard filters?";
+	public static final String REMOVE_GLOBAL_FILTERS_TITLE = "Remove Dashboard Filter";
 	
 	public static final Map<Integer, ChartDetails> CHART_MAP = new HashMap<Integer, ChartDetails>(){
 		private static final long serialVersionUID = 1L;
@@ -140,5 +142,7 @@ public class Constants {
 	public static final String LAST_UPDATED_DATE = "lastUpdatedDate";
 	public static final String CHART_TITLE = "Chart Title";
 	public static final String DASHBOARD_NOT_EXISTS = "The Provided Dashboard doesn't exists";
+
+	public static final String COMMON_FILTERS = "commonFilters";
 	
 }

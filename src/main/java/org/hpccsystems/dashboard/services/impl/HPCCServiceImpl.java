@@ -76,6 +76,7 @@ public class HPCCServiceImpl implements HPCCService{
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Fetching Column Schema --> FileName: " + Sql );
+				LOG.debug("Hpcc Connection : " + hpccConnection);
 			}
 			
 			final DFUInfoResponse result = soap.DFUInfo(req);	

@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Map; 
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -27,6 +26,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.DropEvent;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -113,7 +113,6 @@ public class EditChartController extends SelectorComposer<Component> {
 	@Override
 	public void doAfterCompose(final Component comp) throws Exception {
 		super.doAfterCompose(comp);
-		String application = Labels.getLabel("application");
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
 		
@@ -127,19 +126,39 @@ public class EditChartController extends SelectorComposer<Component> {
 		if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) execution.getAttribute(Constants.CIRCUIT_CONFIG);
 			columnSet = new HashSet<Field>();
-			for (Field field : configuration.getFields()) {
-				columnSet.add(field);
-			}
-			
+			columnSet.addAll(configuration.getFields());
 			filterListBox.setDroppable("false");			
 		} else {
 			try{
+				if(LOG.isDebugEnabled()) {
+					LOG.debug("Querying Coloumn Schema \n File -> " + chartData.getFileName() + 
+							" \nHpcc Connection -> " + chartData.getHpccConnection());
+				}
+				
 				columnSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());
+				
 			}catch(Exception e) {
 				Clients.showNotification(Labels.getLabel("unableToFetchColumns"), "error", comp, "middle_center", 3000, true);
 				LOG.error(Constants.ERROR_RETRIEVE_COLUMNS, e);
 				return;
 			}			
+		}
+
+		List<Field> fields = new ArrayList<Field>();
+		fields.addAll(columnSet);
+		chartData.setFields(fields);
+		
+		//Setting fields to ChartData
+		if(Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
+			Set<Filter> filterSet = (Set<Filter>) Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS);
+			for (Filter filter : filterSet) {
+				for (Field field : chartData.getFields()) {
+					if(filter.getColumn().equals(field.getColumnName())) {
+						chartData.setIsFiltered(true);
+						chartData.getFilterList().add(filter);
+					}
+				}
+			}
 		}
 		
 		// When live chart is present in ChartPanel
@@ -364,7 +383,6 @@ public class EditChartController extends SelectorComposer<Component> {
 
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
 		String str =Labels.getLabel("dropMeasureOnly");
-		System.out.println("str==" +str);
 		//Validations
 		if(!Constants.NUMERIC_DATA.equals(draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE))){
 			Clients.showNotification(str, "error", YAxisListBox, "end_center", 3000, true);
@@ -640,14 +658,14 @@ public class EditChartController extends SelectorComposer<Component> {
 	public void onDropToFilterItem(final DropEvent dropEvent) {
 		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
 		
-		if(chartData.getFilterList().contains(draggedListitem.getLabel())) {
-			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
-			return;
-		}
-		
 		Filter filter = new Filter();
 		filter.setColumn(draggedListitem.getLabel());
 		filter.setType((Integer) draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE));
+		
+		if(chartData.getFilterList().contains(filter)) {
+			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
+			return;
+		}
 		
 		createFilterListItem(filter);
 	}

@@ -1,5 +1,5 @@
 <window 
-	border="none"
+	border="none" 
 	id="dashboardWin"
 	apply="org.hpccsystems.dashboard.controller.DashboardController"
 	zclass="dashboard-container"
@@ -31,11 +31,11 @@
 					
 					<toolbar align="end" style="float:right; border-style: none;">
 						<popup id="filterColumnPopup" zclass="popup">
-							<listbox width="200px"  multiple="false" id="commonFilterList" >
+							<listbox width="200px"  multiple="false" id="commonFilterList" rows="10">
 								
 							</listbox>
-						</popup> 
-						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup"></button>
+						</popup>
+						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup, position=start_before"></button>
 					</toolbar>
 				</hbox>
 			</div>
@@ -43,22 +43,11 @@
 		<panelchildren>
 			<grid style="border:none;">
 				<columns>
-					<column width="120px"></column>
+					<column width="200px"></column>
 					<column></column>
 				</columns>
 				<rows id="filterRows">
-					<row>
-						<div>
-							<label sclass="h5"> Country </label>
-							<button sclass="glyphicon glyphicon-remove-circle btn btn-link img-btn" style="float: right;"></button>
-						</div>
-						<hbox>
-							<checkbox zclass="checkbox" value="" label="India" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Italy" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Germany" style="margin: 0px; padding-right: 5px;"></checkbox>
-							<checkbox zclass="checkbox" value="" label="Australia" style="margin: 0px; padding-right: 5px;"></checkbox>
-						</hbox>
-					</row>
+					
 				</rows>
 			</grid>
 		</panelchildren>
