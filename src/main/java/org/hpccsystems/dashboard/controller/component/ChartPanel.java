@@ -90,7 +90,13 @@ public class ChartPanel extends Panel {
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
-			textbox.setValue("Chart Title");
+			Session session = Sessions.getCurrent();
+			String lang = (String)session.getAttribute("lang");
+			if(lang!=null && lang.equalsIgnoreCase("Chinese")){
+			textbox.setValue(Labels.getLabel("chartTitle"));
+			}else{
+				textbox.setValue("Chart Title");
+			}
 		}
 		textbox.setWidth("300px");
 		textbox.setMaxlength(30);
