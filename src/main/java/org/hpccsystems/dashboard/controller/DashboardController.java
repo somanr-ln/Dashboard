@@ -4,13 +4,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.HashSet; 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -280,6 +279,20 @@ public class DashboardController extends SelectorComposer<Component>{
 				}
 			}
 			
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
+			}	
+			constructFilterItem();
+			commonFiltersPanel.setVisible(true);
+		}
+		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
+	}	
+	
+	/**
+	 * Method to construct existing filter row and filter items
+	 */
+	private void constructFilterItem() {
+		try{
 			//Generating applied filter rows, with values
 			Set<Field> commonFilters;
 			commonFilters = new LinkedHashSet<Field>();
@@ -302,52 +315,45 @@ public class DashboardController extends SelectorComposer<Component>{
 				}
 			}
 			
-			if(LOG.isDebugEnabled()) {
-				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
-			}
-			
-
-			// Getting All filter columns
-			columnSet = new HashSet<Field>();
-			Set<Field> fieldSet = null;
-			XYChartData chartData  = null;
-			for (Portlet portlet : dashboard.getPortletList()) {
-				if(portlet.getChartData() != null){
-					chartData = portlet.getChartData();
-					fieldSet = hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection());					
-					for(Field field :fieldSet){
-						// Excluding persisted 
-						if(!columnSet.contains(field) && !commonFilters.contains(field)){
-							columnSet.add(field);
-						}
+		// Getting All filter columns
+		Set<Field> columnSet = new HashSet<Field>();
+		Set<Field> fieldSet = null;
+		XYChartData chartData = null;
+		for (Portlet portlet : dashboard.getPortletList()) {
+			if (portlet.getChartData() != null) {
+				chartData = portlet.getChartData();
+				fieldSet = hpccService.getColumnSchema(chartData.getFileName(),chartData.getHpccConnection());
+				for (Field field : fieldSet) {
+					// Excluding persisted
+					if (!columnSet.contains(field)	&& !commonFilters.contains(field)) {
+						columnSet.add(field);
 					}
-				}				
+				}
 			}
-			
-			if(LOG.isDebugEnabled()){
-				LOG.debug("common columnSet in --->" + columnSet);
-			}
-			// Generating popup
-			Listitem filterItem = null;
-			for(Field field : columnSet){
-				filterItem = new Listitem();
-				filterItem.setLabel(field.getColumnName());
-				filterItem.setAttribute(Constants.FIELD, field);
-				filterItem.setParent(commonFilterList);
-			}
-			
-			commonFiltersPanel.setVisible(true);
 		}
-		
-		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
-	}	
-	
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("common columnSet in --->" + columnSet);
+		}
+		// Generating popup
+		Listitem filterItem = null;
+		for (Field field : columnSet) {
+			filterItem = new Listitem();
+			filterItem.setLabel(field.getColumnName());
+			filterItem.setAttribute(Constants.FIELD, field);
+			filterItem.setParent(commonFilterList);
+		}
+		}catch(Exception e){
+			LOG.debug("Exception while creating filter Items in constructFilterItem()", e);
+		}
+
+	}
 	
 	/**
 	 * onSelect listener when a coloumn is selected in Popup
 	 * @param event
 	 * @throws Exception
-	 */
+	 */	
 	@Listen("onSelect = #commonFilterList")
 	public void onEvent(SelectEvent<Component, Object> event) throws Exception {
 		Listitem selectedItem = (Listitem) event.getSelectedItems().iterator().next();
@@ -371,6 +377,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		columnSet.remove(field);
 		selectedItem.detach();
 		
+		List<Filter> portletFilterList = new ArrayList<Filter>();
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 					portlet.getChartData().getIsFiltered()){
@@ -378,15 +385,18 @@ public class DashboardController extends SelectorComposer<Component>{
 					// overriding the portlet specific filter by selected global/dashboard filter
 					if (!filter.getIsCommonFilter()
 							&& filter.getColumn().equals(field.getColumnName())) {
-						portlet.getChartData().getFilterList().remove(filter);
-						if(portlet.getChartData().getFilterList().size() < 1){
-							portlet.getChartData().setIsFiltered(false);
-						}
-						
-						updateWidgets(portlet);
+						portletFilterList.add(filter);						
 					}
 				}
+				//Removing portlet specific filters, when selecting the same global filter
+				for(Filter filter : portletFilterList){
+				portlet.getChartData().getFilterList().remove(filter);
+				if(portlet.getChartData().getFilterList().size() < 1){
+					portlet.getChartData().setIsFiltered(false);
+				}}				
+				updateWidgets(portlet);
 			}
+			
 		}
 	}
 	
@@ -425,7 +435,6 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 	}
 	
-	
 	/**
 	 * Event listener to be invoked when a new live chart is drawn.
 	 * Adds new columns to the displayed Filter Column list 
@@ -451,7 +460,6 @@ public class DashboardController extends SelectorComposer<Component>{
 			
 		}
 	};
-	
 	/**
 	 * Creates a row of Common filters with a list of Distinct Values 
 	 * from the specified filter column from all datasets present in the Dashboard
@@ -539,14 +547,14 @@ public class DashboardController extends SelectorComposer<Component>{
 						portlet.getChartData().getFilterList().remove(filter);
 						if (portlet.getChartData().getFilterList().size() < 1) {
 							portlet.getChartData().setIsFiltered(false);
-						}
+						}						
 					}
 					
 					// refreshing the chart && updating DB
 					updateWidgets(portlet);
+
 				}
 			}
-			
 			// removing global filter object from session filter list
 			if(commonFilterSet.remove(filter)) {
 				//Adding to the list of columns
@@ -638,7 +646,6 @@ public class DashboardController extends SelectorComposer<Component>{
 			}
 		}
 	};
-	
 	
 	/**
 	 * Event to be triggered onClick of 'Add Widget' Button
@@ -910,7 +917,10 @@ public class DashboardController extends SelectorComposer<Component>{
 			}catch(DataAccessException e){
 				LOG.error("Exception in onPanelClose()", e);
 			}
-			
+			//Refreshing the global filters by removing theirr columns of this deleting portlet
+			filterRows.getChildren().clear();
+			commonFilterList.getChildren().clear();
+			constructFilterItem();
 		}
 	};	
 	
