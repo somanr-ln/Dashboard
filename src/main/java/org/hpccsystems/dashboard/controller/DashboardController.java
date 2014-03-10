@@ -474,7 +474,6 @@ public class DashboardController extends SelectorComposer<Component>{
 		public void onEvent(MouseEvent event) throws Exception {
 			Row removedRow = (Row) event.getTarget().getParent().getParent();
 			Filter filter = (Filter) removedRow.getAttribute(Constants.FILTER);
-			Field field = (Field) removedRow.getAttribute(Constants.FIELD);
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
 						&& portlet.getChartData().getIsFiltered()) {
