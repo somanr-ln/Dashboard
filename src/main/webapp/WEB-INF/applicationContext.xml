@@ -52,10 +52,6 @@
 	<bean id="applicationDao" class="org.hpccsystems.dashboard.dao.impl.ApplicationDaoImpl">
 	   <property name="dataSource"><ref bean="mySQLDataSource"/></property>	   
 	</bean>	 
-	
-	<bean id="dashboardHelper" class="org.hpccsystems.dashboard.util.DashboardHelper">
-	</bean>	
-	
  	
  	<bean id="mySQLDataSource" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName">

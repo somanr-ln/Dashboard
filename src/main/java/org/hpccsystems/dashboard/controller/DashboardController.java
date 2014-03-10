@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet; 
-import java.util.Iterator; 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,6 @@ import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
-import org.hpccsystems.dashboard.util.DashboardHelper;
 import org.hpccsystems.dashboard.util.DashboardUtil;
 import org.springframework.dao.DataAccessException;
 import org.zkoss.util.resource.Labels;
@@ -50,6 +49,7 @@ import org.zkoss.zkmax.zul.Navbar;
 import org.zkoss.zkmax.zul.Navitem;
 import org.zkoss.zkmax.zul.Portalchildren;
 import org.zkoss.zkmax.zul.Portallayout;
+import org.zkoss.zkplus.spring.SpringUtil;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Div;
@@ -126,9 +126,6 @@ public class DashboardController extends SelectorComposer<Component>{
     
     @WireVariable
 	HPCCService hpccService;
-    
-    @WireVariable
-    DashboardHelper dashboardHelper;
     
 	@Override
 	public void doAfterCompose(final Component comp) throws Exception {
@@ -385,12 +382,41 @@ public class DashboardController extends SelectorComposer<Component>{
 							portlet.getChartData().setIsFiltered(false);
 						}
 						
-						dashboardHelper.updateWidgets(portlet,portalChildren);
+						updateWidgets(portlet,portalChildren);
 					}
 				}
 			}
 		}
 	}
+	
+	public void updateWidgets(Portlet portlet,List<Portalchildren> portalChildren) throws Exception{
+
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Updating charts in portlet - " + portlet);
+		}
+
+		//Updating widget with latest filter details into DB
+		ChartRenderer chartRenderer = (ChartRenderer) SpringUtil.getBean("chartRenderer");
+		WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+		portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
+		widgetService.updateWidget(portlet);
+
+		//Refreshing chart with updated filter values
+		chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);
+
+		Portalchildren children = portalChildren.get(portlet.getColumn());
+		LOG.debug("portalchildren in updateWidgets()-->"+children);
+		ChartPanel panel =null;
+		for (Component comp : children.getChildren()) {
+			panel = (ChartPanel) comp;
+			if (panel.getPortlet().getId() == portlet.getId()) {
+				if (panel.drawD3Graph() != null) {
+					Clients.evalJavaScript(panel.drawD3Graph());
+				}
+			}
+		}
+	}
+	
 	
 	EventListener<Event> onDrawingLiveChart = new EventListener<Event>() {
 		
@@ -506,7 +532,7 @@ public class DashboardController extends SelectorComposer<Component>{
 					}
 					
 					// refreshing the chart && updating DB
-					dashboardHelper.updateWidgets(portlet,portalChildren);
+					updateWidgets(portlet,portalChildren);
 
 				}
 			}
@@ -583,7 +609,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				
 				if(chartData.getFields().contains(field)){
 					try {
-						dashboardHelper.updateWidgets(portlet,portalChildren);
+						updateWidgets(portlet,portalChildren);
 					} catch (Exception e) {
 						LOG.error("Error Updating Charts", e);
 						//TODO: Show Notification
@@ -815,7 +841,7 @@ public class DashboardController extends SelectorComposer<Component>{
 										}
 									}
 									// refreshing the chart && updating DB
-									dashboardHelper.updateWidgets(portlet,portalChildren);
+									updateWidgets(portlet,portalChildren);
 								}
 							}
 							Sessions.getCurrent().removeAttribute(Constants.COMMON_FILTERS);
