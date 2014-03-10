@@ -155,7 +155,7 @@ public class EditChartController extends SelectorComposer<Component> {
 				for (Field field : chartData.getFields()) {
 					if(filter.getColumn().equals(field.getColumnName())) {
 						chartData.setIsFiltered(true);
-						chartData.getFilterList().add(filter);
+						chartData.getFilterSet().add(filter);
 					}
 				}
 			}
@@ -209,7 +209,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			validateDroppable();
 
 			if(chartData.getIsFiltered()) {
-				for (Filter filter : chartData.getFilterList()) {
+				for (Filter filter : chartData.getFilterSet()) {
 					if(!filter.getIsCommonFilter()){
 						createFilterListItem(filter);
 					}
@@ -662,7 +662,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		filter.setColumn(draggedListitem.getLabel());
 		filter.setType((Integer) draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE));
 		
-		if(chartData.getFilterList().contains(filter)) {
+		if(chartData.getFilterSet().contains(filter)) {
 			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
 			return;
 		}
@@ -721,8 +721,8 @@ public class EditChartController extends SelectorComposer<Component> {
 		public void onEvent(final Event event) throws Exception {	
 			Listitem listItem =(Listitem) event.getTarget().getParent().getParent();			
 			
-			chartData.getFilterList().remove(listItem.getAttribute(Constants.FILTER));
-			if(chartData.getFilterList().size() < 1){
+			chartData.getFilterSet().remove(listItem.getAttribute(Constants.FILTER));
+			if(chartData.getFilterSet().size() < 1){
 				chartData.setIsFiltered(false);
 			}
 			

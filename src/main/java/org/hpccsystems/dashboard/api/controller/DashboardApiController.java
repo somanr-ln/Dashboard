@@ -208,7 +208,7 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 						yColumnValidation(failedValColumnList, yColumnList,	chartConfiguration);
 						// Filter Column Validation
 						if (chartData.getIsFiltered()) {
-							for (Filter filter : chartData.getFilterList()) {
+							for (Filter filter : chartData.getFilterSet()) {
 								filterColumn = filter.getColumn();
 								filterDataType = filter.getType();
 								filterColumnValidation(failedValColumnList,	filterColumn, filterDataType, chartConfiguration);

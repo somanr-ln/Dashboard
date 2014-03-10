@@ -106,7 +106,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 			}
 		}
 		
-		chartData.getFilterList().add(filter);
+		chartData.getFilterSet().add(filter);
 	}
 	
 	@Listen("onClick = button#filtersSelectedBtn")
@@ -129,8 +129,8 @@ public class StringFilterController extends SelectorComposer<Component>{
 		filter.setValues(selectedValues);
 
 		chartData.setIsFiltered(true);
-		if(!chartData.getFilterList().contains(filter)){
-			chartData.getFilterList().add(filter);
+		if(!chartData.getFilterSet().contains(filter)){
+			chartData.getFilterSet().add(filter);
 		
 		}
 		try {
