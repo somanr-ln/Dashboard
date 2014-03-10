@@ -31,11 +31,11 @@
 					
 					<toolbar align="end" style="float:right; border-style: none;">
 						<popup id="filterColumnPopup" zclass="popup">
-							<listbox width="200px"  multiple="false" id="commonFilterList" >
+							<listbox width="200px"  multiple="false" id="commonFilterList" rows="10">
 								
 							</listbox>
 						</popup>
-						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup"></button>
+						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup, position=start_before"></button>
 					</toolbar>
 				</hbox>
 			</div>
