@@ -414,8 +414,6 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 	};
 	
-	
-	
 	/**
 	 * Creates a row of Common filters with a list of Distinct Values 
 	 * from the specified filter column from all datasets present in the Dashboard
@@ -506,9 +504,7 @@ public class DashboardController extends SelectorComposer<Component>{
 						// removing global filter object from session filter list
 						commonFilterSet.remove(filter);
 					}
-					if (portlet.getChartData().getFilterList().size() < 1) {
-						portlet.getChartData().setIsFiltered(false);
-					}
+					
 					// refreshing the chart && updating DB
 					dashboardHelper.updateWidgets(portlet,portalChildren);
 
@@ -841,7 +837,6 @@ public class DashboardController extends SelectorComposer<Component>{
 		}
 	}
 	
-	
 	/**
 	 *  When a widget is deleted
 	 */
@@ -983,4 +978,6 @@ public class DashboardController extends SelectorComposer<Component>{
 			return;			
 		}
   }
+	
+	
 }

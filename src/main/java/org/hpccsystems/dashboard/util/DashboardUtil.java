@@ -1,6 +1,7 @@
 package org.hpccsystems.dashboard.util;
 
-public class DashboardUtil {
+
+public class DashboardUtil {	
 	/**
 	 * Checks whether a column is numeric
 	 * @param column
