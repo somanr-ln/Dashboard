@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map; 
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -127,10 +126,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) execution.getAttribute(Constants.CIRCUIT_CONFIG);
 			columnSet = new HashSet<Field>();
-			for (Field field : configuration.getFields()) {
-				columnSet.add(field);
-			}
-			
+			columnSet.addAll(configuration.getFields());
 			filterListBox.setDroppable("false");			
 		} else {
 			try{
@@ -149,9 +145,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		}
 
 		List<Field> fields = new ArrayList<Field>();
-		for (Field field : columnSet) {
-			fields.add(field);
-		}
+		fields.addAll(columnSet);
 		chartData.setFields(fields);
 		
 		//Setting fields to ChartData
