@@ -26,8 +26,10 @@ import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -320,6 +322,10 @@ public class EditWidgetController extends SelectorComposer<Component> {
 				LOG.error("Exception in closeEditWindow()", ex);
 				return;
 			}
+			
+			final Include include = (Include) Selectors.iterable(this.getSelf().getPage(), "#mainInclude").iterator().next();
+			Window window = (Window) include.getChildren().iterator().next();
+			Events.sendEvent("onDrawingLiveChart", window, portlet);
 			editPortletWindow.detach();
 		}
 	}

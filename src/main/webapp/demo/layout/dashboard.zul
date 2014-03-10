@@ -34,7 +34,7 @@
 							<listbox width="200px"  multiple="false" id="commonFilterList" >
 								
 							</listbox>
-						</popup> 
+						</popup>
 						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup"></button>
 					</toolbar>
 				</hbox>
