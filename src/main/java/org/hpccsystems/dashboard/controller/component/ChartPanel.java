@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;
@@ -89,13 +90,7 @@ public class ChartPanel extends Panel {
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
-			Session session = Sessions.getCurrent();
-			String lang = (String)session.getAttribute("lang");
-			if(lang!=null && lang.equalsIgnoreCase("Chinese")){
 			textbox.setValue(Labels.getLabel("chartTitle"));
-			}else{
-				textbox.setValue("Chart Title");
-			}
 		}
 		textbox.setWidth("300px");
 		textbox.setMaxlength(30);
