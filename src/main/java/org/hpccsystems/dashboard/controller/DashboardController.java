@@ -273,7 +273,7 @@ public class DashboardController extends SelectorComposer<Component>{
 					portlet.getChartData().setFilterSet(filters);
 				}
 			}
-
+ 
 			if(LOG.isDebugEnabled()) {
 				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
 			}	
