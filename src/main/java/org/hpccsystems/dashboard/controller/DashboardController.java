@@ -195,44 +195,42 @@ public class DashboardController extends SelectorComposer<Component>{
 			XYChartData chartData = null;
 			ChartPanel panel = null;
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if(!portlet.getWidgetState().equals(Constants.STATE_DELETE)){
-					//Constructing chart data only when live chart is drawn
-					if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
-						chartData = chartRenderer.parseXML(portlet.getChartDataXML());
-						
-						portlet.setChartData(chartData);
-						if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
-							//For chart widgets
+				//Constructing chart data only when live chart is drawn
+				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+					chartData = chartRenderer.parseXML(portlet.getChartDataXML());
+					
+					portlet.setChartData(chartData);
+					if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
+						//For chart widgets
 
-							//Getting fields
-							List<Field> fields = new ArrayList<Field>();
-							fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
-							chartData.setFields(fields);
-							
-							try	{
-								chartRenderer.constructChartJSON(chartData, portlet, false);
-							}catch(Exception ex) {
-								Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
-										"error", comp, "middle_center", 3000, true);
-								LOG.error("Exception while fetching column data from Hpcc", ex);
-							}
-							
-							//Checking for Common filters
-							if(chartData.getIsFiltered()){
-								for (Filter filter : chartData.getFilterList()) {
-									if(filter.getIsCommonFilter())
-										dashboard.setShowFiltersPanel(true);
-								}
+						//Getting fields
+						List<Field> fields = new ArrayList<Field>();
+						fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
+						chartData.setFields(fields);
+						
+						try	{
+							chartRenderer.constructChartJSON(chartData, portlet, false);
+						}catch(Exception ex) {
+							Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
+									"error", comp, "middle_center", 3000, true);
+							LOG.error("Exception while fetching column data from Hpcc", ex);
+						}
+						
+						//Checking for Common filters
+						if(chartData.getIsFiltered()){
+							for (Filter filter : chartData.getFilterSet()) {
+								if(filter.getIsCommonFilter())
+									dashboard.setShowFiltersPanel(true);
 							}
 						}
 					}
-					
-					panel = new ChartPanel(portlet);
-					portalChildren.get(portlet.getColumn()).appendChild(panel);
-										
-					if(panel.drawD3Graph() != null){
-						Clients.evalJavaScript(panel.drawD3Graph());
-					}
+				}
+				
+				panel = new ChartPanel(portlet);
+				portalChildren.get(portlet.getColumn()).appendChild(panel);
+									
+				if(panel.drawD3Graph() != null){
+					Clients.evalJavaScript(panel.drawD3Graph());
 				}
 			}
 			
@@ -256,12 +254,12 @@ public class DashboardController extends SelectorComposer<Component>{
 		if(dashboard.isShowFiltersPanel()) {
 			//Unifying Filter Objects - Making Duplicates filters a single instance
 			List<Filter> persistedGlobalFilters = new ArrayList<Filter>();
-			List<Filter> filters;
+			Set<Filter> filters;
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 						portlet.getChartData().getIsFiltered()){
-					filters = new ArrayList<Filter>();
-					for (Filter filter : portlet.getChartData().getFilterList()) {
+					filters = new LinkedHashSet<Filter>();
+					for (Filter filter : portlet.getChartData().getFilterSet()) {
 						if(filter.getIsCommonFilter() && persistedGlobalFilters.contains(filter)){
 							filters.add(persistedGlobalFilters.get(persistedGlobalFilters.indexOf(filter)));
 						} else {
@@ -270,10 +268,10 @@ public class DashboardController extends SelectorComposer<Component>{
 								persistedGlobalFilters.add(filter);
 						}
 					}
-					portlet.getChartData().setFilterList(filters);
+					portlet.getChartData().setFilterSet(filters);
 				}
 			}
-
+ 
 			if(LOG.isDebugEnabled()) {
 				LOG.debug("Persisted Common filters -> " + persistedGlobalFilters);
 			}	
@@ -283,7 +281,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			for (Portlet portlet : dashboard.getPortletList()) {
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 						portlet.getChartData().getIsFiltered()) {
-					for (Filter filter : portlet.getChartData().getFilterList()) {
+					for (Filter filter : portlet.getChartData().getFilterSet()) {
 						// Considering only String filters now
 						if(filter.getIsCommonFilter() && 
 								filter.getType().equals(Constants.STRING_DATA)) {
@@ -367,7 +365,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 					portlet.getChartData().getIsFiltered()){
-				for (Filter filter : portlet.getChartData().getFilterList()) {
+				for (Filter filter : portlet.getChartData().getFilterSet()) {
 					// overriding the portlet specific filter by selected global/dashboard filter
 					if (!filter.getIsCommonFilter()
 							&& filter.getColumn().equals(field.getColumnName())) {
@@ -376,8 +374,8 @@ public class DashboardController extends SelectorComposer<Component>{
 				}
 				//Removing portlet specific filters, when selecting the same global filter
 				for(Filter filter : portletFilterList){
-				portlet.getChartData().getFilterList().remove(filter);
-				if(portlet.getChartData().getFilterList().size() < 1){
+				portlet.getChartData().getFilterSet().remove(filter);
+				if(portlet.getChartData().getFilterSet().size() < 1){
 					portlet.getChartData().setIsFiltered(false);
 				}}				
 				updateWidgets(portlet);
@@ -580,20 +578,20 @@ public class DashboardController extends SelectorComposer<Component>{
 				if(filter.getValues().size() < 1) {
 					//Removing Filter if no values selected
 					if(chartData.getIsFiltered()){
-						chartData.getFilterList().remove(filter);
-						if(chartData.getFilterList().size() < 1)
+						chartData.getFilterSet().remove(filter);
+						if(chartData.getFilterSet().size() < 1)
 							chartData.setIsFiltered(false);
 					}
 				} else {
 					// Adding Filter to Portlets
 					if(portlet.getChartData().getFields().contains(field)) {
 						//Overriding filter if applied already
-						if(chartData.getIsFiltered() && chartData.getFilterList().contains(filter)){
-							chartData.getFilterList().remove(filter);
-							chartData.getFilterList().add(filter);
+						if(chartData.getIsFiltered() && chartData.getFilterSet().contains(filter)){
+							chartData.getFilterSet().remove(filter);
+							chartData.getFilterSet().add(filter);
 						} else {
 							chartData.setIsFiltered(true);
-							chartData.getFilterList().add(filter);
+							chartData.getFilterSet().add(filter);
 						}
 						
 					}
@@ -822,9 +820,9 @@ public class DashboardController extends SelectorComposer<Component>{
 									for (Filter filter : appliedCommonFilterSet) {
 										// removing global filter object from filterlist
 										if (portlet.getChartData().getIsFiltered()
-												&& portlet.getChartData().getFilterList().contains(filter)) {
-											portlet.getChartData().getFilterList().remove(filter);
-											if (portlet.getChartData().getFilterList().size() < 1) {
+												&& portlet.getChartData().getFilterSet().contains(filter)) {
+											portlet.getChartData().getFilterSet().remove(filter);
+											if (portlet.getChartData().getFilterSet().size() < 1) {
 												portlet.getChartData().setIsFiltered(false);
 											}
 										}
@@ -906,7 +904,7 @@ public class DashboardController extends SelectorComposer<Component>{
 				
 				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				
-				for (Filter filter : deletedPortlet.getChartData().getFilterList()) {
+				for (Filter filter : deletedPortlet.getChartData().getFilterSet()) {
 					if(filter.getIsCommonFilter()){
 						if(LOG.isDebugEnabled()) {
 							LOG.debug("Adding to remove list -> " + filter);
@@ -916,7 +914,7 @@ public class DashboardController extends SelectorComposer<Component>{
 							if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 									! deletedPortlet.getChartData().getFileName().equals(portlet.getChartData().getFileName()) &&
 									portlet.getChartData().getIsFiltered()) {
-								for (Filter portletFilter : portlet.getChartData().getFilterList()) {
+								for (Filter portletFilter : portlet.getChartData().getFilterSet()) {
 									if(portletFilter.equals(filter)) {
 										filtersToRefresh.add(filter);
 									}
@@ -1021,9 +1019,9 @@ public class DashboardController extends SelectorComposer<Component>{
 			if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
 					&& portlet.getChartData().getIsFiltered()) {
 				// removing global filter object from filter list
-				if (portlet.getChartData().getFilterList().contains(filter)) {
-					portlet.getChartData().getFilterList().remove(filter);
-					if (portlet.getChartData().getFilterList().size() < 1) {
+				if (portlet.getChartData().getFilterSet().contains(filter)) {
+					portlet.getChartData().getFilterSet().remove(filter);
+					if (portlet.getChartData().getFilterSet().size() < 1) {
 						portlet.getChartData().setIsFiltered(false);
 					}
 				}

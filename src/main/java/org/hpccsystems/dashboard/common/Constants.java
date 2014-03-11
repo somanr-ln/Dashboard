@@ -40,6 +40,7 @@ public class Constants {
 	public static final Integer LINE_CHART = 2;
 	public static final Integer PIE_CHART = 3;
 	public static final Integer TABLE_WIDGET = 4;
+	public static final Integer TREE_LAYOUT = 5;
 	
 	public static final String COLUMN_DATA_TYPE = "dataType";
 	public static final Integer NUMERIC_DATA = 1;
@@ -48,7 +49,6 @@ public class Constants {
 	public static final short ReorderPotletPanels = 20;
 	public static final short ResizePotletPanels = 30;
 	
-	public static final String STATE_DELETE = "D";
 	public static final String STATE_LIVE_CHART = "L";
 	public static final String STATE_GRAYED_CHART = "G";
 	public static final String STATE_EMPTY = "E";
@@ -61,8 +61,6 @@ public class Constants {
 	public static final String EDIT_SQL =  "getColumnSchema::Sql:";
 	public static final String DELETE_DASHBOARD = "You are about to delete the Active Dashboard. Do you want to proceed?";
 	public static final String DELETE_DASHBOARD_TITLE = "Delete Dashboard";
-	public static final String TREE_NAME = "name";
-	public static final String TREE_TYPE = "type";
 	public static final String TREE_DIRECTORY = "Directory";
 	public static final String TREE_FILE = "File";
 	public static final String TREE_IS_DIRECTORY = "isDirectory";
@@ -109,6 +107,7 @@ public class Constants {
 			put(LINE_CHART, new ChartDetails(LINE_CHART, "chart/Linechart_black.jpg" ,"Line Chart", "LineChartDescription", 2,0));
 			put(PIE_CHART, new ChartDetails(PIE_CHART, "chart/PieChart_black.jpg" ,"Pie Chart", "PieDescription", 1, 1));
 			put(TABLE_WIDGET, new ChartDetails(TABLE_WIDGET, "chart/table_black.png" ,"Table Widget", "TableWidgetDescription", 0, 0));
+			put(TREE_LAYOUT, new ChartDetails(TREE_LAYOUT, "chart/TreeLayout_black.jpg" ,"Table Widget", "Tree layout description", 0, 0));
 		}
 		
 	};

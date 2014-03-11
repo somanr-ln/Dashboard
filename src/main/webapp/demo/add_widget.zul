@@ -39,6 +39,11 @@
 				</row>
 				<row zclass="div">
 					<vbox align="center">
+						<image src="chart/TreeLayout.jpg" sclass="addwidget-img"/>
+						${labels.treeLayout}
+						<button label="Add" id="treeLayout" sclass="btn btn-default"/>
+					</vbox>
+					<vbox align="center">
 						<image src="chart/Chorddiagram.jpg" sclass="addwidget-img"/>
 						${labels.chordDiagram}
 						<button label="Add" disabled="true" sclass="btn btn-default"/>
@@ -46,11 +51,6 @@
 					<vbox align="center">
 						<image src="chart/Timeline.jpg" sclass="addwidget-img"/>
 						${labels.timeLine}
-						<button label="Add" disabled="true" sclass="btn btn-default"/>
-					</vbox>
-					<vbox align="center">
-						<image src="chart/TreeLayout.jpg" sclass="addwidget-img"/>
-						${labels.treeLayout}
 						<button label="Add" disabled="true" sclass="btn btn-default"/>
 					</vbox>
 					<vbox align="center">
