@@ -1,7 +1,9 @@
 package org.hpccsystems.dashboard.entity.chart;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,7 +23,7 @@ public class XYChartData {
 	
 	
 	private Boolean isFiltered = false;
-	private List<Filter> filterList;
+	private Set<Filter> filterSet;
 	
 	private Boolean isGrouped = false;
 	private Group group;
@@ -111,15 +113,15 @@ public class XYChartData {
 	}
 
 	@XmlElement
-	public List<Filter> getFilterList() {
-		if(filterList == null){
-			filterList = new ArrayList<Filter>();
+	public Set<Filter> getFilterSet() {
+		if(filterSet == null){
+			filterSet = new LinkedHashSet<Filter>();
 		}
-		return filterList;
+		return filterSet;
 	}
 
-	public void setFilterList(List<Filter> filterList) {
-		this.filterList = filterList;
+	public void setFilterSet(Set<Filter> filterSet) {
+		this.filterSet = filterSet;
 	}
 	
 	@XmlElement
@@ -136,7 +138,7 @@ public class XYChartData {
 		return "XYChartData [hpccConnection=" + hpccConnection + ", fileName="
 				+ fileName + ", xColumnNames=" + xColumnNames + ", yColumns="
 				+ yColumns + ", tableColumns=" + tableColumns + ", isFiltered="
-				+ isFiltered + ", filterList=" + filterList + ", isGrouped="
+				+ isFiltered + ", filterSet=" + filterSet + ", isGrouped="
 				+ isGrouped + ", group=" + group + ", fields=" + fields + "]";
 	}
 

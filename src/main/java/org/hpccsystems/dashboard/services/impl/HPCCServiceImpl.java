@@ -383,7 +383,7 @@ public class HPCCServiceImpl implements HPCCService{
 		if(chartData.getIsFiltered()){
 			queryTxt.append(" where ");
 			
-			Iterator<Filter> iterator = chartData.getFilterList().iterator();
+			Iterator<Filter> iterator = chartData.getFilterSet().iterator();
 			while (iterator.hasNext()) {
 				Filter filter = iterator.next();
 				

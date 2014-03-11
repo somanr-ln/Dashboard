@@ -98,7 +98,7 @@ public class ChartRenderer {
 		if(chartData.getIsFiltered())
 			filterDescription.append(" WHERE ");
 		
-		Iterator<Filter> filterIterator = chartData.getFilterList().iterator(); 
+		Iterator<Filter> filterIterator = chartData.getFilterSet().iterator(); 
 		while (filterIterator.hasNext()) {
 			Filter filter = (Filter) filterIterator.next();
 			header.addProperty("isFiltered", true);
