@@ -23,9 +23,11 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Group;
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
+import org.hpccsystems.dashboard.entity.chart.tree.Node;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.EncryptDecrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.util.Clients;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -422,4 +425,48 @@ public class ChartRenderer {
 		
 	    return sw.toString();
 	}
+
+	public String constructTreeJSON(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+		
+		Node parent = new Node(fName + " " + lName);
+		
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName, hpccConnection);
+		List<Node> nodeChildrenL1 = new ArrayList<Node>();
+		StringBuilder nameBuilder;
+		for (List<String> list : childrenL1) {
+			nameBuilder = new StringBuilder();
+			for (String string : list) {
+				nameBuilder.append(string);
+			}
+			nodeChildrenL1.add(new Node(nameBuilder.toString()));
+		}
+		parent.setChildren(nodeChildrenL1);
+		
+		List<List<String>> childrenL2;
+		List<Node> nodeChildrenL2;
+		int i = 0;
+		for (List<String> list : childrenL1) {
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
+			
+			nodeChildrenL2 = new ArrayList<Node>();
+			for (List<String> list2 : childrenL2) {
+				nameBuilder = new StringBuilder();
+				for (String string : list2) {
+					nameBuilder.append(string);
+				}
+				nodeChildrenL2.add(new Node(nameBuilder.toString()));
+			}
+			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
+			i++;
+		}
+		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
+		}
+		
+		return new Gson().toJson(parent);
+	}
 }
+
+
+

@@ -80,5 +80,9 @@ public interface HPCCService {
 	 * @throws Exception
 	 */
 	List<FileMeta> getFileList(String scope, HpccConnection hpccConnection) throws Exception;
+	
+	List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception;
+	
+	List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception;
 
 }

@@ -36,7 +36,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.zkoss.util.resource.Labels;
 
 import ws_sql.ws.hpccsystems.ExecuteSQLRequest;
 import ws_sql.ws.hpccsystems.ExecuteSQLResponse;
@@ -648,6 +647,145 @@ public class HPCCServiceImpl implements HPCCService{
 				throw ex;
 			} 
 		return results;
+	}
+
+
+	@Override
+	public List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select prim_range, prim_name, addr_suffix, v_city_name, st  from test::providers where lname = '");
+			queryTxt.append(lName);
+			queryTxt.append("' and fname = '");
+			queryTxt.append(fName);
+			queryTxt.append("'");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("prim_range").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("prim_name").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("addr_suffix").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+		
+		}
+		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
+	}
+	
+	@Override
+	public List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception {
+		
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select t1.lname, t1.fname from test::providers as t1 inner join test::facility as t2 on (t2.lnpid = t1.lnpid AND t2.prim_range = t1.prim_range and t2.prim_name = t1.prim_name AND (t2.prim_range = '");
+			queryTxt.append(primRange);
+			queryTxt.append("' AND t2.prim_name = '");
+			queryTxt.append(primName);
+			queryTxt.append("'))");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("fname").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("lname").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+			
+		} catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
 	}
 
 
