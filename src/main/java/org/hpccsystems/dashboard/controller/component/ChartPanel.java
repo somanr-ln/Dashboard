@@ -279,22 +279,21 @@ public class ChartPanel extends Panel {
 	EventListener<Event> deleteListener = new EventListener<Event>() {
 
 		public void onEvent(final Event event)throws Exception  {
-			try{
-			portlet.setWidgetState(Constants.STATE_DELETE);
-			WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
-			widgetService.deleteWidget(portlet.getId());
-			ChartPanel.this.detach();
-			
-			Window window =  null;
-			Session session = Sessions.getCurrent();
-			final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
-			for (final Component component : list) {
-				if(component instanceof Window){
-					window = (Window) component;
-					Events.sendEvent(new Event("onPortalClose", window, portlet));
+			try {
+				WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
+				widgetService.deleteWidget(portlet.getId());
+				ChartPanel.this.detach();
+				
+				Window window =  null;
+				Session session = Sessions.getCurrent();
+				final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
+				for (final Component component : list) {
+					if(component instanceof Window){
+						window = (Window) component;
+						Events.sendEvent(new Event("onPortalClose", window, portlet));
+					}
 				}
-			}
-			}catch(DataAccessException ex){
+			} catch(DataAccessException ex){
 				LOG.error("Exception while deleting widget", ex);
 			}
 		} 
