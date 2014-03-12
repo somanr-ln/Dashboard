@@ -23,9 +23,11 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Group;
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
+import org.hpccsystems.dashboard.entity.chart.tree.Node;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.EncryptDecrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.util.Clients;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -74,8 +77,8 @@ public class ChartRenderer {
 		
 		
 		if(chartData.getYColumns().size() > 0 && 
-				chartData.getXColumnNames().size() > 0) {
-			header.addProperty("xName", chartData.getXColumnNames().get(0));
+				chartData.getxColumnNames().size() > 0) {
+			header.addProperty("xName", chartData.getxColumnNames().get(0).toString());
 			
 			for (Measure measure : chartData.getYColumns()) {
 				yName.append(measure.getColumn() +  "_"  + measure.getAggregateFunction());
@@ -84,7 +87,7 @@ public class ChartRenderer {
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		title.append(chartData.getXColumnNames().get(0) + " BY " + yName.toString());
+		title.append(chartData.getxColumnNames().get(0).toString() + " BY " + yName.toString());
 		
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
@@ -98,9 +101,13 @@ public class ChartRenderer {
 		if(chartData.getIsFiltered())
 			filterDescription.append(" WHERE ");
 		
-		Iterator<Filter> filterIterator = chartData.getFilterList().iterator(); 
+		Iterator<Filter> filterIterator = chartData.getFilterSet().iterator(); 
 		while (filterIterator.hasNext()) {
 			Filter filter = (Filter) filterIterator.next();
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Filter -> " + filter);
+			}
+			
 			header.addProperty("isFiltered", true);
 			if(chartData.getIsFiltered() &&
 					Constants.STRING_DATA.equals(filter.getType())) {
@@ -135,7 +142,7 @@ public class ChartRenderer {
 		Iterator<XYModel> iterator =null;	
 		try	{
 			List<XYModel> list = null;
-			if(chartData.getXColumnNames().size() > 1) {
+			if(chartData.getxColumnNames().size() > 1) {
 				list = refactorResult(hpccService.getChartData(chartData), chartData);
 			}else {
 				list = hpccService.getChartData(chartData);
@@ -219,7 +226,7 @@ public class ChartRenderer {
 			JsonArray rows = new JsonArray();
 			JsonArray row = new JsonArray();
 			
-			if(chartData.getXColumnNames().size() > 1 ){
+			if(chartData.getxColumnNames().size() > 1 ){
 				for (String colName : chartData.getGroup().getyColumnNames()) {
 					row.add(new JsonPrimitive(colName));
 				}
@@ -243,7 +250,7 @@ public class ChartRenderer {
 					rows.add(row);
 					
 					List<String> yColumnNames;
-					if(chartData.getXColumnNames().size() > 1){
+					if(chartData.getxColumnNames().size() > 1){
 						yColumnNames = chartData.getGroup().getyColumnNames();
 					} else {
 						yColumnNames = new ArrayList<String>();
@@ -273,7 +280,6 @@ public class ChartRenderer {
 			header.add("xValues", xValues);
 			
 			final String data = header.toString();
-			
 			portlet.setChartDataJSON(data);
 		}
 	}
@@ -283,17 +289,17 @@ public class ChartRenderer {
 		List<XYModel> result = new ArrayList<XYModel>();
 		
 		List<String> xLabels = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(0), //First X column is being displayed as labels  
+				chartData.getxColumnNames().get(0).toString(), //First X column is being displayed as labels  
 				chartData, true);
 		
 		List<String> groupedList = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(1), //Second X column is grouped
+				chartData.getxColumnNames().get(1).toString(), //Second X column is grouped
 				chartData, true); 
 				
 		//Constructing Group Object
 		Group group = new Group();
 		List<String> newCols = new ArrayList<String>();
-		newCols.add(chartData.getXColumnNames().get(0));
+		newCols.add(chartData.getxColumnNames().get(0).toString());
 		group.setxColumnNames(newCols);
 		group.setyColumnNames(groupedList);
 		chartData.setGroup(group);
@@ -422,4 +428,48 @@ public class ChartRenderer {
 		
 	    return sw.toString();
 	}
+
+	public String constructTreeJSON(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+		
+		Node parent = new Node(fName + " " + lName);
+		
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName, hpccConnection);
+		List<Node> nodeChildrenL1 = new ArrayList<Node>();
+		StringBuilder nameBuilder;
+		for (List<String> list : childrenL1) {
+			nameBuilder = new StringBuilder();
+			for (String string : list) {
+				nameBuilder.append(string);
 }
+			nodeChildrenL1.add(new Node(nameBuilder.toString()));
+		}
+		parent.setChildren(nodeChildrenL1);
+		
+		List<List<String>> childrenL2;
+		List<Node> nodeChildrenL2;
+		int i = 0;
+		for (List<String> list : childrenL1) {
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
+			
+			nodeChildrenL2 = new ArrayList<Node>();
+			for (List<String> list2 : childrenL2) {
+				nameBuilder = new StringBuilder();
+				for (String string : list2) {
+					nameBuilder.append(string);
+				}
+				nodeChildrenL2.add(new Node(nameBuilder.toString()));
+			}
+			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
+			i++;
+		}
+		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
+		}
+		
+		return new Gson().toJson(parent);
+	}
+}
+
+
+

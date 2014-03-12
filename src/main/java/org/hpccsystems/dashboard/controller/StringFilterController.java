@@ -68,7 +68,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		try	{
 			// If filter column is already used to plot graph, then distinct values are filtered as well
 			// String Filters are checked against X Columns only
-			if(chartData.getXColumnNames().contains(filter.getColumn())) {
+			if(chartData.getxColumnNames().contains(filter.getColumn())) {
 				valueList = hpccService.getDistinctValues(filter.getColumn(), chartData, true);
 			} else {
 				valueList = hpccService.getDistinctValues(filter.getColumn(), chartData, false);
@@ -106,7 +106,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 			}
 		}
 		
-		chartData.getFilterList().add(filter);
+		chartData.getFilterSet().add(filter);
 	}
 	
 	@Listen("onClick = button#filtersSelectedBtn")
@@ -129,8 +129,8 @@ public class StringFilterController extends SelectorComposer<Component>{
 		filter.setValues(selectedValues);
 
 		chartData.setIsFiltered(true);
-		if(!chartData.getFilterList().contains(filter)){
-			chartData.getFilterList().add(filter);
+		if(!chartData.getFilterSet().contains(filter)){
+			chartData.getFilterSet().add(filter);
 		
 		}
 		try {
