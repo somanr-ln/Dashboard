@@ -144,27 +144,11 @@ public class EditChartController extends SelectorComposer<Component> {
 				return;
 			}
 		}
-<<<<<<< HEAD
-=======
 
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 		//Setting fields to ChartData
 		List<Field> fields = new ArrayList<Field>();
 		fields.addAll(columnSet);
 		chartData.setFields(fields);
-<<<<<<< HEAD
-		// Setting common filters for Newly created chart
-		if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
-		if (Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
-			Set<Filter> filterSet = (Set<Filter>) Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS);
-			for (Filter filter : filterSet) {
-					if( (Constants.STRING_DATA.equals(filter.getType()) && filter.getValues() != null) ||
-							(Constants.NUMERIC_DATA.equals(filter.getType()) && filter.getStartValue() != null && filter.getEndValue() != null) ) {
-				for (Field field : chartData.getFields()) {
-					if (filter.getColumn().equals(field.getColumnName())) {
-						chartData.setIsFiltered(true);
-=======
-		
 		// Setting common filters for Newly created chart
 		if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 			if(Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
@@ -175,7 +159,6 @@ public class EditChartController extends SelectorComposer<Component> {
 						for (Field field : chartData.getFields()) {
 							if(filter.getColumn().equals(field.getColumnName())) {
 								chartData.setIsFiltered(true);
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 								chartData.getFilterSet().add(filter);
 							}
 						}
@@ -229,16 +212,10 @@ public class EditChartController extends SelectorComposer<Component> {
 				chartData.getYColumns().remove(column);
 			}
 			validateDroppable();
-<<<<<<< HEAD
-			if (chartData.getIsFiltered()) {
-				for (Filter filter : chartData.getFilterSet()) {
-					if (!filter.getIsCommonFilter()) {
-=======
 
 			if(chartData.getIsFiltered()) {
 				for (Filter filter : chartData.getFilterSet()) {
 					if(!filter.getIsCommonFilter()){
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 						createFilterListItem(filter);
 					}
 				}
@@ -252,34 +229,6 @@ public class EditChartController extends SelectorComposer<Component> {
 		}
 		Listitem listItem;
 		Listcell listcell;
-<<<<<<< HEAD
-			for (Field field : columnSet) {
-				listItem = new Listitem();
-				listcell = new Listcell(field.getColumnName());
-				listItem.appendChild(listcell);
-				listItem.setDraggable("true");
-				if (DashboardUtil.checkNumeric(field.getDataType())) {
-					listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.NUMERIC_DATA);
-					final Measure measure = new Measure(field.getColumnName(), "sum");
-					listItem.setAttribute(Constants.MEASURE, measure);
-					final Popup popup = new Popup();
-					popup.setWidth("100px");
-					popup.setZclass("popup");
-					final Button button = new Button("Sum");
-					button.setZclass("btn btn-xs");
-					button.setStyle("font-size: 10px; float: right;");
-					button.setPopup(popup);
-					
-					Listbox listbox = new Listbox();
-					listbox.setMultiple(false);
-					listbox.appendItem("Average", "avg");
-					listbox.appendItem("Count", "count");
-					listbox.appendItem("Minimum", "min");
-					listbox.appendItem("Maximum", "max");
-					listbox.appendItem("Sum", "sum");
-					listbox.addEventListener(Events.ON_SELECT, selectAggregateFunctionListener);
-					
-=======
 		for (Field field :columnSet ) {
 			listItem = new Listitem();
 			listcell = new Listcell(field.getColumnName());
@@ -308,7 +257,6 @@ public class EditChartController extends SelectorComposer<Component> {
 				
 				listbox.addEventListener(Events.ON_SELECT, selectAggregateFunctionListener);
 				
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 				popup.appendChild(listbox);
 					listcell.appendChild(popup);
 					listcell.appendChild(button);
@@ -400,10 +348,6 @@ public class EditChartController extends SelectorComposer<Component> {
 					listItem.setParent(attributeListBox);
 				}
 			}
-<<<<<<< HEAD
-=======
-		}
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Portlet object -- " + portlet);
 		}
@@ -540,12 +484,7 @@ public class EditChartController extends SelectorComposer<Component> {
 	 * based on conditions from application constants
 	 */
 	private void validateDroppable() {
-<<<<<<< HEAD
 		// 0 - is for unlimited drops. So limiting drops only when not equals to
-		// 0
-=======
-		// 0 - is for unlimited drops. So limiting drops only when not equals to 0
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 
 		// Measures
 		if (!(Constants.CHART_MAP.get(portlet.getChartType()).getMaxYColumns() == 0)) {
@@ -717,7 +656,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("axisName" + axisName);
 				LOG.debug("Removing" + chartData.getxColumnNames().remove(axisName));
-				LOG.debug("Removed item from x Axis box, XColumnNames size  - " + chartData.getXColumnNames().size());
+				LOG.debug("Removed item from x Axis box, XColumnNames size  - " + chartData.getxColumnNames().size());
 				LOG.debug("List - " + chartData.getxColumnNames());
 			}
 			// Only clear the existing chart when no columns are present
@@ -742,10 +681,6 @@ public class EditChartController extends SelectorComposer<Component> {
 		Filter filter = new Filter();
 		filter.setColumn(draggedListitem.getLabel());
 		filter.setType((Integer) draggedListitem.getAttribute(Constants.COLUMN_DATA_TYPE));
-<<<<<<< HEAD
-=======
-		
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 		if(chartData.getFilterSet().contains(filter)) {
 			Clients.showNotification(Labels.getLabel("columnAlreadyAdded"), "error", filterListBox, "end_center", 3000, true);
 			return;
@@ -794,20 +729,12 @@ public class EditChartController extends SelectorComposer<Component> {
 
 	// Listener to close filter window
 	EventListener<Event> filterClearListener = new EventListener<Event>() {
-<<<<<<< HEAD
-		public void onEvent(final Event event) throws Exception {
-			Listitem listItem = (Listitem) event.getTarget().getParent().getParent();
-
-=======
 		public void onEvent(final Event event) throws Exception {	
 			Listitem listItem =(Listitem) event.getTarget().getParent().getParent();			
-			
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 			chartData.getFilterSet().remove(listItem.getAttribute(Constants.FILTER));
 			if(chartData.getFilterSet().size() < 1){
 				chartData.setIsFiltered(false);
 			}
-
 			try {
 				chartRenderer.constructChartJSON(chartData, portlet, true);
 				chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);

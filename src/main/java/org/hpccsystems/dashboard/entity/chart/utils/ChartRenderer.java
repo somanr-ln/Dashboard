@@ -429,30 +429,28 @@ public class ChartRenderer {
 	    return sw.toString();
 	}
 
-	public String constructTreeJSON(String fName, String lName, HpccConnection hpccConnection) throws Exception {
-		
+	public String constructTreeJSON(String fName, String lName,
+			HpccConnection hpccConnection) throws Exception {
+
 		Node parent = new Node(fName + " " + lName);
-		
-		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName, hpccConnection);
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,	hpccConnection);
 		List<Node> nodeChildrenL1 = new ArrayList<Node>();
 		StringBuilder nameBuilder;
 		for (List<String> list : childrenL1) {
 			nameBuilder = new StringBuilder();
 			for (String string : list) {
 				nameBuilder.append(string);
-<<<<<<< HEAD
-=======
 			}
 			nodeChildrenL1.add(new Node(nameBuilder.toString()));
 		}
 		parent.setChildren(nodeChildrenL1);
-		
+
 		List<List<String>> childrenL2;
 		List<Node> nodeChildrenL2;
 		int i = 0;
 		for (List<String> list : childrenL1) {
-			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
-			
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
+
 			nodeChildrenL2 = new ArrayList<Node>();
 			for (List<String> list2 : childrenL2) {
 				nameBuilder = new StringBuilder();
@@ -464,47 +462,9 @@ public class ChartRenderer {
 			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
 			i++;
 		}
-		
-		if(LOG.isDebugEnabled()) {
+		if (LOG.isDebugEnabled()) {
 			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
 		}
-		
-		return new Gson().toJson(parent);
-	}
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
-}
-<<<<<<< HEAD
-			nodeChildrenL1.add(new Node(nameBuilder.toString()));
-		}
-		parent.setChildren(nodeChildrenL1);
-		
-		List<List<String>> childrenL2;
-		List<Node> nodeChildrenL2;
-		int i = 0;
-		for (List<String> list : childrenL1) {
-			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
-			
-			nodeChildrenL2 = new ArrayList<Node>();
-			for (List<String> list2 : childrenL2) {
-				nameBuilder = new StringBuilder();
-				for (String string : list2) {
-					nameBuilder.append(string);
-				}
-				nodeChildrenL2.add(new Node(nameBuilder.toString()));
-			}
-			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
-			i++;
-		}
-		
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
-		}
-		
 		return new Gson().toJson(parent);
 	}
 }
-=======
->>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
-
-
-
