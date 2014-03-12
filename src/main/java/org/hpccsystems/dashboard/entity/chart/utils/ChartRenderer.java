@@ -78,7 +78,7 @@ public class ChartRenderer {
 		
 		if(chartData.getYColumns().size() > 0 && 
 				chartData.getxColumnNames().size() > 0) {
-			header.addProperty("xName", chartData.getxColumnNames().get(0).toString());
+			header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
 			
 			for (Measure measure : chartData.getYColumns()) {
 				yName.append(measure.getColumn() +  "_"  + measure.getAggregateFunction());
@@ -87,7 +87,7 @@ public class ChartRenderer {
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		title.append(chartData.getxColumnNames().get(0).toString() + " BY " + yName.toString());
+		title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
 		
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
@@ -289,17 +289,17 @@ public class ChartRenderer {
 		List<XYModel> result = new ArrayList<XYModel>();
 		
 		List<String> xLabels = hpccService.getDistinctValues(
-				chartData.getxColumnNames().get(0).toString(), //First X column is being displayed as labels  
+				chartData.getxColumnNames().get(0).getColumnName(), //First X column is being displayed as labels  
 				chartData, true);
 		
 		List<String> groupedList = hpccService.getDistinctValues(
-				chartData.getxColumnNames().get(1).toString(), //Second X column is grouped
+				chartData.getxColumnNames().get(1).getColumnName(), //Second X column is grouped
 				chartData, true); 
 				
 		//Constructing Group Object
 		Group group = new Group();
 		List<String> newCols = new ArrayList<String>();
-		newCols.add(chartData.getxColumnNames().get(0).toString());
+		newCols.add(chartData.getxColumnNames().get(0).getColumnName());
 		group.setxColumnNames(newCols);
 		group.setyColumnNames(groupedList);
 		chartData.setGroup(group);

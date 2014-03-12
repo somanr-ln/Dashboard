@@ -512,16 +512,17 @@ public class EditChartController extends SelectorComposer<Component> {
 
 	private void createYListChild(Measure measure) {
 		Listitem yAxisItem = new Listitem();
-		final Textbox textbox = new Textbox();
+		final Textbox textBox = new Textbox();
+		textBox.setInplace(true);
 		yAxisItem.setAttribute(Constants.MEASURE, measure);
 		Listcell listcell = new Listcell();
 		if (measure.getDisplayYColumnName() == null) {
-			textbox.setValue(measure.getColumn() + "_" + measure.getAggregateFunction());
+			textBox.setValue(measure.getColumn() + "_" + measure.getAggregateFunction());
 		} else {
-			textbox.setValue(measure.getDisplayYColumnName());
+			textBox.setValue(measure.getDisplayYColumnName());
 		}
-		textbox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
-		listcell.appendChild(textbox);
+		textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
+		listcell.appendChild(textBox);
 		Button closeBtn = new Button();
 		closeBtn.setSclass("glyphicon glyphicon-remove btn btn-link img-btn");
 		closeBtn.setStyle("float:right");
@@ -608,6 +609,7 @@ public class EditChartController extends SelectorComposer<Component> {
 	private void createXListChild(Attribute attribute) {
 		final Listitem xAxisItem = new Listitem();
 		final Textbox textBox = new Textbox();
+		textBox.setInplace(true);
 		xAxisItem.setAttribute(Constants.ATTRIBUTE, attribute);
 		final Listcell listcell = new Listcell();
 		if (attribute.getDisplayXColumnName() == null) {
