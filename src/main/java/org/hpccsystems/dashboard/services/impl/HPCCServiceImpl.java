@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.FileMeta;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
@@ -36,7 +37,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.zkoss.util.resource.Labels;
 
 import ws_sql.ws.hpccsystems.ExecuteSQLRequest;
 import ws_sql.ws.hpccsystems.ExecuteSQLResponse;
@@ -151,8 +151,8 @@ public class HPCCServiceImpl implements HPCCService{
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Inside getChartData");
-				if(chartData.getXColumnNames() != null && chartData.getXColumnNames().size() > 0)				{
-				LOG.debug("Column names --> " + chartData.getXColumnNames().get(0) + chartData.getYColumns().get(0));
+				if(chartData.getxColumnNames()!= null && chartData.getxColumnNames().size() > 0)				{
+				LOG.debug("Column names --> " + chartData.getxColumnNames().get(0) + chartData.getYColumns().get(0));
 				}
 			}
 			
@@ -188,8 +188,8 @@ public class HPCCServiceImpl implements HPCCService{
 					    
 						fstElmnt = (Element) fstNode;
 					    valueList = new ArrayList<Object>();
-					    for(String xColumnName : chartData.getXColumnNames()){
-					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName);
+					    for(Attribute xColumnName : chartData.getxColumnNames()){
+					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName.getColumnName());
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
 					    	lstNm = lstNmElmnt.getChildNodes();
 					    	if(lstNm.item(0) == null){
@@ -202,7 +202,7 @@ public class HPCCServiceImpl implements HPCCService{
 					    dataObj.setxAxisValues(valueList);
 					    
 					    valueList = new ArrayList<Object>();
-					    int outCount = chartData.getXColumnNames().size() + 1;
+					    int outCount = chartData.getxColumnNames().size() + 1;
 					    for (Measure measure : chartData.getYColumns()) {
 					    	lstNmElmntLst = fstElmnt.getElementsByTagName( measure.getAggregateFunction() + "out" + outCount);
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
@@ -383,7 +383,7 @@ public class HPCCServiceImpl implements HPCCService{
 		if(chartData.getIsFiltered()){
 			queryTxt.append(" where ");
 			
-			Iterator<Filter> iterator = chartData.getFilterList().iterator();
+			Iterator<Filter> iterator = chartData.getFilterSet().iterator();
 			while (iterator.hasNext()) {
 				Filter filter = iterator.next();
 				
@@ -434,46 +434,46 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return StringBuilder
 	 * 
 	 */
-	private String constructQuery(XYChartData chartData)
-	{
-		StringBuilder queryTxt=new StringBuilder("select ");
-		try	{
-			if(LOG.isDebugEnabled()) {
+	private String constructQuery(XYChartData chartData) {
+		StringBuilder queryTxt = new StringBuilder("select ");
+		try {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("Building Query");
 				LOG.debug("isFiltered -> " + chartData.getIsFiltered());
 			}
-			
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(", ");
 			}
-			
+
 			for (Measure measure : chartData.getYColumns()) {
 				queryTxt.append(measure.getAggregateFunction());
 				queryTxt.append("(");
 				queryTxt.append(measure.getColumn());
 				queryTxt.append("),");
 			}
-			//Deleting last comma
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
-			
 			queryTxt.append(" from ");
 			queryTxt.append(chartData.getFileName());
-				
 			queryTxt.append(constructWhereClause(chartData));
-			
 			queryTxt.append(" group by ");
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(",");
 			}
-			//Deleting last comma
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
-			
+
 			queryTxt.append(" order by ");
-			queryTxt.append(chartData.getXColumnNames().get(0));
-		}catch(Exception e)	{
-			LOG.error("Exception while constructing query in constructQuery()", e);
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
+			}
+		} catch (Exception e) {
+			LOG.error("Exception while constructing query in constructQuery()",	e);
 		}
 		return queryTxt.toString();
 	}
@@ -648,6 +648,145 @@ public class HPCCServiceImpl implements HPCCService{
 				throw ex;
 			} 
 		return results;
+	}
+
+
+	@Override
+	public List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select prim_range, prim_name, addr_suffix, v_city_name, st  from test::providers where lname = '");
+			queryTxt.append(lName);
+			queryTxt.append("' and fname = '");
+			queryTxt.append(fName);
+			queryTxt.append("'");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("prim_range").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("prim_name").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("addr_suffix").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+		
+		}
+		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
+	}
+	
+	@Override
+	public List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception {
+		
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select t1.lname, t1.fname from test::providers as t1 inner join test::facility as t2 on (t2.lnpid = t1.lnpid AND t2.prim_range = t1.prim_range and t2.prim_name = t1.prim_name AND (t2.prim_range = '");
+			queryTxt.append(primRange);
+			queryTxt.append("' AND t2.prim_name = '");
+			queryTxt.append(primName);
+			queryTxt.append("'))");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("fname").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("lname").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+			
+		} catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
 	}
 
 
