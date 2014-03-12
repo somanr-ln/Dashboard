@@ -78,17 +78,28 @@ public class ChartRenderer {
 		
 		if(chartData.getYColumns().size() > 0 && 
 				chartData.getxColumnNames().size() > 0) {
-			header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
 			
+			if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
+			} else {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayXColumnName());
+			}
 			for (Measure measure : chartData.getYColumns()) {
-				yName.append(measure.getColumn() +  "_"  + measure.getAggregateFunction());
+				if (measure.getDisplayYColumnName() == null) {
+					yName.append(measure.getColumn() + "_" + measure.getAggregateFunction());
+				} else {
+					yName.append(measure.getDisplayYColumnName());
+				}
 				yName.append(" & ");
 			}
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
-		
+		if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+			title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
+		}else{
+			title.append(chartData.getxColumnNames().get(0).getDisplayXColumnName() + " BY " + yName.toString());
+		}
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
 		} else {
