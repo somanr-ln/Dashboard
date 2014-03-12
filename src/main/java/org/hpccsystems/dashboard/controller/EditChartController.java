@@ -144,18 +144,24 @@ public class EditChartController extends SelectorComposer<Component> {
 			}			
 		}
 
+		//Setting fields to ChartData
 		List<Field> fields = new ArrayList<Field>();
 		fields.addAll(columnSet);
 		chartData.setFields(fields);
 		
-		//Setting fields to ChartData
-		if(Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
-			Set<Filter> filterSet = (Set<Filter>) Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS);
-			for (Filter filter : filterSet) {
-				for (Field field : chartData.getFields()) {
-					if(filter.getColumn().equals(field.getColumnName())) {
-						chartData.setIsFiltered(true);
-						chartData.getFilterSet().add(filter);
+		// Setting common filters for Newly created chart
+		if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+			if(Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS) != null) {
+				Set<Filter> filterSet = (Set<Filter>) Sessions.getCurrent().getAttribute(Constants.COMMON_FILTERS);
+				for (Filter filter : filterSet) {
+					if( (Constants.STRING_DATA.equals(filter.getType()) && filter.getValues() != null) ||
+							(Constants.NUMERIC_DATA.equals(filter.getType()) && filter.getStartValue() != null && filter.getEndValue() != null) ) {
+						for (Field field : chartData.getFields()) {
+							if(filter.getColumn().equals(field.getColumnName())) {
+								chartData.setIsFiltered(true);
+								chartData.getFilterSet().add(filter);
+							}
+						}
 					}
 				}
 			}
@@ -225,7 +231,6 @@ public class EditChartController extends SelectorComposer<Component> {
 
 		Listitem listItem;
 		Listcell listcell;
-		if(columnSet != null){
 		for (Field field :columnSet ) {
 			listItem = new Listitem();
 			listcell = new Listcell(field.getColumnName());
@@ -347,7 +352,10 @@ public class EditChartController extends SelectorComposer<Component> {
 				listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.STRING_DATA);
 				listItem.setParent(attributeListBox);
 			}
-		}} 
+		}
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Portlet object -- " + portlet);
+		}
 	}	
 
 	/**
@@ -494,9 +502,6 @@ public class EditChartController extends SelectorComposer<Component> {
 	 * based on conditions from application constants
 	 */
 	private void validateDroppable() {
-		if(LOG.isDebugEnabled()){
-			LOG.debug("Portlet object -- " + portlet);
-		}
 		// 0 - is for unlimited drops. So limiting drops only when not equals to 0
 
 		//Measures

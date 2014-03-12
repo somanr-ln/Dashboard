@@ -199,15 +199,14 @@ public class DashboardController extends SelectorComposer<Component>{
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 					chartData = chartRenderer.parseXML(portlet.getChartDataXML());
 					
+					//Getting fields
+					List<Field> fields = new ArrayList<Field>();
+					fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
+					chartData.setFields(fields);
+					
 					portlet.setChartData(chartData);
 					if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
 						//For chart widgets
-
-						//Getting fields
-						List<Field> fields = new ArrayList<Field>();
-						fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
-						chartData.setFields(fields);
-						
 						try	{
 							chartRenderer.constructChartJSON(chartData, portlet, false);
 						}catch(Exception ex) {
@@ -300,7 +299,8 @@ public class DashboardController extends SelectorComposer<Component>{
 			// Getting All filter columns
 			commonFilterFieldSet = new LinkedHashSet<Field>();
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
+						!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
 					for (Field field : portlet.getChartData().getFields()) {
 						// Excluding persisted
 						if (!commonFilters.contains(field)) {
@@ -361,24 +361,27 @@ public class DashboardController extends SelectorComposer<Component>{
 		commonFilterFieldSet.remove(field);
 		selectedItem.detach();
 		
-		List<Filter> portletFilterList = new ArrayList<Filter>();
+		List<Filter> filtersToReomove = new ArrayList<Filter>();
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
-					portlet.getChartData().getIsFiltered()){
+					portlet.getChartData().getIsFiltered()) {
+				
+				filtersToReomove = new ArrayList<Filter>();
 				for (Filter filter : portlet.getChartData().getFilterSet()) {
 					// overriding the portlet specific filter by selected global/dashboard filter
 					if (!filter.getIsCommonFilter()
 							&& filter.getColumn().equals(field.getColumnName())) {
-						portletFilterList.add(filter);						
+						filtersToReomove.add(filter);						
 					}
 				}
+				
 				//Removing portlet specific filters, when selecting the same global filter
-				for(Filter filter : portletFilterList){
-				portlet.getChartData().getFilterSet().remove(filter);
-				if(portlet.getChartData().getFilterSet().size() < 1){
-					portlet.getChartData().setIsFiltered(false);
-				}}				
-				updateWidgets(portlet);
+				if ( portlet.getChartData().getFilterSet().removeAll(filtersToReomove) ) {
+					if(portlet.getChartData().getFilterSet().size() < 1){
+						portlet.getChartData().setIsFiltered(false);
+					}			
+					updateWidgets(portlet);
+				}
 			}
 			
 		}
@@ -430,7 +433,8 @@ public class DashboardController extends SelectorComposer<Component>{
 			Portlet portlet = (Portlet) event.getData();
 			
 			if(dashboard.isShowFiltersPanel() && 
-					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
+					Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
 				Listitem filterItem = null;
 				for (Field field : portlet.getChartData().getFields()) {
 					if(commonFilterFieldSet.add(field)){
@@ -483,7 +487,8 @@ public class DashboardController extends SelectorComposer<Component>{
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART)) {
+			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) && 
+					!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
 				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
 						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
@@ -944,6 +949,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			//Refreshing filters
 			Row row;
 			{
+				List<Row> rowsToDelete = new ArrayList<Row>();
 				Filter filter;
 				Field field;
 				for (Component component : filterRows.getChildren()) {
@@ -952,8 +958,13 @@ public class DashboardController extends SelectorComposer<Component>{
 					field = (Field) row.getAttribute(Constants.FIELD);
 					if(filtersToRefresh.contains(filter)) {
 						filterRows.insertBefore(createStringFilterRow(field, filter), row);
-						row.detach();
+						rowsToDelete.add(row);
 					}
+				}
+				
+				//Deleting refreshed rows
+				for(int i=0; i < rowsToDelete.size(); i++) {
+					rowsToDelete.get(i).detach();
 				}
 			}
 			

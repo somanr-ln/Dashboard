@@ -182,7 +182,7 @@ public class ChartPanel extends Panel {
 	//To construct Table Widget
 	public void drawTableWidget(){
 		TableRenderer tableRenderer = (TableRenderer) SpringUtil.getBean("tableRenderer");
-		Vbox vbox = tableRenderer.constructTableWidget(portlet, false);
+		Vbox vbox = tableRenderer.constructTableWidget(portlet, portlet.getChartData(), false);
 		chartDiv.getChildren().clear();
 		chartDiv.appendChild(vbox);
 	}

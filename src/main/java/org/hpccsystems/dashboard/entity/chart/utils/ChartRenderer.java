@@ -104,6 +104,10 @@ public class ChartRenderer {
 		Iterator<Filter> filterIterator = chartData.getFilterSet().iterator(); 
 		while (filterIterator.hasNext()) {
 			Filter filter = (Filter) filterIterator.next();
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Filter -> " + filter);
+			}
+			
 			header.addProperty("isFiltered", true);
 			if(chartData.getIsFiltered() &&
 					Constants.STRING_DATA.equals(filter.getType())) {

@@ -296,7 +296,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					div.getChildren().clear();
 					div.appendChild(
 							tableRenderer.constructTableWidget(
-									portlet, false)
+									portlet, portlet.getChartData(), false)
 							);
 				} else {
 					//For Chart Widgets
