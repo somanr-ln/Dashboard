@@ -440,7 +440,40 @@ public class ChartRenderer {
 			nameBuilder = new StringBuilder();
 			for (String string : list) {
 				nameBuilder.append(string);
+<<<<<<< HEAD
+=======
+			}
+			nodeChildrenL1.add(new Node(nameBuilder.toString()));
+		}
+		parent.setChildren(nodeChildrenL1);
+		
+		List<List<String>> childrenL2;
+		List<Node> nodeChildrenL2;
+		int i = 0;
+		for (List<String> list : childrenL1) {
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
+			
+			nodeChildrenL2 = new ArrayList<Node>();
+			for (List<String> list2 : childrenL2) {
+				nameBuilder = new StringBuilder();
+				for (String string : list2) {
+					nameBuilder.append(string);
+				}
+				nodeChildrenL2.add(new Node(nameBuilder.toString()));
+			}
+			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
+			i++;
+		}
+		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
+		}
+		
+		return new Gson().toJson(parent);
+	}
+>>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 }
+<<<<<<< HEAD
 			nodeChildrenL1.add(new Node(nameBuilder.toString()));
 		}
 		parent.setChildren(nodeChildrenL1);
@@ -470,6 +503,8 @@ public class ChartRenderer {
 		return new Gson().toJson(parent);
 	}
 }
+=======
+>>>>>>> branch 'master' of https://github.com/dhanasiddharth/Dashboard
 
 
 

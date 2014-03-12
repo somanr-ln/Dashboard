@@ -40,6 +40,8 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 	@Wire
 	Button tableWidget;
 	@Wire
+	Button treeLayout;
+	@Wire
 	Window idWindow;
 	
 		
@@ -50,6 +52,8 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 		lineChartButton.setAttribute(Constants.CHART_TYPE, Constants.LINE_CHART);
 		pieChartButton.setAttribute(Constants.CHART_TYPE, Constants.PIE_CHART);
 		tableWidget.setAttribute(Constants.CHART_TYPE, Constants.TABLE_WIDGET);
+		treeLayout.setAttribute(Constants.CHART_TYPE, Constants.TREE_LAYOUT);
+		
 		final Portlet portlet = (Portlet) Executions.getCurrent().getArg()
 				.get(Constants.PORTLET);
 		if(LOG.isDebugEnabled()){

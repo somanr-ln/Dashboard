@@ -90,7 +90,13 @@ public class ChartPanel extends Panel {
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
+			Session session = Sessions.getCurrent();
+			String lang = (String)session.getAttribute("lang");
+			if(lang!=null && lang.equalsIgnoreCase("Chinese")){
 			textbox.setValue(Labels.getLabel("chartTitle"));
+			}else{
+				textbox.setValue("Chart Title");
+			}
 		}
 		textbox.setWidth("300px");
 		textbox.setMaxlength(30);
@@ -176,7 +182,7 @@ public class ChartPanel extends Panel {
 	//To construct Table Widget
 	public void drawTableWidget(){
 		TableRenderer tableRenderer = (TableRenderer) SpringUtil.getBean("tableRenderer");
-		Vbox vbox = tableRenderer.constructTableWidget(portlet, false);
+		Vbox vbox = tableRenderer.constructTableWidget(portlet, portlet.getChartData(), false);
 		chartDiv.getChildren().clear();
 		chartDiv.appendChild(vbox);
 	}
@@ -279,21 +285,21 @@ public class ChartPanel extends Panel {
 	EventListener<Event> deleteListener = new EventListener<Event>() {
 
 		public void onEvent(final Event event)throws Exception  {
-			try {
-				WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
-				widgetService.deleteWidget(portlet.getId());
-				ChartPanel.this.detach();
-				
-				Window window =  null;
-				Session session = Sessions.getCurrent();
-				final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
-				for (final Component component : list) {
-					if(component instanceof Window){
-						window = (Window) component;
-						Events.sendEvent(new Event("onPortalClose", window, portlet));
-					}
+			try{
+			WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
+			widgetService.deleteWidget(portlet.getId());
+			ChartPanel.this.detach();
+			
+			Window window =  null;
+			Session session = Sessions.getCurrent();
+			final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
+			for (final Component component : list) {
+				if(component instanceof Window){
+					window = (Window) component;
+					Events.sendEvent(new Event("onPortalClose", window, portlet));
 				}
-			} catch(DataAccessException ex){
+			}
+			}catch(DataAccessException ex){
 				LOG.error("Exception while deleting widget", ex);
 			}
 		} 

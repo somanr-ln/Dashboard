@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -44,13 +45,13 @@ public class TableRenderer {
 		 * @return
 		 * 	Table as Listbox
 		 */	
-		public Vbox constructTableWidget(final Portlet portlet, Boolean isEditing){		
+		public Vbox constructTableWidget(final Portlet portlet, XYChartData chartData, Boolean isEditing){		
 			
 			HPCCService hpccService = (HPCCService) SpringUtil.getBean("hpccService");
 			
 			LinkedHashMap<String, List<String>> tableDataMap;
 			try {
-				tableDataMap = hpccService.fetchTableData(portlet.getChartData());
+				tableDataMap = hpccService.fetchTableData(chartData);
 			} catch (Exception e) {
 				Clients.showNotification("Unexpected error. Could not construct table.", true);
 				LOG.error("Table data error", e);
