@@ -36,6 +36,7 @@
 	.ui-slider .ui-slider-range {
 		background-color: #B3B3B3;
 	}
+	
 </style>
 
 <vlayout vflex="1" hflex="1" zclass="dashboard-body" style="overflow:auto; margin-top: 30px; margin-left: 5px;">
