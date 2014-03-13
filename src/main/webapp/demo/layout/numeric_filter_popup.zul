@@ -1,4 +1,4 @@
-<div width="250px" 
+<div width="250px"  
 	style="background: white;"
 	apply="org.hpccsystems.dashboard.controller.NumericFilterController">
 	
