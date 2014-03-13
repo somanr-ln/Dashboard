@@ -91,6 +91,7 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 		lineChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		pieChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		tableWidget.addEventListener(Events.ON_CLICK, closeClick);
+		treeLayout.addEventListener(Events.ON_CLICK, closeClick);
 	}
 
 }

@@ -77,18 +77,29 @@ public class ChartRenderer {
 		
 		
 		if(chartData.getYColumns().size() > 0 && 
-				chartData.getXColumnNames().size() > 0) {
-			header.addProperty("xName", chartData.getXColumnNames().get(0));
+				chartData.getxColumnNames().size() > 0) {
 			
+			if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
+			} else {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayXColumnName());
+			}			
 			for (Measure measure : chartData.getYColumns()) {
-				yName.append(measure.getColumn() +  "_"  + measure.getAggregateFunction());
+				if (measure.getDisplayYColumnName() == null) {
+					yName.append(measure.getColumn() + "_" + measure.getAggregateFunction());
+				} else {
+					yName.append(measure.getDisplayYColumnName());
+				}
 				yName.append(" & ");
 			}
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		title.append(chartData.getXColumnNames().get(0) + " BY " + yName.toString());
-		
+		if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+			title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
+		}else{
+			title.append(chartData.getxColumnNames().get(0).getDisplayXColumnName() + " BY " + yName.toString());
+		}
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
 		} else {
@@ -104,6 +115,10 @@ public class ChartRenderer {
 		Iterator<Filter> filterIterator = chartData.getFilterSet().iterator(); 
 		while (filterIterator.hasNext()) {
 			Filter filter = (Filter) filterIterator.next();
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Filter -> " + filter);
+			}
+			
 			header.addProperty("isFiltered", true);
 			if(chartData.getIsFiltered() &&
 					Constants.STRING_DATA.equals(filter.getType())) {
@@ -138,7 +153,7 @@ public class ChartRenderer {
 		Iterator<XYModel> iterator =null;	
 		try	{
 			List<XYModel> list = null;
-			if(chartData.getXColumnNames().size() > 1) {
+			if(chartData.getxColumnNames().size() > 1) {
 				list = refactorResult(hpccService.getChartData(chartData), chartData);
 			}else {
 				list = hpccService.getChartData(chartData);
@@ -222,7 +237,7 @@ public class ChartRenderer {
 			JsonArray rows = new JsonArray();
 			JsonArray row = new JsonArray();
 			
-			if(chartData.getXColumnNames().size() > 1 ){
+			if(chartData.getxColumnNames().size() > 1 ){
 				for (String colName : chartData.getGroup().getyColumnNames()) {
 					row.add(new JsonPrimitive(colName));
 				}
@@ -246,7 +261,7 @@ public class ChartRenderer {
 					rows.add(row);
 					
 					List<String> yColumnNames;
-					if(chartData.getXColumnNames().size() > 1){
+					if(chartData.getxColumnNames().size() > 1){
 						yColumnNames = chartData.getGroup().getyColumnNames();
 					} else {
 						yColumnNames = new ArrayList<String>();
@@ -276,7 +291,6 @@ public class ChartRenderer {
 			header.add("xValues", xValues);
 			
 			final String data = header.toString();
-			
 			portlet.setChartDataJSON(data);
 		}
 	}
@@ -286,17 +300,17 @@ public class ChartRenderer {
 		List<XYModel> result = new ArrayList<XYModel>();
 		
 		List<String> xLabels = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(0), //First X column is being displayed as labels  
+				chartData.getxColumnNames().get(0).getColumnName(), //First X column is being displayed as labels  
 				chartData, true);
 		
 		List<String> groupedList = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(1), //Second X column is grouped
+				chartData.getxColumnNames().get(1).getColumnName(), //Second X column is grouped
 				chartData, true); 
 				
 		//Constructing Group Object
 		Group group = new Group();
 		List<String> newCols = new ArrayList<String>();
-		newCols.add(chartData.getXColumnNames().get(0));
+		newCols.add(chartData.getxColumnNames().get(0).getColumnName());
 		group.setxColumnNames(newCols);
 		group.setyColumnNames(groupedList);
 		chartData.setGroup(group);
@@ -426,11 +440,22 @@ public class ChartRenderer {
 	    return sw.toString();
 	}
 
-	public String constructTreeJSON(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+	/**
+	 * Method to construct JSON data to draw tree layout
+	 * @param fName
+	 * @param lName
+	 * @param hpccConnection
+	 * @return String
+	 * @throws Exception
+	 */
+	public String constructTreeJSON(String fName, String lName,
+			HpccConnection hpccConnection) throws Exception {
 		
-		Node parent = new Node(fName + " " + lName);
-		
-		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName, hpccConnection);
+		if(LOG.isDebugEnabled()){
+		LOG.debug("fName : "+fName+" lName : "+lName+" hpccConnection : "+hpccConnection);
+		}
+		Node parent = new Node(fName + " " + lName);		
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,hpccConnection);
 		List<Node> nodeChildrenL1 = new ArrayList<Node>();
 		StringBuilder nameBuilder;
 		for (List<String> list : childrenL1) {
@@ -446,7 +471,7 @@ public class ChartRenderer {
 		List<Node> nodeChildrenL2;
 		int i = 0;
 		for (List<String> list : childrenL1) {
-			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1), hpccConnection);
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
 			
 			nodeChildrenL2 = new ArrayList<Node>();
 			for (List<String> list2 : childrenL2) {

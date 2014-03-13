@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.controller.component.ChartPanel;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
@@ -296,7 +297,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					div.getChildren().clear();
 					div.appendChild(
 							tableRenderer.constructTableWidget(
-									portlet, false)
+									portlet, portlet.getChartData(), false)
 							);
 				} else {
 					//For Chart Widgets
