@@ -98,7 +98,7 @@ public class ChartPanel extends Panel {
 				textbox.setValue("Chart Title");
 			}
 		}
-		textbox.setWidth("300px");
+		textbox.setWidth("250px");
 		textbox.setMaxlength(30);
 		textbox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
 
