@@ -447,8 +447,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			Portlet portlet = (Portlet) event.getData();
 			
 			if(dashboard.isShowFiltersPanel() && 
-					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
-					Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
+					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) ) {
 				Listitem filterItem = null;
 				for (Field field : portlet.getChartData().getFields()) {
 					if(commonFilterFieldSet.add(field)){

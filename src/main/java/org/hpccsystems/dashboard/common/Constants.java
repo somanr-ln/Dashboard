@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.hpccsystems.dashboard.entity.ChartDetails;
  
+
 /**
  * Constants class is used to maintain the constant's for Dashboard project.
  *
@@ -18,6 +19,7 @@ public class Constants {
 	public static final String FIELD = "field";
 	public static final String CHART_DATA = "chartData";
 	public static final String MEASURE = "measure";
+	public static final String ATTRIBUTE = "attribute";
 	public static final String DASHBOARD = "dashboard"; 
 	
 	public static final String EDIT_WINDOW_DONE_BUTTON = "doneButton";

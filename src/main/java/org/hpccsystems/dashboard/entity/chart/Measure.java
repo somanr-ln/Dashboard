@@ -2,11 +2,12 @@ package org.hpccsystems.dashboard.entity.chart;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
+ 
+@XmlRootElement 
 public class Measure {
 	private String column;
 	private String aggregateFunction;
+	private String displayYColumnName;
 	
 	public Measure() {}
 	
@@ -16,10 +17,11 @@ public class Measure {
 	 * @param columnName
 	 * @param aggregateFunction
 	 */
-	public Measure( String columnName, String aggregateFunction) {
+	public Measure(String columnName, String aggregateFunction) {
 		this.column = columnName;
 		this.aggregateFunction = aggregateFunction;
 	}
+	
 	
 	@XmlAttribute
 	public String getColumn() {
@@ -61,6 +63,16 @@ public class Measure {
 		} else {
 			return this.column.equals(obj);
 		}
+	}
+
+
+	public String getDisplayYColumnName() {
+		return displayYColumnName;
+	}
+
+
+	public void setDisplayYColumnName(String displayYColumnName) {
+		this.displayYColumnName = displayYColumnName;
 	}
 
 }

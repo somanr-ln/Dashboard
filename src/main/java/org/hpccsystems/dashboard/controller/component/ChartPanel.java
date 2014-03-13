@@ -3,11 +3,13 @@ package org.hpccsystems.dashboard.controller.component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
+import org.apache.commons.logging.Log; 
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
+import org.hpccsystems.dashboard.entity.chart.TreeData;
+import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.WidgetService;
@@ -22,6 +24,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.Selectors;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zkplus.spring.SpringUtil;
 import org.zkoss.zul.Box;
 import org.zkoss.zul.Button;
@@ -29,12 +32,14 @@ import org.zkoss.zul.Caption;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Window;
+
 
 /**
  * ChartPanel class is used to create,edit and delete the Dashboard portlet's.
@@ -55,10 +60,9 @@ public class ChartPanel extends Panel {
 	final Button deleteBtn = new Button();
 	final Div holderDiv = new Div();
 	final Div chartDiv = new Div();
-	final Textbox textbox = new Textbox();
-	
-	final Box imageContainer = new Box();
-	
+	final Textbox textbox = new Textbox();	
+	final Box imageContainer = new Box();	
+	final Textbox treetextBox = new Textbox();
 	Portlet portlet;
 
 	public ChartPanel(final Portlet argPortlet) {
@@ -98,7 +102,7 @@ public class ChartPanel extends Panel {
 				textbox.setValue("Chart Title");
 			}
 		}
-		textbox.setWidth("300px");
+		textbox.setWidth("250px");
 		textbox.setMaxlength(30);
 		textbox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
 
@@ -187,6 +191,9 @@ public class ChartPanel extends Panel {
 		chartDiv.appendChild(vbox);
 	}
 
+	/**
+	 * Adds static image
+	 */
 	private void setStaticImage() {
 		createChartHolder();
 		Image image = new Image();
@@ -197,6 +204,9 @@ public class ChartPanel extends Panel {
 		portlet.setWidgetState(Constants.STATE_GRAYED_CHART);
 	}
 	
+	/**
+	 * Creates div for chart
+	 */
 	private void createChartHolder() {
 		String divId;
 		Integer seq = 0;
@@ -245,10 +255,13 @@ public class ChartPanel extends Panel {
 			final Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put(Constants.PARENT, ChartPanel.this);
 			parameters.put(Constants.PORTLET, portlet);
-			
+			if(Constants.TREE_LAYOUT == portlet.getChartType()){
+				onTreeInclude();
+			}else{
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
 			window.doModal();
+			}
 		}
 
 	};
@@ -332,6 +345,62 @@ public class ChartPanel extends Panel {
 			}catch(DataAccessException ex){
 				LOG.error("Exception while updating chart title", ex);
 			}
+		}
+	};
+	
+	/**
+	 * Method to enable Tree layout window
+	 */
+	public void onTreeInclude() {
+		TreeData treeData = new TreeData();
+		treeData.setHpccConnection(constructHpccObj());
+		//portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+		portlet.setTreeData(treeData);
+		constructTreeSearchDiv();
+	}
+	
+	private HpccConnection constructHpccObj(){
+		HpccConnection hpccConnection = new HpccConnection(
+				"216.19.105.2", 18010, "", "generic_dashboard",
+				"Lexis123!", true, false);	
+		return hpccConnection;
+			
+	}
+	/**
+	 * Method to create root key search div for Tree layout
+	 */
+	private void constructTreeSearchDiv(){
+		Hbox hbox = new Hbox();
+		Label searchLabel = new Label();
+		searchLabel.setValue("Root Key :");
+		Button searchButton = new Button();
+		searchButton.setLabel("DrawTree");
+		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
+		hbox.appendChild(searchLabel);
+		hbox.appendChild(treetextBox);
+		hbox.appendChild(searchButton);
+		final Div treeDiv = new Div();
+		treeDiv.appendChild(hbox);		
+		holderDiv.getChildren().clear();
+		holderDiv.appendChild(treeDiv);
+		holderDiv.appendChild(chartDiv);
+		holderDiv.setHeight("620px");
+		removeStaticImage();
+	}
+			
+	/**
+	 * Listener to draw tree layout
+	 */
+	EventListener<Event> drawTreeListener = new EventListener<Event>() {
+
+		@Override
+		public void onEvent(Event event) throws Exception {
+			ChartRenderer renderer = (ChartRenderer)SpringUtil.getBean("chartRenderer");
+			String[] rootArray = treetextBox.getValue().split("\\s+");
+			String treeJSON = renderer.constructTreeJSON(rootArray[0], rootArray[1], portlet.getTreeData().getHpccConnection());
+			portlet.setChartDataJSON(treeJSON);
+			Clients.evalJavaScript("drawTreeLayout('" + chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ); 
+			
 		}
 	};
 	

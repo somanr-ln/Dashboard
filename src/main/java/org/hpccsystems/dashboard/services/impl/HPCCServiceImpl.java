@@ -13,17 +13,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.rpc.ServiceException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.FileMeta;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
@@ -150,8 +149,8 @@ public class HPCCServiceImpl implements HPCCService{
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Inside getChartData");
-				if(chartData.getXColumnNames() != null && chartData.getXColumnNames().size() > 0)				{
-				LOG.debug("Column names --> " + chartData.getXColumnNames().get(0) + chartData.getYColumns().get(0));
+				if(chartData.getxColumnNames()!= null && chartData.getxColumnNames().size() > 0)				{
+				LOG.debug("Column names --> " + chartData.getxColumnNames().get(0) + chartData.getYColumns().get(0));
 				}
 			}
 			
@@ -187,8 +186,8 @@ public class HPCCServiceImpl implements HPCCService{
 					    
 						fstElmnt = (Element) fstNode;
 					    valueList = new ArrayList<Object>();
-					    for(String xColumnName : chartData.getXColumnNames()){
-					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName);
+					    for(Attribute xColumnName : chartData.getxColumnNames()){
+					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName.getColumnName());
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
 					    	lstNm = lstNmElmnt.getChildNodes();
 					    	if(lstNm.item(0) == null){
@@ -201,7 +200,7 @@ public class HPCCServiceImpl implements HPCCService{
 					    dataObj.setxAxisValues(valueList);
 					    
 					    valueList = new ArrayList<Object>();
-					    int outCount = chartData.getXColumnNames().size() + 1;
+					    int outCount = chartData.getxColumnNames().size() + 1;
 					    for (Measure measure : chartData.getYColumns()) {
 					    	lstNmElmntLst = fstElmnt.getElementsByTagName( measure.getAggregateFunction() + "out" + outCount);
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
@@ -433,46 +432,46 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return StringBuilder
 	 * 
 	 */
-	private String constructQuery(XYChartData chartData)
-	{
-		StringBuilder queryTxt=new StringBuilder("select ");
-		try	{
-			if(LOG.isDebugEnabled()) {
+	private String constructQuery(XYChartData chartData) {
+		StringBuilder queryTxt = new StringBuilder("select ");
+		try {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("Building Query");
 				LOG.debug("isFiltered -> " + chartData.getIsFiltered());
 			}
-			
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(", ");
 			}
-			
+
 			for (Measure measure : chartData.getYColumns()) {
 				queryTxt.append(measure.getAggregateFunction());
 				queryTxt.append("(");
 				queryTxt.append(measure.getColumn());
 				queryTxt.append("),");
 			}
-			//Deleting last comma
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
-			
 			queryTxt.append(" from ");
 			queryTxt.append(chartData.getFileName());
-				
 			queryTxt.append(constructWhereClause(chartData));
-			
 			queryTxt.append(" group by ");
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(",");
 			}
-			//Deleting last comma
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
-			
+
 			queryTxt.append(" order by ");
-			queryTxt.append(chartData.getXColumnNames().get(0));
-		}catch(Exception e)	{
-			LOG.error("Exception while constructing query in constructQuery()", e);
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
+			}
+		} catch (Exception e) {
+			LOG.error("Exception while constructing query in constructQuery()",	e);
 		}
 		return queryTxt.toString();
 	}
@@ -514,6 +513,12 @@ public class HPCCServiceImpl implements HPCCService{
 		}
 		queryTxt.append(" from ");
 		queryTxt.append(tableData.getFileName());
+		if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
+			queryTxt.append(constructWhereClause(tableData));
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("queryTxt --> " + queryTxt);
+		}
 		req.setSqlText(queryTxt.toString());
 		req.setTargetCluster("thor");
 		final ExecuteSQLResponse result = soap.executeSQL(req);
@@ -553,7 +558,7 @@ public class HPCCServiceImpl implements HPCCService{
 			}
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(("filterDataList -->" + tableDataMap));
+			LOG.debug(("tableDataMap -->" + tableDataMap));
 		}
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);

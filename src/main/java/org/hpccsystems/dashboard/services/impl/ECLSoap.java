@@ -17,7 +17,6 @@ import javax.net.ssl.SSLSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.zkoss.util.resource.Labels;
 
 import sun.misc.BASE64Encoder;
         
