@@ -4,7 +4,7 @@
 	apply="org.hpccsystems.dashboard.controller.DashboardController"
 	zclass="dashboard-container"
 	contentStyle="overflow:hidden"
-	vflex="1">
+	vflex="1"> 
 
 <caption sclass="panel-heading" zclass="dashboard-header">
 	<div style="padding:0">
@@ -16,7 +16,7 @@
 				<button id="deleteDashboard" iconSclass="glyphicon glyphicon-trash" zclass="btn btn-sm btn-danger" label=" ${labels.deleteDashboard}"></button>
 			</toolbar>
 			
-		</hbox>
+		</hbox> 
 	</div>
 </caption>
 
@@ -27,6 +27,14 @@
 	}
 	.popup-content {
 		padding: 3px;
+	}
+	
+	.ui-slider .ui-slider-handle {
+		border-color: #979797;
+	}
+	
+	.ui-slider .ui-slider-range {
+		background-color: #B3B3B3;
 	}
 </style>
 	

@@ -75,7 +75,7 @@ public class NumericFilterController extends SelectorComposer<Component>{
 		} else {
 			Map<Integer, BigDecimal> map = null;
 			try	{
-				if(chartData.getXColumnNames().contains(filter.getColumn()) ||
+				if(chartData.getxColumnNames().contains(filter.getColumn()) ||
 						chartData.getYColumns().contains(filter.getColumn())){
 					map = hpccService.getMinMax(filter.getColumn(), chartData, true);
 				} else {
@@ -133,8 +133,8 @@ public class NumericFilterController extends SelectorComposer<Component>{
 	@Listen("onClick = button#filtersSelectedBtn")
 	public void onfiltersSelected() {
 				
-		filter.setStartValue((double) minimumSlider.getCurpos());
-		filter.setEndValue((double) maximumSlider.getCurpos());
+		filter.setStartValue(new BigDecimal(minimumSlider.getCurpos()));
+		filter.setEndValue(new BigDecimal(maximumSlider.getCurpos()));
 		
 		chartData.setIsFiltered(true);
 		if(!chartData.getFilterSet().contains(filter)){
