@@ -106,11 +106,10 @@ public class StringFilterController extends SelectorComposer<Component>{
 			}
 		}
 		
-		chartData.getFilterSet().add(filter);
 	}
-	
+	 
 	@Listen("onClick = button#filtersSelectedBtn")
-	public void onfiltersSelected() {
+	public void onfiltersSelected() { 
 		List<String> selectedValues = new ArrayList<String>();
 		
 		Set<Listitem> selectedSet =  filterListBox.getSelectedItems();

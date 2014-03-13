@@ -3,9 +3,14 @@
 <!-- authentication init have to locate before composition -->
 <?init class="org.zkoss.zk.ui.util.Composition" arg0="/demo/layout/template.zul"?>
 
+<?script src="js/lib/jquery-ui.custom.js"?>
+<?style src="css/jquery-ui.css"?>
+
 <?script src="js/barchart.js"?>
 <?script src="js/piechart.js"?>
+<?script src="js/treelayout.js"?>
 <?style src="css/c3.css"?>
+<?style src="css/tree.css"?>
 
 <?style src="css/bootstrap/css/bootstrap.min.css"?>
 <?style src="css/flat.css"?>

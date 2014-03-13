@@ -1,5 +1,6 @@
 package org.hpccsystems.dashboard.entity;
 
+import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 
 public class Portlet {
@@ -14,7 +15,14 @@ public class Portlet {
 	private String chartDataJSON;
 	
 	private XYChartData chartData;
+	private TreeData treeData;
 
+	public TreeData getTreeData() {
+		return treeData;
+	}
+	public void setTreeData(TreeData treeData) {
+		this.treeData = treeData;
+	}
 	public final Integer getColumn() {
 		return column;
 	}
@@ -70,7 +78,7 @@ public class Portlet {
 				+ chartType + ", widgetState=" + widgetState + ", column="
 				+ column + ", chartDataXML=" + chartDataXML
 				+ ", chartDataJSON=" + chartDataJSON + ", chartData="
-				+ chartData + "]";
+				+ chartData +", treeData="+ treeData+"]";
 	}
 	
 }

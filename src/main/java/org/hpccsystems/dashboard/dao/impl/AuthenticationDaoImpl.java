@@ -14,7 +14,6 @@ import org.hpccsystems.dashboard.rowmapper.UserRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 
 /**

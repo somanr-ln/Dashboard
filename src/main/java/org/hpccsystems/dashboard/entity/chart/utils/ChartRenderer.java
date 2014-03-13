@@ -2,7 +2,7 @@ package org.hpccsystems.dashboard.entity.chart.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.StringWriter; 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,13 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
@@ -83,7 +81,7 @@ public class ChartRenderer {
 				header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
 			} else {
 				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayXColumnName());
-			}
+			}			
 			for (Measure measure : chartData.getYColumns()) {
 				if (measure.getDisplayYColumnName() == null) {
 					yName.append(measure.getColumn() + "_" + measure.getAggregateFunction());
@@ -243,7 +241,11 @@ public class ChartRenderer {
 				}
 			} else {
 				for (Measure measure : chartData.getYColumns()) {
-					row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					if(measure.getDisplayYColumnName()==null){
+						row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					}else{
+						row.add(new JsonPrimitive(measure.getDisplayYColumnName()));
+					}
 				}
 			}
 			
@@ -266,7 +268,11 @@ public class ChartRenderer {
 					} else {
 						yColumnNames = new ArrayList<String>();
 						for (Measure measure : chartData.getYColumns()) {
-							yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							if(measure.getDisplayYColumnName()==null){
+								yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							}else{
+								yColumnNames.add(measure.getDisplayYColumnName());
+							}
 						}
 					}
 					
@@ -440,11 +446,22 @@ public class ChartRenderer {
 	    return sw.toString();
 	}
 
+	/**
+	 * Method to construct JSON data to draw tree layout
+	 * @param fName
+	 * @param lName
+	 * @param hpccConnection
+	 * @return String
+	 * @throws Exception
+	 */
 	public String constructTreeJSON(String fName, String lName,
 			HpccConnection hpccConnection) throws Exception {
-
-		Node parent = new Node(fName + " " + lName);
-		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,	hpccConnection);
+		
+		if(LOG.isDebugEnabled()){
+		LOG.debug("fName : "+fName+" lName : "+lName+" hpccConnection : "+hpccConnection);
+		}
+		Node parent = new Node(fName + " " + lName);		
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,hpccConnection);
 		List<Node> nodeChildrenL1 = new ArrayList<Node>();
 		StringBuilder nameBuilder;
 		for (List<String> list : childrenL1) {
@@ -461,6 +478,7 @@ public class ChartRenderer {
 		int i = 0;
 		for (List<String> list : childrenL1) {
 			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
+			
 
 			nodeChildrenL2 = new ArrayList<Node>();
 			for (List<String> list2 : childrenL2) {

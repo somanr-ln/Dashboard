@@ -13,12 +13,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.rpc.ServiceException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -515,6 +513,12 @@ public class HPCCServiceImpl implements HPCCService{
 		}
 		queryTxt.append(" from ");
 		queryTxt.append(tableData.getFileName());
+		if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
+			queryTxt.append(constructWhereClause(tableData));
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("queryTxt --> " + queryTxt);
+		}
 		req.setSqlText(queryTxt.toString());
 		req.setTargetCluster("thor");
 		final ExecuteSQLResponse result = soap.executeSQL(req);
@@ -554,7 +558,7 @@ public class HPCCServiceImpl implements HPCCService{
 			}
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(("filterDataList -->" + tableDataMap));
+			LOG.debug(("tableDataMap -->" + tableDataMap));
 		}
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);

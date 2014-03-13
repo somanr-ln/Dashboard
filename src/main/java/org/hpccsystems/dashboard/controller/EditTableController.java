@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -32,6 +31,7 @@ import org.zkoss.zul.Button;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
+
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
 public class EditTableController extends SelectorComposer<Component> {

@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -12,7 +11,6 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.controller.component.ChartPanel;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
-import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
