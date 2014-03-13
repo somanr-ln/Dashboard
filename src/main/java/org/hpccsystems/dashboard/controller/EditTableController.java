@@ -1,5 +1,6 @@
 package org.hpccsystems.dashboard.controller;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -97,12 +98,18 @@ public class EditTableController extends SelectorComposer<Component> {
 						throw new Exception("Column doesn't exist");
 					}
 				}
-				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, true));
+				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
 			}
 			
 		}
+		
+		//Setting fields to ChartData
+		List<Field> fields = new ArrayList<Field>();
+		fields.addAll(columnSet);
+		tableData.setFields(fields);
+		
 		
 		Listitem listItem;
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
@@ -121,7 +128,7 @@ public class EditTableController extends SelectorComposer<Component> {
 			
 			//TODO: Add else part
 			tableHolder.appendChild(
-						tableRenderer.constructTableWidget(portlet, true)
+						tableRenderer.constructTableWidget(portlet, tableData, true)
 					);
 		} else { 
 			for (Field field : columnSet) {
@@ -188,7 +195,7 @@ public class EditTableController extends SelectorComposer<Component> {
 				
 				tableHolder.getChildren().clear();
 				tableHolder.appendChild(
-						tableRenderer.constructTableWidget(portlet, true)
+						tableRenderer.constructTableWidget(portlet, tableData,  true)
 						);
 			} catch (Exception e) {
 				Clients.showNotification(Labels.getLabel("tableCreationFailed"), "error", tableHolder, "middle_center", 3000, true);

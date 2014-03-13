@@ -5,10 +5,10 @@ import java.util.List;
 public class Node {
 	private String name;
 	private List<Node> children;
-	
+
 	public Node() {
 	}
-	
+
 	public Node(String name) {
 		this.setName(name);
 	}
