@@ -15,6 +15,7 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.ChartDetails;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
@@ -185,7 +186,7 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 		try {
 			
 			XYChartData chartData = null;
-			List<String> xColumnList = null;
+			List<Attribute> xColumnList = null;
 			List<Measure> yColumnList = null;
 			String filterColumn = null;
 			Integer filterDataType = 0;
@@ -201,7 +202,7 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 				for (Portlet portlet : portletList) {
 					chartData = chartRenderer.parseXML(portlet.getChartDataXML());
 					if (chartData != null) {
-						xColumnList = chartData.getXColumnNames();
+						xColumnList = chartData.getxColumnNames();
 						yColumnList = chartData.getYColumns();
 						// For XAxis & YAxis Validation
 						xColumnValidation(failedValColumnList, xColumnList,	chartConfiguration);
@@ -264,18 +265,18 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 	 * @return
 	 */
 	private void xColumnValidation(List<String> failedColumnList,
-			List<String> xColumnList, ChartConfiguration configuration) {
+			List<Attribute> xColumnList, ChartConfiguration configuration) {
 		Boolean xAxisValStatus = false;
 		if(xColumnList != null){
-		for (String fieldValue : xColumnList) {
+		for (Attribute fieldValue : xColumnList) {
 			for (Field entry : configuration.getFields()) {
-				if (fieldValue.equals(entry.getColumnName().trim())) {
+				if (fieldValue.getColumnName().equals(entry.getColumnName().trim())) {
 					xAxisValStatus = true;
 					break;
 				}
 			}
-			if (!xAxisValStatus && !failedColumnList.contains(fieldValue.trim())) {
-				failedColumnList.add(fieldValue.trim());
+			if (!xAxisValStatus && !failedColumnList.contains(fieldValue)) {
+				failedColumnList.add(fieldValue.getColumnName());
 			}
 			xAxisValStatus = false;
 		  }

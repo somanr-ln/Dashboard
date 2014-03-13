@@ -17,7 +17,7 @@ public class XYChartData {
 	
 	private String fileName;
 	
-	private List<String> xColumnNames;
+	private List<Attribute> xColumnNames;
 	private List<Measure> yColumns;
 	private List<String> tableColumns;
 	
@@ -37,18 +37,6 @@ public class XYChartData {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
-	}
-
-	@XmlElement
-	public List<String> getXColumnNames() {
-		if(xColumnNames == null) {
-			xColumnNames = new ArrayList<String>();
-		}
-		return xColumnNames;
-	}
-
-	public void setXColumnNames(List<String> xColumnNames) {
-		this.xColumnNames = xColumnNames;
 	}
 
 	@XmlElement
@@ -140,6 +128,19 @@ public class XYChartData {
 				+ yColumns + ", tableColumns=" + tableColumns + ", isFiltered="
 				+ isFiltered + ", filterSet=" + filterSet + ", isGrouped="
 				+ isGrouped + ", group=" + group + ", fields=" + fields + "]";
+	}
+	
+	@XmlElement
+	public List<Attribute> getxColumnNames() {
+		
+		if(xColumnNames == null) {
+			xColumnNames = new ArrayList<Attribute>();
+		} 
+		return xColumnNames;
+	}
+
+	public void setxColumnNames(List<Attribute> xColumnNames) {
+		this.xColumnNames = xColumnNames;
 	}
 
 	
