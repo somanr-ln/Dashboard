@@ -1,4 +1,4 @@
-package org.hpccsystems.dashboard.common;
+package org.hpccsystems.dashboard.common; 
 import java.util.HashMap;
 import java.util.Map;
 import org.hpccsystems.dashboard.entity.ChartDetails;

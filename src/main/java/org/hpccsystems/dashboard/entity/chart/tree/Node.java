@@ -2,6 +2,7 @@ package org.hpccsystems.dashboard.entity.chart.tree;
 
 import java.util.List;
 
+
 public class Node {
 	private String name;
 	private List<Node> children;

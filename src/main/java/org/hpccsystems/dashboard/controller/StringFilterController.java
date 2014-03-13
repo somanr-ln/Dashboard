@@ -109,7 +109,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 	}
 	
 	@Listen("onClick = button#filtersSelectedBtn")
-	public void onfiltersSelected() {
+	public void onfiltersSelected() { 
 		List<String> selectedValues = new ArrayList<String>();
 		
 		Set<Listitem> selectedSet =  filterListBox.getSelectedItems();

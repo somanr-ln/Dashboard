@@ -2,7 +2,7 @@ package org.hpccsystems.dashboard.entity.chart;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-
+ 
 @XmlRootElement
 public class Measure {
 	private String column;

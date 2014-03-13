@@ -4,7 +4,7 @@
 	apply="org.hpccsystems.dashboard.controller.DashboardController"
 	zclass="dashboard-container"
 	contentStyle="overflow:hidden"
-	vflex="1">
+	vflex="1"> 
 
 <caption sclass="panel-heading" zclass="dashboard-header">
 	<div style="padding:0">
