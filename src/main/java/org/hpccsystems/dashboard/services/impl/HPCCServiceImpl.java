@@ -469,7 +469,11 @@ public class HPCCServiceImpl implements HPCCService{
 			
 			for (Attribute columnName : chartData.getxColumnNames()) {
 				queryTxt.append(columnName.getColumnName());
+				queryTxt.append(",");
 			}
+			// Deleting last comma
+			queryTxt.deleteCharAt(queryTxt.length() - 1);
+			
 		} catch (Exception e) {
 			LOG.error("Exception while constructing query in constructQuery()",	e);
 		}
