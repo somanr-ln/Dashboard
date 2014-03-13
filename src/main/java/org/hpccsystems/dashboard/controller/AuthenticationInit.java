@@ -7,7 +7,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.UserCredential;
 import org.hpccsystems.dashboard.services.impl.AuthenticationServiceImpl;
-import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Page;
 import org.zkoss.zk.ui.util.Initiator;
