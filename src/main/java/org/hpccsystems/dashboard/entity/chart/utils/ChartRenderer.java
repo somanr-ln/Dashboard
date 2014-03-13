@@ -241,7 +241,11 @@ public class ChartRenderer {
 				}
 			} else {
 				for (Measure measure : chartData.getYColumns()) {
-					row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					if(measure.getDisplayYColumnName()==null){
+						row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					}else{
+						row.add(new JsonPrimitive(measure.getDisplayYColumnName()));
+					}
 				}
 			}
 			
@@ -264,7 +268,11 @@ public class ChartRenderer {
 					} else {
 						yColumnNames = new ArrayList<String>();
 						for (Measure measure : chartData.getYColumns()) {
-							yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							if(measure.getDisplayYColumnName()==null){
+								yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							}else{
+								yColumnNames.add(measure.getDisplayYColumnName());
+							}
 						}
 					}
 					

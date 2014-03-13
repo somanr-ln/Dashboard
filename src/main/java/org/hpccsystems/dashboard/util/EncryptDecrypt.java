@@ -22,7 +22,6 @@ import javax.crypto.spec.PBEParameterSpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.zkoss.util.resource.Labels;
 
 public class EncryptDecrypt {
 
