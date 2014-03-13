@@ -16,7 +16,7 @@
 				<button id="deleteDashboard" iconSclass="glyphicon glyphicon-trash" zclass="btn btn-sm btn-danger" label=" ${labels.deleteDashboard}"></button>
 			</toolbar>
 			
-		</hbox>
+		</hbox> 
 	</div>
 </caption>
 

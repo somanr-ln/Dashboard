@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hpccsystems.dashboard.api.entity.Field;
 
-@XmlRootElement
+@XmlRootElement 
 public class XYChartData {
 	
 	private HpccConnection hpccConnection;
