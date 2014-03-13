@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.zkoss.util.resource.Labels;
 
 /**
  * Service class to define Widget related services
