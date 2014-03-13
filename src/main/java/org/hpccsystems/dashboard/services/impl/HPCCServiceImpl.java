@@ -513,6 +513,12 @@ public class HPCCServiceImpl implements HPCCService{
 		}
 		queryTxt.append(" from ");
 		queryTxt.append(tableData.getFileName());
+		if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
+			queryTxt.append(constructWhereClause(tableData));
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("queryTxt --> " + queryTxt);
+		}
 		req.setSqlText(queryTxt.toString());
 		req.setTargetCluster("thor");
 		final ExecuteSQLResponse result = soap.executeSQL(req);
@@ -552,7 +558,7 @@ public class HPCCServiceImpl implements HPCCService{
 			}
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(("filterDataList -->" + tableDataMap));
+			LOG.debug(("tableDataMap -->" + tableDataMap));
 		}
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);

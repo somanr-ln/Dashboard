@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet; 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -299,8 +299,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			// Getting All filter columns
 			commonFilterFieldSet = new LinkedHashSet<Field>();
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
-						!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
+				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) ) {
 					for (Field field : portlet.getChartData().getFields()) {
 						// Excluding persisted
 						if (!commonFilters.contains(field)) {
@@ -399,25 +398,29 @@ public class DashboardController extends SelectorComposer<Component>{
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Updating charts in portlet - " + portlet);
 		}
-
-		//Updating widget with latest filter details into DB
-		ChartRenderer chartRenderer = (ChartRenderer) SpringUtil.getBean("chartRenderer");
-		WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
-		portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
-		widgetService.updateWidget(portlet);
-
-		//Refreshing chart with updated filter values
-		chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);
-
 		Portalchildren children = portalChildren.get(portlet.getColumn());
 		LOG.debug("portalchildren in updateWidgets()-->"+children);
 		ChartPanel panel =null;
 		for (Component comp : children.getChildren()) {
 			panel = (ChartPanel) comp;
 			if (panel.getPortlet().getId() == portlet.getId()) {
-				if (panel.drawD3Graph() != null) {
+				break;
+			}
+		}
+		//Updating widget with latest filter details into DB
+		WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+		portlet.setChartDataXML(chartRenderer.convertToXML(portlet.getChartData()));
+		widgetService.updateWidget(portlet);
+		
+		if(Constants.TABLE_WIDGET.equals(portlet.getChartType())){	
+			//Refreshing table with updated filter values
+			panel.drawTableWidget();
+		}else{
+			ChartRenderer chartRenderer = (ChartRenderer) SpringUtil.getBean("chartRenderer");
+			//Refreshing chart with updated filter values
+			chartRenderer.constructChartJSON(portlet.getChartData(), portlet, false);	
+			if (panel.drawD3Graph() != null) {
 					Clients.evalJavaScript(panel.drawD3Graph());
-				}
 			}
 		}
 	}
@@ -433,8 +436,7 @@ public class DashboardController extends SelectorComposer<Component>{
 			Portlet portlet = (Portlet) event.getData();
 			
 			if(dashboard.isShowFiltersPanel() && 
-					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
-					Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
+					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) ) {
 				Listitem filterItem = null;
 				for (Field field : portlet.getChartData().getFields()) {
 					if(commonFilterFieldSet.add(field)){
@@ -487,8 +489,7 @@ public class DashboardController extends SelectorComposer<Component>{
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) && 
-					!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
+			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) ) {
 				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
 						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
