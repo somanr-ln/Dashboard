@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -528,8 +529,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		row.appendChild(div);
 		row.appendChild(hbox);
 		return row;
-	}
-	
+	}	
 	
 	private Row createNumericFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();

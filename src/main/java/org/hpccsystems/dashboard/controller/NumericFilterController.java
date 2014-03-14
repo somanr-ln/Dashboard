@@ -132,8 +132,8 @@ public class NumericFilterController extends SelectorComposer<Component>{
 	@Listen("onClick = button#filtersSelectedBtn")
 	public void onfiltersSelected() {
 				
-		filter.setStartValue((double) minimumSlider.getCurpos());
-		filter.setEndValue((double) maximumSlider.getCurpos());
+		filter.setStartValue(new BigDecimal(minimumSlider.getCurpos()));
+		filter.setEndValue(new BigDecimal(maximumSlider.getCurpos()));
 		
 		chartData.setIsFiltered(true);
 		if(!chartData.getFilterSet().contains(filter)){

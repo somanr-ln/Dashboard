@@ -91,6 +91,7 @@ public class ChartPanel extends Panel {
 
 		textbox.setInplace(true);
 		textbox.setVflex("1");
+		textbox.setStyle("border: none;	color: black;");
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {

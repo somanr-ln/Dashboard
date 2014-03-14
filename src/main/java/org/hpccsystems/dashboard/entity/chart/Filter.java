@@ -1,5 +1,6 @@
 package org.hpccsystems.dashboard.entity.chart;
 
+import java.math.BigDecimal;
 import java.util.List; 
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -18,8 +19,8 @@ public class Filter {
 	/**
 	 * Present only for Numeric Filter
 	 */
-	private Double StartValue;
-	private Double EndValue;
+	private BigDecimal StartValue;
+	private BigDecimal EndValue;
 	
 	private boolean isCommonFilter = false;
 	
@@ -43,20 +44,20 @@ public class Filter {
 	}
 	
 	@XmlElement
-	public Double getStartValue() {
+	public BigDecimal getStartValue() {
 		return StartValue;
 	}
 	
-	public void setStartValue(Double startValue) {
+	public void setStartValue(BigDecimal startValue) {
 		StartValue = startValue;
 	}
 	
 	@XmlElement
-	public Double getEndValue() {
+	public BigDecimal getEndValue() {
 		return EndValue;
 	}
 	
-	public void setEndValue(Double endValue) {
+	public void setEndValue(BigDecimal endValue) {
 		EndValue = endValue;
 	}
 	
