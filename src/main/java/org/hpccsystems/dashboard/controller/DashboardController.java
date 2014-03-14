@@ -219,14 +219,14 @@ public class DashboardController extends SelectorComposer<Window>{
 							Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
 									"error", comp, "middle_center", 3000, true);
 							LOG.error("Exception while fetching column data from Hpcc", ex);
-						}
+						}					
 						
-						//Checking for Common filters
-						if(chartData.getIsFiltered()){
-							for (Filter filter : chartData.getFilterSet()) {
-								if(filter.getIsCommonFilter())
-									dashboard.setShowFiltersPanel(true);
-							}
+					}
+					//Checking for Common filters
+					if(chartData.getIsFiltered()){
+						for (Filter filter : chartData.getFilterSet()) {
+							if(filter.getIsCommonFilter())
+								dashboard.setShowFiltersPanel(true);
 						}
 					}
 				}
@@ -254,6 +254,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Created Dashboard");
 			LOG.debug("Panel Count - " + dashboard.getColumnCount());
+			LOG.debug("dashboard.isShowFiltersPanel() --> " + dashboard.isShowFiltersPanel());
 		}
 		
 		if(dashboard.isShowFiltersPanel()) {
@@ -325,7 +326,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			constructFilterItem(commonFilterFieldSet);
 
-			commonFiltersPanel.setVisible(true);
+			 commonFiltersPanel.setVisible(true);
 		}
 		
 		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
@@ -474,7 +475,7 @@ public class DashboardController extends SelectorComposer<Window>{
 	 */
 	private Row createStringFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
-		
+		row.setAttribute(Constants.ROW_CHECKED, false);
 		if(appliedCommonFilterSet == null ){
 			appliedCommonFilterSet = new HashSet<Filter>();
 		}
@@ -522,17 +523,18 @@ public class DashboardController extends SelectorComposer<Window>{
 			//To display previously selected filter values
 			if(filter != null && filter.getValues() != null && filter.getValues().contains(value)){
 				checkbox.setChecked(true);
+				row.setAttribute(Constants.ROW_CHECKED, true);
 			}
 		}
 		
 		row.appendChild(div);
 		row.appendChild(hbox);
 		return row;
-	}
+	}	
 	
 	private Row createNumericFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
-		
+		row.setAttribute(Constants.ROW_CHECKED, false);
 		if(appliedCommonFilterSet == null ){
 			appliedCommonFilterSet = new HashSet<Filter>();
 		}
@@ -693,6 +695,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		
 		Hbox hbox = (Hbox) this.getSelf().getFellow(data[0]);
 		Row row = (Row) hbox.getParent();
+		row.setAttribute(Constants.ROW_CHECKED, true);
 		Filter filter = (Filter) row.getAttribute(Constants.FILTER);
 		Field field = (Field) row.getAttribute(Constants.FIELD);
 		
@@ -733,6 +736,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		}
 		
 	}
+
 	
 	/**
 	 * Listener to remove global filters
@@ -742,13 +746,19 @@ public class DashboardController extends SelectorComposer<Window>{
 		@Override
 		public void onEvent(MouseEvent event) throws Exception {
 			Row removedRow = (Row) event.getTarget().getParent().getParent();
+			Boolean rowChecked = (Boolean)removedRow.getAttribute(Constants.ROW_CHECKED);
+			//refresh the portlets, if the removed row/filter has any checked values
+			if(rowChecked){
 			Iterator<Portlet> iterator = removeFilter(removedRow).iterator();
 			
 			// refreshing the chart && updating DB
 			while (iterator.hasNext()) {
 				Portlet portlet = (Portlet) iterator.next();
 				updateWidgets(portlet);
+				}
 			}
+			//Removing the Filter row in UI
+			removeFilterRow(removedRow);
 		}
 	};
 
@@ -764,7 +774,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			Row row = (Row) hbox.getParent();
 			Filter filter = (Filter) row.getAttribute(Constants.FILTER);
 			Field field = (Field) row.getAttribute(Constants.FIELD);
-			
+			row.setAttribute(Constants.ROW_CHECKED, true);
 			//Instantiating Value list if empty
 			if(filter.getValues() == null){
 				List<String> values = new ArrayList<String>();
@@ -1196,7 +1206,10 @@ public class DashboardController extends SelectorComposer<Window>{
 				}
 			}
 			for (Row row2 : rowsToReplace) {
+				//refreshing portlets
 				portlets.addAll(removeFilter(row2));
+				//removing filter row in UI
+				removeFilterRow(row2);
 			}
 			for (Portlet portlet : portlets) {
 				updateWidgets(portlet);
@@ -1254,21 +1267,28 @@ public class DashboardController extends SelectorComposer<Window>{
 				
 				portletsToRefresh.add(portlet);
 			}
-		}
-		
-		// removing global filter object from session filter list
-		if(appliedCommonFilterSet.remove(filter)) {
-			//Adding to the list of columns
-			commonFilterFieldSet.add(field);
-			Listitem listitem = new Listitem(field.getColumnName());
-			listitem.setAttribute(Constants.FIELD, field);
-			listitem.setParent(commonFilterList);
-		}
-		
-		rowToRemove.detach();
-		
+		}	
 		return portletsToRefresh;
 	}
+	
+	/**
+	 * Method to remove global filter row in UI
+	 * @param rowToRemove
+	 */
+	private void removeFilterRow(Row rowToRemove){
+		
+		Filter filter = (Filter) rowToRemove.getAttribute(Constants.FILTER);
+		Field field = (Field) rowToRemove.getAttribute(Constants.FIELD);
+		// removing global filter object from session filter list
+				if(appliedCommonFilterSet.remove(filter)) {
+					//Adding to the list of columns
+					commonFilterFieldSet.add(field);
+					Listitem listitem = new Listitem(field.getColumnName());
+					listitem.setAttribute(Constants.FIELD, field);
+					listitem.setParent(commonFilterList);			
+				}				
+				rowToRemove.detach();
+		}
 	
 	
 	@Listen("onPortalMove = portallayout")
