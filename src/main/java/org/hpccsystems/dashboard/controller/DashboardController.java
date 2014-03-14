@@ -219,14 +219,14 @@ public class DashboardController extends SelectorComposer<Window>{
 							Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
 									"error", comp, "middle_center", 3000, true);
 							LOG.error("Exception while fetching column data from Hpcc", ex);
-						}
+						}					
 						
-						//Checking for Common filters
-						if(chartData.getIsFiltered()){
-							for (Filter filter : chartData.getFilterSet()) {
-								if(filter.getIsCommonFilter())
-									dashboard.setShowFiltersPanel(true);
-							}
+					}
+					//Checking for Common filters
+					if(chartData.getIsFiltered()){
+						for (Filter filter : chartData.getFilterSet()) {
+							if(filter.getIsCommonFilter())
+								dashboard.setShowFiltersPanel(true);
 						}
 					}
 				}
@@ -254,6 +254,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		if(LOG.isDebugEnabled()){
 			LOG.debug("Created Dashboard");
 			LOG.debug("Panel Count - " + dashboard.getColumnCount());
+			LOG.debug("dashboard.isShowFiltersPanel() --> " + dashboard.isShowFiltersPanel());
 		}
 		
 		if(dashboard.isShowFiltersPanel()) {
@@ -325,7 +326,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			constructFilterItem(commonFilterFieldSet);
 
-			commonFiltersPanel.setVisible(true);
+			 commonFiltersPanel.setVisible(true);
 		}
 		
 		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
@@ -528,7 +529,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		row.appendChild(div);
 		row.appendChild(hbox);
 		return row;
-	}
+	}	
 	
 	private Row createNumericFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
@@ -733,6 +734,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		}
 		
 	}
+
 	
 	/**
 	 * Listener to remove global filters
