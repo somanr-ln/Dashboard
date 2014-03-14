@@ -20,6 +20,7 @@ import org.hpccsystems.dashboard.controller.component.ChartPanel;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.entity.chart.Filter;
+import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
@@ -199,40 +200,55 @@ public class DashboardController extends SelectorComposer<Window>{
 			}
 			
 			XYChartData chartData = null;
+			TreeData treeData = null;
 			ChartPanel panel = null;
 			for (Portlet portlet : dashboard.getPortletList()) {
 				//Constructing chart data only when live chart is drawn
 				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
-					chartData = chartRenderer.parseXML(portlet.getChartDataXML());
-					
-					//Getting fields
-					List<Field> fields = new ArrayList<Field>();
-					fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
-					chartData.setFields(fields);
-					
-					portlet.setChartData(chartData);
-					if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
-						//For chart widgets
-						try	{
-							chartRenderer.constructChartJSON(chartData, portlet, false);
-						}catch(Exception ex) {
-							Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
-									"error", comp, "middle_center", 3000, true);
-							LOG.error("Exception while fetching column data from Hpcc", ex);
-						}					
+					//For Pie/Line/Bar charts
+					if(!Constants.TREE_LAYOUT.equals(portlet.getChartType())){
+						chartData = chartRenderer.parseXML(portlet.getChartDataXML());
 						
-					}
-					//Checking for Common filters
-					if(chartData.getIsFiltered()){
-						for (Filter filter : chartData.getFilterSet()) {
-							if(filter.getIsCommonFilter())
-								dashboard.setShowFiltersPanel(true);
+						//Getting fields
+						List<Field> fields = new ArrayList<Field>();
+						fields.addAll(hpccService.getColumnSchema(chartData.getFileName(), chartData.getHpccConnection()));
+						chartData.setFields(fields);
+						
+						portlet.setChartData(chartData);
+						if(! portlet.getChartType().equals(Constants.TABLE_WIDGET)){
+							//For chart widgets
+							try	{
+								chartRenderer.constructChartJSON(chartData, portlet, false);
+							}catch(Exception ex) {
+								Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), 
+										"error", comp, "middle_center", 3000, true);
+								LOG.error("Exception while fetching column data from Hpcc", ex);
+							}					
+							
 						}
+						//Checking for Common filters
+						if(chartData.getIsFiltered()){
+							for (Filter filter : chartData.getFilterSet()) {
+								if(filter.getIsCommonFilter())
+									dashboard.setShowFiltersPanel(true);
+							}
+						}
+					}else{
+						//For Tree Layout
+						treeData = chartRenderer.parseXMLToTreeData(portlet.getChartDataXML());
+						portlet.setTreeData(treeData);
+						String[] rootArray = treeData.getRootKey().split("\\s+");
+						portlet.setChartDataJSON(chartRenderer.constructTreeJSON(
+								rootArray[0], rootArray[1], treeData.getHpccConnection()));
 					}
 				}
 				
 				panel = new ChartPanel(portlet);
 				portalChildren.get(portlet.getColumn()).appendChild(panel);
+				//creating search textbox for tree layout
+				if(Constants.TREE_LAYOUT.equals(portlet.getChartType())){
+					panel.constructTreeSearchDiv();
+				}
 									
 				if(panel.drawD3Graph() != null){
 					Clients.evalJavaScript(panel.drawD3Graph());
@@ -262,8 +278,9 @@ public class DashboardController extends SelectorComposer<Window>{
 			List<Filter> persistedGlobalFilters = new ArrayList<Filter>();
 			Set<Filter> filters;
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
-						portlet.getChartData().getIsFiltered()){
+				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) 
+						&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())
+						&&	portlet.getChartData().getIsFiltered()){
 					filters = new LinkedHashSet<Filter>();
 					for (Filter filter : portlet.getChartData().getFilterSet()) {
 						if(filter.getIsCommonFilter() && persistedGlobalFilters.contains(filter)){
@@ -285,8 +302,9 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Generating applied filter rows, with values
 			Set<Field> commonFilters = new HashSet<Field>();
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
-						portlet.getChartData().getIsFiltered()) {
+				if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) 
+						&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())
+						&& portlet.getChartData().getIsFiltered()) {
 					for (Filter filter : portlet.getChartData().getFilterSet()) {
 						if(filter.getIsCommonFilter()) {
 							Field field = null;
@@ -310,7 +328,8 @@ public class DashboardController extends SelectorComposer<Window>{
 			// Getting All filter columns
 			commonFilterFieldSet = new LinkedHashSet<Field>();
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) ) {
+				if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) 
+						&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())) {
 					for (Field field : portlet.getChartData().getFields()) {
 						// Excluding persisted
 						if (!commonFilters.contains(field)) {
@@ -374,8 +393,9 @@ public class DashboardController extends SelectorComposer<Window>{
 		
 		List<Filter> filtersToReomove = new ArrayList<Filter>();
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
-					portlet.getChartData().getIsFiltered()) {
+			if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) 
+					&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())
+					&& portlet.getChartData().getIsFiltered()) {
 				
 				filtersToReomove = new ArrayList<Filter>();
 				for (Filter filter : portlet.getChartData().getFilterSet()) {
@@ -501,7 +521,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting distinct values from all live Portlets
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) ) {
+			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) 
+					&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())) {
 				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
 						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
@@ -557,20 +578,21 @@ public class DashboardController extends SelectorComposer<Window>{
 		//A set of Datasets used in dashboard, for avoiding multiple fetches to the same dataset
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting Minimum and Maximum across all portlets
-		BigDecimal min = new BigDecimal(0);
-		BigDecimal max = new BigDecimal(0);
+		BigDecimal min = null;
+		BigDecimal max = null;
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) && 
-					!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
+					!Constants.TABLE_WIDGET.equals(portlet.getChartType())
+					&& !Constants.TREE_LAYOUT.equals(portlet.getChartType())) {
 				if(!dataFiles.contains(portlet.getChartData().getFileName()) && 
 						portlet.getChartData().getFields().contains(field)) {
 					dataFiles.add(portlet.getChartData().getFileName());
 					Map<Integer, BigDecimal> map = hpccService.getMinMax(filter.getColumn(), portlet.getChartData(), false);
 					
-					if(min.compareTo(map.get(Constants.FILTER_MINIMUM)) < 0) {
+					if(min==null || min.compareTo(map.get(Constants.FILTER_MINIMUM)) > 0) {
 						min = map.get(Constants.FILTER_MINIMUM);
 					}
-					if(max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
+					if(max==null || max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
 						max = map.get(Constants.FILTER_MAXIMUM);
 					}
 				}
@@ -711,7 +733,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		filter.setEndValue(rangeFactor.multiply(new BigDecimal(endPosition)).add(min));
 		
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()))
+			if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+					|| Constants.TREE_LAYOUT.equals(portlet.getChartType()))
 				continue;
 			
 			XYChartData chartData = portlet.getChartData();
@@ -801,8 +824,10 @@ public class DashboardController extends SelectorComposer<Window>{
 			}
 			
 			for (Portlet portlet : dashboard.getPortletList()) {
-				if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()))
+				if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+					 || Constants.TREE_LAYOUT.equals(portlet.getChartType())){
 					continue;
+				}
 				
 				XYChartData chartData = portlet.getChartData();
 				if(filter.getValues().size() < 1) {
