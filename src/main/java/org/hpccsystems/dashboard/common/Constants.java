@@ -145,5 +145,7 @@ public class Constants {
 	public static final String DASHBOARD_NOT_EXISTS = "The Provided Dashboard doesn't exists";
 
 	public static final String COMMON_FILTERS = "commonFilters";
+	public static final String ROW_CHECKED = "rowChecked";
+	
 	
 }
