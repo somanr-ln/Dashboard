@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.zkoss.math.RoundingModes;
 
 import ws_sql.ws.hpccsystems.ExecuteSQLRequest;
 import ws_sql.ws.hpccsystems.ExecuteSQLResponse;
@@ -408,12 +410,12 @@ public class HPCCServiceImpl implements HPCCService{
 					queryTxt.append(" )");
 				} else if(Constants.NUMERIC_DATA.equals(filter.getType())) {
 					queryTxt.append(filter.getColumn());
-					queryTxt.append(" > ");
-					queryTxt.append(filter.getStartValue());
+					queryTxt.append(" >= ");
+					queryTxt.append(filter.getStartValue().setScale(0, RoundingMode.DOWN));
 					queryTxt.append(" and ");
 					queryTxt.append(filter.getColumn());
-					queryTxt.append(" < ");
-					queryTxt.append(filter.getEndValue());
+					queryTxt.append(" <= ");
+					queryTxt.append(filter.getEndValue().setScale(0, RoundingMode.CEILING));
 				}
 				
 				queryTxt.append(")");
