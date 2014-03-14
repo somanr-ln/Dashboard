@@ -557,8 +557,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		//A set of Datasets used in dashboard, for avoiding multiple fetches to the same dataset
 		Set<String> dataFiles = new HashSet<String>();
 		// Getting Minimum and Maximum across all portlets
-		BigDecimal min = new BigDecimal(0);
-		BigDecimal max = new BigDecimal(0);
+		BigDecimal min = null;
+		BigDecimal max = null;
 		for (Portlet portlet : dashboard.getPortletList()) {
 			if(portlet.getWidgetState().equals(Constants.STATE_LIVE_CHART) && 
 					!Constants.TABLE_WIDGET.equals(portlet.getChartType())) {
@@ -567,10 +567,10 @@ public class DashboardController extends SelectorComposer<Window>{
 					dataFiles.add(portlet.getChartData().getFileName());
 					Map<Integer, BigDecimal> map = hpccService.getMinMax(filter.getColumn(), portlet.getChartData(), false);
 					
-					if(min.compareTo(map.get(Constants.FILTER_MINIMUM)) < 0) {
+					if(min==null || min.compareTo(map.get(Constants.FILTER_MINIMUM)) > 0) {
 						min = map.get(Constants.FILTER_MINIMUM);
 					}
-					if(max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
+					if(max==null || max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
 						max = map.get(Constants.FILTER_MAXIMUM);
 					}
 				}
