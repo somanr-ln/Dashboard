@@ -581,14 +581,16 @@ public class DashboardController extends SelectorComposer<Window>{
 				public void onEvent(Event event) throws Exception {
 					Button button = (Button) event.getTarget();
 					Row row = (Row) button.getParent().getParent();
+
+					row.setAttribute(Constants.ROW_CHECKED, true);
+					
 					Filter filter = (Filter) row.getAttribute(Constants.FILTER);
 					Field field = (Field) row.getAttribute(Constants.FIELD);
-					if(filter.getValues() != null && 
-							filter.getValues().size() > 0) {
+					if(filter.getValues() != null) {
 						updateStringFilterToPortlets(filter, field);
 						button.setSclass("btn-default");
 					} else {
-						Clients.showNotification("Please Choose values to apply", "warning", row, "after_center", 2000);
+						Clients.showNotification(Labels.getLabel("selectValueToApply"), "warning", row, "after_center", 2000);
 					}
 				}
 				
