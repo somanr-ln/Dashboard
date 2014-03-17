@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log; 
+
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -278,48 +279,48 @@ public class EditChartController extends SelectorComposer<Component> {
 					Listbox listbox = new Listbox();
 					listbox.setMultiple(false);
 					listbox.appendItem("Create Measure", "count");
-				listbox.addEventListener(Events.ON_SELECT, new EventListener<SelectEvent<Component, Object>>() {
+					listbox.addEventListener(Events.ON_SELECT, new EventListener<SelectEvent<Component, Object>>() {
 
-								@Override
-								public void onEvent(SelectEvent<Component, Object> event) throws Exception {
-									Listitem selectedItem = (Listitem) event.getSelectedItems().iterator().next();
-									if (!selectedItem.getValue().equals("count"))
-										return;
+						@Override
+						public void onEvent(SelectEvent<Component, Object> event) throws Exception {
+							Listitem selectedItem = (Listitem) event.getSelectedItems().iterator().next();
+							if (!selectedItem.getValue().equals("count"))
+								return;
 
-									// Create Measure
-									Listitem listItem = new Listitem();
-									Listcell listcell = new Listcell(columnName);
-									listItem.appendChild(listcell);
-									listItem.setDraggable("true");
-									listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.NUMERIC_DATA);
-									final Measure measure = new Measure(columnName, "count");
-									listItem.setAttribute(Constants.MEASURE, measure);
+							// Create Measure
+							Listitem listItem = new Listitem();
+							Listcell listcell = new Listcell(columnName);
+							listItem.appendChild(listcell);
+							listItem.setDraggable("true");
+							listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.NUMERIC_DATA);
+							final Measure measure = new Measure(columnName, "count");
+							listItem.setAttribute(Constants.MEASURE, measure);
 
-									final Popup popup = new Popup();
-									popup.setWidth("100px");
-									popup.setZclass("popup");
-									final Button button = new Button("Count");
-									button.setZclass("btn btn-xs");
-									button.setStyle("font-size: 10px; float: right;");
-									button.setPopup(popup);
+							final Popup popup = new Popup();
+							popup.setWidth("100px");
+							popup.setZclass("popup");
+							final Button button = new Button("Count");
+							button.setZclass("btn btn-xs");
+							button.setStyle("font-size: 10px; float: right;");
+							button.setPopup(popup);
 
-									Listbox listbox = new Listbox();
-									listbox.setMultiple(false);
-									listbox.appendItem("Count", "count");
+							Listbox listbox = new Listbox();
+							listbox.setMultiple(false);
+							listbox.appendItem("Count", "count");
 
-									listbox.addEventListener(Events.ON_SELECT, selectAggregateFunctionListener);
+							listbox.addEventListener(Events.ON_SELECT, selectAggregateFunctionListener);
 
-									popup.appendChild(listbox);
-									listcell.appendChild(popup);
-									listcell.appendChild(button);
+							popup.appendChild(listbox);
+							listcell.appendChild(popup);
+							listcell.appendChild(button);
 
-									listItem.setParent(measureListBox);
+							listItem.setParent(measureListBox);
 
-									btn.setVisible(false);
-									btn.setDisabled(true);
-									popup1.close();
-								}
-							});
+							btn.setVisible(false);
+							btn.setDisabled(true);
+							popup1.close();
+						}
+					});
 
 					popup1.appendChild(listbox);
 					listcell.appendChild(btn);
@@ -344,7 +345,7 @@ public class EditChartController extends SelectorComposer<Component> {
 							});
 
 				listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.STRING_DATA);
-					listItem.setParent(attributeListBox);
+				listItem.setParent(attributeListBox);
 				}
 			}
 		if(LOG.isDebugEnabled()){
@@ -581,10 +582,9 @@ public class EditChartController extends SelectorComposer<Component> {
 			return;
 		}
 		Attribute attribute = (Attribute) draggedListitem.getAttribute(Constants.ATTRIBUTE);
-		Attribute newAttribute = new Attribute(attribute.getColumnName());
-
+		
 		// Validations
-		if (chartData.getYColumns().contains(newAttribute.getColumnName()) || chartData.getxColumnNames().contains(
+		if (chartData.getYColumns().contains(attribute.getColumnName()) || chartData.getxColumnNames().contains(
 						draggedListitem.getLabel())) {
 			Clients.showNotification(Labels.getLabel("columnOnlyUsedWhilePlottingGraph"), "error", XAxisListBox, "end_center", 3000, true);
 			return;
@@ -596,10 +596,10 @@ public class EditChartController extends SelectorComposer<Component> {
 			Clients.showNotification(Labels.getLabel("chartAlreadyGrouped"), "error", XAxisListBox, "end_center", 3000, true);
 			return;
 		}
-		createXListChild(newAttribute);
+		createXListChild(attribute);
 		// passing X,Y axis values to draw the chart
 		xAxisDropped = true;
-		chartData.getxColumnNames().add(newAttribute);
+		chartData.getxColumnNames().add(attribute);
 		if (yAxisDropped) {
 			constructChart();
 		}
@@ -648,17 +648,20 @@ public class EditChartController extends SelectorComposer<Component> {
 
 	private EventListener<Event> xAxisItemDetachListener = new EventListener<Event>() {
 		public void onEvent(final Event event) throws Exception {
-			Listcell listcell = (Listcell) event.getTarget().getParent();
-			Listitem xAxisItem = (Listitem) listcell.getParent();
-			String axisName = listcell.getLabel();
+			Listitem xAxisItem = (Listitem) event.getTarget().getParent().getParent();
+			
+			Attribute attribute = (Attribute) xAxisItem.getAttribute(Constants.ATTRIBUTE);
+			
 			xAxisItem.detach();
-			chartData.getxColumnNames().remove(axisName);
-			// Disabling done button
-			doneButton.setDisabled(true);
+			chartData.getxColumnNames().remove(attribute);
+			
+			if(chartData.getxColumnNames().size() <1) {
+				// Disabling done button
+				doneButton.setDisabled(true);
+			}
+			
 			// Enabling drops if no column is dropped
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("axisName" + axisName);
-				LOG.debug("Removing" + chartData.getxColumnNames().remove(axisName));
 				LOG.debug("Removed item from x Axis box, XColumnNames size  - " + chartData.getxColumnNames().size());
 				LOG.debug("List - " + chartData.getxColumnNames());
 			}
