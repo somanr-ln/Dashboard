@@ -122,13 +122,9 @@ public class EditTableController extends SelectorComposer<Component> {
 				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				System.out.println("field.getColumnName()========" +field.getColumnName());
-				System.out.println("tableData.getTableColumns()============" +tableData.getTableColumns());
 				if(tableData.getTableColumns().contains(field.getColumnName())) {
-					System.out.println("targetList========" +targetList);
 					listItem.setParent(targetList);
 				} else {
-					System.out.println("sourceList=========" +sourceList);
 					listItem.setParent(sourceList);
 				}
 			}
@@ -139,7 +135,6 @@ public class EditTableController extends SelectorComposer<Component> {
 					);
 		} else { 
 			for (Field field : columnSet) {
-				System.out.println("Inside for loop");
 				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
