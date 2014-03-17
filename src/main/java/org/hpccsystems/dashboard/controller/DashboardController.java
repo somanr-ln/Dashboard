@@ -694,6 +694,10 @@ public class DashboardController extends SelectorComposer<Window>{
 		Integer sliderStart = 0;
 		Integer sliderEnd = 100;
 		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Min & Max - " + min + max);
+		}
+		
 		//Translating min & max to a scale of 0 to 100 using Linear equation 
 		//((actualVal - actualMin)/(actualMax- actualMin)) = ((sliderVal - sliderMin)/(sliderMax- sliderMin))
 		// Range Factor = (actualMax- actualMin)/(sliderMax- sliderMin)
