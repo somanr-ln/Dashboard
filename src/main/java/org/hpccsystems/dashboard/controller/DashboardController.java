@@ -1262,7 +1262,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
 			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
 					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
-					&& deletedPortlet.getChartData().getIsFiltered()) {
+					&& deletedPortlet.getChartData().getIsFiltered())  {
 				
 				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				

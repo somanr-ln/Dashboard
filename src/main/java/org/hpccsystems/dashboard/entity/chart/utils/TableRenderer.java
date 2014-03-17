@@ -85,17 +85,17 @@ public class TableRenderer {
 		List<Attribute> displayColumnList = new ArrayList<Attribute>();
 		for (Attribute attribute : chartData.getTableColumns()) {
 			displayColumnList.add(new Attribute(attribute
-					.getDisplayXColumnName()));
+					.getDisplayName()));
 		}
 
 		for (Map.Entry<String, List<Attribute>> entry : tableDataMap.entrySet()) {
 			String columnStr = entry.getKey();
 			for (Attribute attribute : chartData.getTableColumns()) {
 				if (attribute.getColumnName().equals(columnStr)) {
-					if (attribute.getDisplayXColumnName() == null) {
+					if (attribute.getDisplayName() == null) {
 						listheader = new Listheader(columnStr);
 					} else {
-						listheader = new Listheader(attribute.getDisplayXColumnName());
+						listheader = new Listheader(attribute.getDisplayName());
 					}
 					break;
 				}
