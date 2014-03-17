@@ -117,22 +117,36 @@ public class EditTableController extends SelectorComposer<Component> {
 		
 		
 		Listitem listItem;
+		Listcell listCell ;
+		Textbox textBox ;
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
-			for (Field field : columnSet) {
-				listItem = new Listitem(field.getColumnName());
+			for(Attribute attribute : tableData.getTableColumns()){
+				listCell =new Listcell();
+				listItem = new Listitem();
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				if(tableData.getTableColumns().contains(field.getColumnName())) {
-					listItem.setParent(targetList);
-				} else {
+				textBox = new Textbox();
+				textBox.setValue(attribute.getDisplayName());
+				textBox.setInplace(true);
+				textBox.setStyle("border: none;	color: black; width: 150px;");
+				textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
+				textBox.setParent(listCell);
+				listCell.setParent(listItem);
+				listItem.setAttribute(Constants.ATTRIBUTE, attribute);
+				listItem.setParent(targetList);
+			}
+			for (Field field : columnSet) {
+				if(!tableData.getTableColumns().contains(new Attribute(field.getColumnName()))) {
+					listItem = new Listitem();
+					listItem.setDraggable("true");
+					listItem.setDroppable("true");
+					listItem.setLabel(field.getColumnName());
 					listItem.setParent(sourceList);
 				}
 			}
 			
 			//TODO: Add else part
-			tableHolder.appendChild(
-						tableRenderer.constructTableWidget(portlet, tableData, true)
-					);
+			tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
 		} else { 
 			for (Field field : columnSet) {
 				listItem = new Listitem(field.getColumnName());
@@ -160,11 +174,12 @@ public class EditTableController extends SelectorComposer<Component> {
 				newListItem.setParent(sourceList);
 			} else if (targetList.equals(dropped)) {
 				Listcell listCell = new Listcell();
-				Attribute attribute = new Attribute();
+				Attribute attribute = new Attribute(draggedItem.getLabel());
 				attribute.setColumnName(draggedItem.getLabel());
 				newListItem.setAttribute(Constants.ATTRIBUTE, attribute);
 				Textbox textBox = new Textbox();
 				textBox.setInplace(true);
+				textBox.setStyle("border: none;	color: black; width: 150px;");
 				textBox.setValue(draggedItem.getLabel());
 				textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
 				textBox.setParent(listCell);
@@ -200,7 +215,6 @@ public class EditTableController extends SelectorComposer<Component> {
 					LOG.debug("TableColumn Title is being changed");
 				}
 				attribute.setDisplayName(textBox.getValue());
-				tableData.getTableColumns().add(attribute);
 			}
 		};
 	
@@ -209,7 +223,6 @@ public class EditTableController extends SelectorComposer<Component> {
 	public void drawTable() {
 		tableData.getTableColumns().clear();
 		if (targetList.getChildren().size() > 1) {
-			tableData.getTableColumns().clear();
 			Listitem listitem;
 			for (Component component : targetList.getChildren()) {
 				if (component instanceof Listitem) {

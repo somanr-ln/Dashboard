@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.entity.FileMeta;
 import org.hpccsystems.dashboard.entity.chart.Attribute;
@@ -82,8 +81,29 @@ public interface HPCCService {
 	 */
 	List<FileMeta> getFileList(String scope, HpccConnection hpccConnection) throws Exception;
 	
+	/**
+	 * @param fName
+	 * @param lName
+	 * @param hpccConnection
+	 * @return List<List<String>>
+	 * @throws Exception
+	 */
 	List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception;
 	
+	/**
+	 * @param primRange
+	 * @param primName
+	 * @param hpccConnection
+	 * @return List<List<String>>
+	 * @throws Exception
+	 */
 	List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * Service to get list of Root keys from HPcc for Tree Layout
+	 * @param hpccConnection
+	 * @return String[]
+	 */
+	String[] getRootKeyList(HpccConnection hpccConnection) throws Exception;
 
 }

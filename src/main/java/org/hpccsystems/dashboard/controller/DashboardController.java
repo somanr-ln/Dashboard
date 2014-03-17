@@ -874,7 +874,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			// refreshing the chart && updating DB
 			while (iterator.hasNext()) {
-				Portlet portlet = (Portlet) iterator.next();
+				Portlet portlet = iterator.next();
 				updateWidgets(portlet);
 				}
 			}
@@ -1173,39 +1173,55 @@ public class DashboardController extends SelectorComposer<Window>{
 	private void removeGlobalFilters() {
 		try {
 			EventListener<ClickEvent> removeAllGlobalFilters = new EventListener<ClickEvent>() {
-					@Override
-					public void onEvent(ClickEvent event) throws Exception {
-						if (Messagebox.Button.YES.equals(event.getButton()) &&appliedCommonFilterSet != null) {							
-							for (Portlet portlet : dashboard.getPortletList()) {
-								if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
-									for (Filter filter : appliedCommonFilterSet) {
-										// removing global filter object from filterlist
-										if (portlet.getChartData().getIsFiltered()
-												&& portlet.getChartData().getFilterSet().contains(filter)) {
-											portlet.getChartData().getFilterSet().remove(filter);
-											if (portlet.getChartData().getFilterSet().size() < 1) {
-												portlet.getChartData().setIsFiltered(false);
-											}
+				@Override
+				public void onEvent(ClickEvent event) throws Exception {
+					if (Messagebox.Button.YES.equals(event.getButton()) &&appliedCommonFilterSet != null) {							
+						for (Portlet portlet : dashboard.getPortletList()) {
+							if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+								for (Filter filter : appliedCommonFilterSet) {
+									// removing global filter object from filterlist
+									if (portlet.getChartData().getIsFiltered()
+											&& portlet.getChartData().getFilterSet().contains(filter)) {
+										portlet.getChartData().getFilterSet().remove(filter);
+										if (portlet.getChartData().getFilterSet().size() < 1) {
+											portlet.getChartData().setIsFiltered(false);
 										}
 									}
-									// refreshing the chart && updating DB
-									updateWidgets(portlet);
 								}
+								// refreshing the chart && updating DB
+								updateWidgets(portlet);
 							}
-							Sessions.getCurrent().removeAttribute(Constants.COMMON_FILTERS);
-							// Removing common filters Row from UI
-							filterRows.getChildren().clear();
-							// making common filters panel unvisible
-							commonFiltersPanel.setVisible(false);
-							dashboard.setShowFiltersPanel(false);
-						}else if(Messagebox.Button.NO.equals(event.getButton())){
-							dashboard.setShowFiltersPanel(true);
 						}
-
+						Sessions.getCurrent().removeAttribute(Constants.COMMON_FILTERS);
+						// Removing common filters Row from UI
+						filterRows.getChildren().clear();
+						// making common filters panel unvisible
+						commonFiltersPanel.setVisible(false);
+						dashboard.setShowFiltersPanel(false);
+					}else if(Messagebox.Button.NO.equals(event.getButton())){
+						dashboard.setShowFiltersPanel(true);
 					}
-				};
-				 Messagebox.show(Constants.REMOVE_GLOBAL_FILTERS, Constants.REMOVE_GLOBAL_FILTERS_TITLE, new Messagebox.Button[]{
-			               Messagebox.Button.YES, Messagebox.Button.NO }, Messagebox.QUESTION, removeAllGlobalFilters);
+
+				}
+			};
+
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("sclass", "panel");
+
+			Messagebox.show(
+					Constants.REMOVE_GLOBAL_FILTERS, 
+					Constants.REMOVE_GLOBAL_FILTERS_TITLE, 
+					new Messagebox.Button[]{
+							Messagebox.Button.YES, 
+							Messagebox.Button.NO },
+					new String[] {
+						"Yes", "No"
+					},
+					Messagebox.QUESTION,
+					Messagebox.Button.YES,
+					removeAllGlobalFilters, 
+					params
+					);
 		} catch (Exception e) {
 			LOG.debug(" Exception while removing global filters", e);
 		}
@@ -1260,8 +1276,9 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Remove applied filters
 			Set<Filter> filtersToRemove = new HashSet<Filter>();
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
-			if(Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) && 
-					deletedPortlet.getChartData().getIsFiltered()) {
+			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
+					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+					&& deletedPortlet.getChartData().getIsFiltered())  {
 				
 				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				
