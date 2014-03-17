@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.xml.bind.JAXBContext;
@@ -37,7 +38,7 @@ import org.zkoss.zk.ui.util.Clients;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonPrimitive; 
 
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
@@ -523,9 +524,13 @@ public class ChartRenderer {
 		StringBuilder nameBuilder;
 		for (List<String> list : childrenL1) {
 			nameBuilder = new StringBuilder();
-			for (String string : list) {
-				nameBuilder.append(string);
-			}
+			ListIterator<String> iterator = list.listIterator();
+			while(iterator.hasNext()){
+				nameBuilder.append(iterator.next());
+				if(iterator.hasNext()){
+					nameBuilder.append(", ");
+				}
+			}				
 			nodeChildrenL1.add(new Node(nameBuilder.toString()));
 		}
 		parent.setChildren(nodeChildrenL1);

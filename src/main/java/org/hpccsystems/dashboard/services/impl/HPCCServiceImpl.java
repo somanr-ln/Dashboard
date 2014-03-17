@@ -14,10 +14,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.rpc.ServiceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -36,7 +38,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.zkoss.math.RoundingModes;
 
 import ws_sql.ws.hpccsystems.ExecuteSQLRequest;
 import ws_sql.ws.hpccsystems.ExecuteSQLResponse;
@@ -799,7 +800,7 @@ public class HPCCServiceImpl implements HPCCService{
 	}
 
 
-	@Override
+	@Override 
 	public String[] getRootKeyList(HpccConnection hpccConnection) throws Exception {
 		
 		List<String> fnameLnameList = new ArrayList<String>();
@@ -818,7 +819,7 @@ public class HPCCServiceImpl implements HPCCService{
 			soap = locator.getws_sqlServiceSoap();
 			final ExecuteSQLRequest req = new ExecuteSQLRequest();
 			
-			final StringBuilder queryTxt=new StringBuilder("select fname, lname from test::providers");
+			final StringBuilder queryTxt=new StringBuilder("select fname,lname from test::providers group by fname,lname");
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("queryTxt in getRootKeyList() -> " + queryTxt.toString());
@@ -850,9 +851,7 @@ public class HPCCServiceImpl implements HPCCService{
 					fnameLname.append(" ");
 					fnameLname.append(eElement.getElementsByTagName("lname").item(0).getTextContent());
 				}
-				if(!fnameLnameList.contains(fnameLname.toString())){
 				fnameLnameList.add(fnameLname.toString());
-				}
 			}
 			fnameLnameArray = fnameLnameList.toArray((new String[fnameLnameList.size()]));
 			if(LOG.isDebugEnabled()){
