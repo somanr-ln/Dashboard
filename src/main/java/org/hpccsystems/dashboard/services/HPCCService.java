@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.entity.FileMeta;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
@@ -69,7 +70,7 @@ public interface HPCCService {
 	 * @return
 	 * @throws Exception
 	 */
-	LinkedHashMap<String, List<String>> fetchTableData(XYChartData data) throws Exception;
+	LinkedHashMap<String, List<Attribute>> fetchTableData(XYChartData data) throws Exception;
 	
 	
 	/**

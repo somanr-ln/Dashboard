@@ -59,10 +59,12 @@ public class Attribute {
 			return this.columnName.equals(obj);
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Attribute [columnName=" + columnName +"]";
+		return "Attribute [columnName=" + columnName + ", displayXColumnName="
+				+ displayXColumnName + "]";
 	}
-
+	
+	
 }

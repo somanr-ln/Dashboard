@@ -18,7 +18,7 @@ public class XYChartData {
 	
 	private List<Attribute> xColumnNames;
 	private List<Measure> yColumns;
-	private List<String> tableColumns;
+	private List<Attribute> tableColumns;
 	
 	
 	private Boolean isFiltered = false;
@@ -51,6 +51,18 @@ public class XYChartData {
 	}
 
 	@XmlElement
+	public List<Attribute> getTableColumns() {
+		if(tableColumns == null) {
+			tableColumns = new ArrayList<Attribute>();
+		}
+		return tableColumns;
+	}
+
+	public void setTableColumns(List<Attribute> tableColumns) {
+		this.tableColumns = tableColumns;
+	}
+
+	@XmlElement
 	public Boolean getIsFiltered() {
 		return isFiltered;
 	}
@@ -59,17 +71,6 @@ public class XYChartData {
 		this.isFiltered = isFiltered;
 	}
 
-	@XmlElement
-	public final List<String> getTableColumns() {
-		if(tableColumns == null) {
-			tableColumns = new ArrayList<String>();
-		}
-		return tableColumns;
-	}
-
-	public final void setTableColumns(List<String> tableColumnName) {
-		this.tableColumns = tableColumnName;
-	}
 
 	@XmlElement
 	public HpccConnection getHpccConnection() {

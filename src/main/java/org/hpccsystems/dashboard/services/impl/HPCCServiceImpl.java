@@ -489,9 +489,8 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return
 	 * @throws Exception
 	 */
-	public LinkedHashMap<String, List<String>> fetchTableData(XYChartData tableData)
+	public LinkedHashMap<String, List<Attribute>> fetchTableData(XYChartData tableData)
 			throws Exception {
-
 		final StringBuilder queryTxt = new StringBuilder("select ");
 		final Ws_sqlLocator locator = new Ws_sqlLocator();
 		locator.setWs_sqlServiceSoap_userName(tableData.getHpccConnection().getUsername());
@@ -501,19 +500,19 @@ public class HPCCServiceImpl implements HPCCService{
 		} else {
 			locator.setWs_sqlServiceSoapAddress("http://" + tableData.getHpccConnection().getHostIp()+ ":" + WS_SQL_ENDPOINT);
 		}
-		LinkedHashMap<String, List<String>> tableDataMap = new LinkedHashMap<String, List<String>>();
+		LinkedHashMap<String, List<Attribute>> tableDataMap = new LinkedHashMap<String, List<Attribute>>();
 		try
 		{
 		final Ws_sqlServiceSoap soap = locator.getws_sqlServiceSoap();
 		final ExecuteSQLRequest req = new ExecuteSQLRequest();
 
-		List<String> listData = tableData.getTableColumns();
+		List<Attribute> listData = tableData.getTableColumns();
 		int index = 0;
-		for (String data : listData) {
+		for (Attribute data : listData) {
 			if (index != listData.size() - 1) {
-				queryTxt.append(data).append(",");
+				queryTxt.append(data.getColumnName()).append(",");
 			} else if (index == listData.size() - 1) {
-				queryTxt.append(data);
+				queryTxt.append(data.getColumnName());
 			}
 			index++;
 		}
@@ -542,10 +541,10 @@ public class HPCCServiceImpl implements HPCCService{
 		Node fstNode = null;
 		Element fstElmnt = null, lstNmElmnt = null;
 		NodeList lstNmElmntLst = null;
-		List<String> columnListvalue = null;
-		for (String columnName : tableData.getTableColumns()) {
-			columnListvalue = new ArrayList<String>();
-			tableDataMap.put(columnName, columnListvalue);
+		List<Attribute> columnListvalue =null;
+		for (Attribute columnName : tableData.getTableColumns()) {
+			columnListvalue = new ArrayList<Attribute>();
+			tableDataMap.put(columnName.getColumnName(), columnListvalue);
 		}
 		final NodeList nodeList = doc.getElementsByTagName("Row");
 		if (nodeList != null) {
@@ -553,12 +552,12 @@ public class HPCCServiceImpl implements HPCCService{
 				fstNode = nodeList.item(count);
 				if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
 					fstElmnt = (Element) fstNode;
-					for (String data : tableData.getTableColumns()) {
-						lstNmElmntLst = fstElmnt.getElementsByTagName(data);
+					for (Attribute data : tableData.getTableColumns()) {
+						lstNmElmntLst = fstElmnt.getElementsByTagName(data.getColumnName());
 						lstNmElmnt = (Element) lstNmElmntLst.item(0);
 						String str = lstNmElmnt.getTextContent();
 						columnListvalue = tableDataMap.get(lstNmElmnt.getNodeName());
-						columnListvalue.add(str);
+						columnListvalue.add(new Attribute(str));
 					}
 				}
 			}
@@ -569,7 +568,7 @@ public class HPCCServiceImpl implements HPCCService{
 		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);
 			throw ex;
-		}			
+		}		
 		return tableDataMap;
 	}
 
