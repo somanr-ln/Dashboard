@@ -347,7 +347,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			constructFilterItem(commonFilterFieldSet);
 
-			 commonFiltersPanel.setVisible(true);
+			commonFiltersPanel.setVisible(true);
 		}
 		
 		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);

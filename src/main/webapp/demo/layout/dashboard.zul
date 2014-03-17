@@ -60,7 +60,7 @@
 			</div>
 		</caption>
 		<panelchildren>
-			<grid style="border:none;">
+			<grid style="border:none;" emptyMessage="Choose a Column to apply Filters">
 				<columns>
 					<column width="200px"></column>
 					<column></column>
