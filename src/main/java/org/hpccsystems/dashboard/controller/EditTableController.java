@@ -199,7 +199,7 @@ public class EditTableController extends SelectorComposer<Component> {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("TableColumn Title is being changed");
 				}
-				attribute.setDisplayXColumnName(textBox.getValue());
+				attribute.setDisplayName(textBox.getValue());
 				tableData.getTableColumns().add(attribute);
 			}
 		};
