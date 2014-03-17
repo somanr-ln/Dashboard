@@ -70,9 +70,9 @@ public class TableRenderer {
 		listBox.setHflex("1");
 
 		if (isEditing) {
-			listBox.setHeight("512px"); // .. 542 - 30
+			listBox.setHeight("490px"); // .. 542 - 30 -22
 		} else {
-			listBox.setHeight("355px"); // .. 385 - 30
+			listBox.setHeight("330px"); // .. 385 - 30 -25
 		}
 		listBox.setAutopaging(true);
 

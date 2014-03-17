@@ -390,7 +390,6 @@ public class ChartPanel extends Panel {
 		holderDiv.getChildren().clear();
 		holderDiv.appendChild(treeDiv);
 		holderDiv.appendChild(chartDiv);
-		holderDiv.setHeight("620px");
 		removeStaticImage();
 	}
 			
