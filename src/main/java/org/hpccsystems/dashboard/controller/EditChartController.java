@@ -117,7 +117,6 @@ public class EditChartController extends SelectorComposer<Component> {
 		super.doAfterCompose(comp);
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
-
 		chartData = (XYChartData) execution.getAttribute(Constants.CHART_DATA);
 		portlet = (Portlet) execution.getAttribute(Constants.PORTLET);
 		doneButton = (Button) execution	.getAttribute(Constants.EDIT_WINDOW_DONE_BUTTON);
@@ -513,6 +512,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		Listitem yAxisItem = new Listitem();
 		final Textbox textBox = new Textbox();
 		textBox.setInplace(true);
+		textBox.setStyle("border: none;	color: black; width: 150px;");
 		yAxisItem.setAttribute(Constants.MEASURE, measure);
 		Listcell listcell = new Listcell();
 		if (measure.getDisplayYColumnName() == null) {
@@ -609,6 +609,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		final Listitem xAxisItem = new Listitem();
 		final Textbox textBox = new Textbox();
 		textBox.setInplace(true);
+		textBox.setStyle("border: none;	color: black; width: 150px;");
 		xAxisItem.setAttribute(Constants.ATTRIBUTE, attribute);
 		final Listcell listcell = new Listcell();
 		if (attribute.getDisplayXColumnName() == null) {
