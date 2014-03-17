@@ -347,7 +347,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			constructFilterItem(commonFilterFieldSet);
 
-			 commonFiltersPanel.setVisible(true);
+			commonFiltersPanel.setVisible(true);
 		}
 		
 		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
@@ -1260,8 +1260,9 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Remove applied filters
 			Set<Filter> filtersToRemove = new HashSet<Filter>();
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
-			if(Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) && 
-					deletedPortlet.getChartData().getIsFiltered()) {
+			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
+					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+					&& deletedPortlet.getChartData().getIsFiltered()) {
 				
 				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				

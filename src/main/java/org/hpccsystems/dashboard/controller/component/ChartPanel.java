@@ -3,7 +3,7 @@ package org.hpccsystems.dashboard.controller.component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log; 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
@@ -12,6 +12,7 @@ import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
+import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
 import org.zkoss.util.resource.Labels;
@@ -29,12 +30,14 @@ import org.zkoss.zkplus.spring.SpringUtil;
 import org.zkoss.zul.Box;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Caption;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
+import org.zkoss.zul.SimpleListModel;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
@@ -62,7 +65,7 @@ public class ChartPanel extends Panel {
 	final Div chartDiv = new Div();
 	final Textbox textbox = new Textbox();	
 	final Box imageContainer = new Box();	
-	final Textbox treetextBox = new Textbox();
+	final Combobox treetextBox = new Combobox();
 	Portlet portlet;
 
 	public ChartPanel(final Portlet argPortlet) {
@@ -273,7 +276,6 @@ public class ChartPanel extends Panel {
 	//Reset button listener
 	EventListener<Event> resetListener = new EventListener<Event>() { 
         public void onEvent(final Event event)throws Exception {
-        	try{
         	portlet.setWidgetState(Constants.STATE_EMPTY);
         	portlet.setChartDataJSON(null);
         	portlet.setChartDataXML(null);
@@ -292,9 +294,18 @@ public class ChartPanel extends Panel {
     		//Clears all chart data from DB
     		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidget(portlet);
-        	}catch(DataAccessException ex){
-        		LOG.error("Exception in resetListener()", ex);
-        	}
+    		
+    		//Calling listener in Dashboard - This listener resets portlet object
+    		Window window =  null;
+    		Session session = Sessions.getCurrent();
+			final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
+			for (final Component component : list) {
+				if(component instanceof Window){
+					window = (Window) component;
+					Events.sendEvent(new Event("onPanelReset", window, portlet));
+				}
+			}
+			
         } 
 	};
 	
@@ -380,6 +391,7 @@ public class ChartPanel extends Panel {
 		searchButton.setLabel("DrawTree");
 		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
 		hbox.appendChild(searchLabel);
+		getRootKeyList();		
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 			treetextBox.setValue(portlet.getTreeData().getRootKey());
 		}
@@ -390,9 +402,25 @@ public class ChartPanel extends Panel {
 		holderDiv.getChildren().clear();
 		holderDiv.appendChild(treeDiv);
 		holderDiv.appendChild(chartDiv);
+		holderDiv.setHeight("620px");
 		removeStaticImage();
 	}
 			
+	/**
+	 * Method to generate Root Key List for TreeLayout Autocomplete function
+	 */
+	private void getRootKeyList() {
+		try{
+		HPCCService hpccService = (HPCCService)SpringUtil.getBean("hpccService");
+		treetextBox.setAutodrop(true);
+		treetextBox.setButtonVisible(false);
+		treetextBox.setModel(new SimpleListModel(hpccService.getRootKeyList(portlet.getTreeData().getHpccConnection())));
+		}catch(Exception ex){
+			LOG.error("Exception while getting root key list", ex);
+		}
+		
+	}
+
 	/**
 	 * Listener to draw tree layout
 	 */
