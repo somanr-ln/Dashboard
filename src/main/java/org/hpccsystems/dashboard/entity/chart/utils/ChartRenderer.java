@@ -78,10 +78,10 @@ public class ChartRenderer {
 		if(chartData.getYColumns().size() > 0 && 
 				chartData.getxColumnNames().size() > 0) {
 			
-			if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+			if (chartData.getxColumnNames().get(0).getDisplayName() == null) {
 				header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
 			} else {
-				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayXColumnName());
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayName());
 			}			
 			for (Measure measure : chartData.getYColumns()) {
 				if (measure.getDisplayYColumnName() == null) {
@@ -94,10 +94,10 @@ public class ChartRenderer {
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		if (chartData.getxColumnNames().get(0).getDisplayXColumnName() == null) {
+		if (chartData.getxColumnNames().get(0).getDisplayName() == null) {
 			title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
 		}else{
-			title.append(chartData.getxColumnNames().get(0).getDisplayXColumnName() + " BY " + yName.toString());
+			title.append(chartData.getxColumnNames().get(0).getDisplayName() + " BY " + yName.toString());
 		}
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());

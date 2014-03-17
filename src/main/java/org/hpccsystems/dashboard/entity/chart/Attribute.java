@@ -10,16 +10,16 @@ public class Attribute {
 	public Attribute(){}
 
 	/**
-	 * Creates aggregated Attribute
 	 * @param columnName
-	 * @param displayXColumnName
+	 * Creates and Attribute and Sets display name as column name
 	 */
 	public Attribute(String columnName) {
 		this.columnName = columnName;
+		this.displayName = columnName;
 	}
 
 	private String columnName;
-	private String displayXColumnName;
+	private String displayName;
 	
 	@XmlAttribute
 	public String getColumnName() {
@@ -31,12 +31,12 @@ public class Attribute {
 	}
 	
 	@XmlAttribute
-	public String getDisplayXColumnName() {
-		return displayXColumnName;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setDisplayXColumnName(String displayXColumnName) {
-		this.displayXColumnName = displayXColumnName;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class Attribute {
 	@Override
 	public String toString() {
 		return "Attribute [columnName=" + columnName + ", displayXColumnName="
-				+ displayXColumnName + "]";
+				+ displayName + "]";
 	}
 	
 	

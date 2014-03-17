@@ -261,8 +261,6 @@ public class EditChartController extends SelectorComposer<Component> {
 					listItem.setParent(measureListBox);
 				} else {
 					listItem.setAttribute(Constants.COLUMN_DATA_TYPE, Constants.STRING_DATA);
-					final Attribute attribute = new Attribute(field.getColumnName());
-					listItem.setAttribute(Constants.ATTRIBUTE, attribute);
 					final String columnName = field.getColumnName();
 					final Popup popup1 = new Popup();
 					popup1.setWidth("200px");
@@ -570,16 +568,9 @@ public class EditChartController extends SelectorComposer<Component> {
 	@Listen("onDrop = #XAxisListBox")
 	public void onDropToXAxisTabBox(final DropEvent dropEvent) {
 
-		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent)
-				.getDragged();
-		String str = Labels.getLabel("dropAttributesOnly");
-		// Validations
-		if (!Constants.STRING_DATA.equals(draggedListitem
-				.getAttribute(Constants.COLUMN_DATA_TYPE))) {
-			Clients.showNotification(str, "error", YAxisListBox, "end_center", 3000, true);
-			return;
-		}
-		Attribute attribute = (Attribute) draggedListitem.getAttribute(Constants.ATTRIBUTE);
+		final Listitem draggedListitem = (Listitem) ((DropEvent) dropEvent).getDragged();
+		
+		Attribute attribute = new Attribute(draggedListitem.getLabel());
 		
 		// Validations
 		if (chartData.getYColumns().contains(attribute.getColumnName()) || chartData.getxColumnNames().contains(
@@ -594,6 +585,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			Clients.showNotification(Labels.getLabel("chartAlreadyGrouped"), "error", XAxisListBox, "end_center", 3000, true);
 			return;
 		}
+		
 		createXListChild(attribute);
 		// passing X,Y axis values to draw the chart
 		xAxisDropped = true;
@@ -611,10 +603,10 @@ public class EditChartController extends SelectorComposer<Component> {
 		textBox.setStyle("border: none;	color: black; width: 150px;");
 		xAxisItem.setAttribute(Constants.ATTRIBUTE, attribute);
 		final Listcell listcell = new Listcell();
-		if (attribute.getDisplayXColumnName() == null) {
+		if (attribute.getDisplayName() == null) {
 			textBox.setValue(attribute.getColumnName());
 		} else {
-			textBox.setValue(attribute.getDisplayXColumnName());
+			textBox.setValue(attribute.getDisplayName());
 		}
 		textBox.addEventListener(Events.ON_CHANGE, xcolumnTitleChangeLisnr);
 		listcell.appendChild(textBox);
@@ -640,7 +632,7 @@ public class EditChartController extends SelectorComposer<Component> {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("XColumn Title is being changed");
 			}
-			attribute.setDisplayXColumnName(textBox.getValue());
+			attribute.setDisplayName(textBox.getValue());
 		}
 	};
 
