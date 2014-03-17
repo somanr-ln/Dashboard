@@ -14,10 +14,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.rpc.ServiceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -36,7 +38,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.zkoss.math.RoundingModes;
 
 import ws_sql.ws.hpccsystems.ExecuteSQLRequest;
 import ws_sql.ws.hpccsystems.ExecuteSQLResponse;
@@ -796,6 +797,71 @@ public class HPCCServiceImpl implements HPCCService{
 			throw ex;
 		} 
 		return list;
+	}
+
+
+	@Override 
+	public String[] getRootKeyList(HpccConnection hpccConnection) throws Exception {
+		
+		List<String> fnameLnameList = new ArrayList<String>();
+		String[] fnameLnameArray = null;
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select fname,lname from test::providers group by fname,lname");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("queryTxt in getRootKeyList() -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String in getRootKeyList() --> " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			StringBuilder fnameLname=null;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);				
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					fnameLname = new StringBuilder();
+					fnameLname.append(eElement.getElementsByTagName("fname").item(0).getTextContent());
+					fnameLname.append(" ");
+					fnameLname.append(eElement.getElementsByTagName("lname").item(0).getTextContent());
+				}
+				fnameLnameList.add(fnameLname.toString());
+			}
+			fnameLnameArray = fnameLnameList.toArray((new String[fnameLnameList.size()]));
+			if(LOG.isDebugEnabled()){
+				LOG.debug("fnameLnameList in getRootKeyList() --> " + fnameLnameList);
+			}
+		}catch(ServiceException | ParserConfigurationException | SAXException | IOException ex){
+			LOG.error("Exception occurred while fetching Root key List in getRootKeyList()", ex);
+			throw ex;
+		}
+		return fnameLnameArray;
 	}
 
 
