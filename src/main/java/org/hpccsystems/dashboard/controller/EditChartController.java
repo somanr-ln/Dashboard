@@ -117,7 +117,6 @@ public class EditChartController extends SelectorComposer<Component> {
 		super.doAfterCompose(comp);
 		Execution execution = Executions.getCurrent();
 		Set<Field> columnSet = null;
-
 		chartData = (XYChartData) execution.getAttribute(Constants.CHART_DATA);
 		portlet = (Portlet) execution.getAttribute(Constants.PORTLET);
 		doneButton = (Button) execution	.getAttribute(Constants.EDIT_WINDOW_DONE_BUTTON);
