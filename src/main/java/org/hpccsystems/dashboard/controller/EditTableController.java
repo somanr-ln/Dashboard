@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
@@ -19,6 +21,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.DropEvent;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -30,7 +33,9 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
+import org.zkoss.zul.Textbox;
 
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
@@ -86,10 +91,10 @@ public class EditTableController extends SelectorComposer<Component> {
 		if(Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())) {
 			try {
 				Set<Field> schemaSet = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
-				for (String column : tableData.getTableColumns()) {
+				for (Attribute column : tableData.getTableColumns()) {
 					boolean columnExist = false;
 					for(Field field : schemaSet){
-						if(column.trim().equals(field.getColumnName().trim())){
+						if(column.getColumnName().equals(field.getColumnName().trim())){
 							columnExist =true;
 							break;
 						}
@@ -117,11 +122,13 @@ public class EditTableController extends SelectorComposer<Component> {
 				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				listItem.addEventListener(Events.ON_DROP, dropListener);
-				
+				System.out.println("field.getColumnName()========" +field.getColumnName());
+				System.out.println("tableData.getTableColumns()============" +tableData.getTableColumns());
 				if(tableData.getTableColumns().contains(field.getColumnName())) {
+					System.out.println("targetList========" +targetList);
 					listItem.setParent(targetList);
 				} else {
+					System.out.println("sourceList=========" +sourceList);
 					listItem.setParent(sourceList);
 				}
 			}
@@ -132,10 +139,10 @@ public class EditTableController extends SelectorComposer<Component> {
 					);
 		} else { 
 			for (Field field : columnSet) {
+				System.out.println("Inside for loop");
 				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				listItem.addEventListener(Events.ON_DROP, dropListener);
 				listItem.setParent(sourceList);
 			}
 		}
@@ -149,64 +156,86 @@ public class EditTableController extends SelectorComposer<Component> {
 		public void onEvent(DropEvent event) throws Exception {
 			Component dragged = event.getDragged();
 			Component dropped = event.getTarget();
-			
-			if(dropped instanceof Listitem) {
-				dropped.getParent().insertBefore(dragged, dropped);
-			} else {
-				//When dropped in list box
-				dropped.appendChild(dragged);
+			Listitem draggedItem = (Listitem) dragged;
+			Listitem newListItem = new Listitem();
+			newListItem.setDraggable("true");
+			if (draggedItem.getAttribute(Constants.ATTRIBUTE) != null && sourceList.equals(dropped)) {
+				Attribute attribute = (Attribute) draggedItem.getAttribute(Constants.ATTRIBUTE);
+				newListItem.setLabel(attribute.getColumnName());
+				newListItem.setParent(sourceList);
+			} else if (targetList.equals(dropped)) {
+				Listcell listCell = new Listcell();
+				Attribute attribute = new Attribute();
+				attribute.setColumnName(draggedItem.getLabel());
+				newListItem.setAttribute(Constants.ATTRIBUTE, attribute);
+				Textbox textBox = new Textbox();
+				textBox.setInplace(true);
+				textBox.setValue(draggedItem.getLabel());
+				textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
+				textBox.setParent(listCell);
+				listCell.setParent(newListItem);
+				newListItem.setParent(targetList);
 			}
-			if(Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId()) && targetList.getChildren().size() > 1)
+			draggedItem.detach();
+			if (Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())
+					&& targetList.getChildren().size() > 1)
 				doneButton.setDisabled(false);
 			else
 				doneButton.setDisabled(true);
-			//Code to update the selected columns since the draw table is not applicaple for circuit config flow
-			List<String> selectedTableColumns=tableData.getTableColumns();
+			// Code to update the selected columns since the draw table is not  applicaple for circuit config flow
+			List<Attribute> selectedTableColumns = tableData.getTableColumns();
 			Listitem listitem;
 			selectedTableColumns.clear();
 			for (Component component : targetList.getChildren()) {
-				if(component instanceof Listitem){
+				if (component instanceof Listitem) {
 					listitem = (Listitem) component;
-					selectedTableColumns.add(
-								listitem.getLabel()
-							);
+					selectedTableColumns.add(new Attribute(listitem.getLabel()));
 				}
 			}
 		}
-		
 	};
+	
+	// Event Listener for Change of tableColumn title text
+		private EventListener<Event> titleChangeLisnr = new EventListener<Event>() {
+			public void onEvent(final Event event) throws Exception {
+				Listitem listItem = (Listitem) event.getTarget().getParent().getParent();
+				Attribute attribute = (Attribute) listItem.getAttribute(Constants.ATTRIBUTE);
+				Textbox textBox = (Textbox) event.getTarget();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("TableColumn Title is being changed");
+				}
+				attribute.setDisplayXColumnName(textBox.getValue());
+				tableData.getTableColumns().add(attribute);
+			}
+		};
+	
 	
 	@Listen("onClick = #drawTable")
 	public void drawTable() {
 		tableData.getTableColumns().clear();
-		if(targetList.getChildren().size() > 1) {
+		if (targetList.getChildren().size() > 1) {
 			tableData.getTableColumns().clear();
 			Listitem listitem;
 			for (Component component : targetList.getChildren()) {
-				if(component instanceof Listitem){
+				if (component instanceof Listitem) {
 					listitem = (Listitem) component;
-					tableData.getTableColumns().add(
-								listitem.getLabel()
-							);
+					Attribute attribute = (Attribute) listitem.getAttribute(Constants.ATTRIBUTE);
+					tableData.getTableColumns().add(attribute);
 				}
 			}
-			
 			try {
-				
+
 				tableHolder.getChildren().clear();
-				tableHolder.appendChild(
-						tableRenderer.constructTableWidget(portlet, tableData,  true)
-						);
+				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
 			} catch (Exception e) {
 				Clients.showNotification(Labels.getLabel("tableCreationFailed"), "error", tableHolder, "middle_center", 3000, true);
 				LOG.error("Table creation failed", e);
 				return;
 			}
-			
 			doneButton.setDisabled(false);
 		} else {
-			Clients.showNotification(Labels.getLabel("moveSomeColumn"), "error", targetList, "middle_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("moveSomeColumn"),
+					"error", targetList, "middle_center", 3000, true);
 		}
 	}
-
 }

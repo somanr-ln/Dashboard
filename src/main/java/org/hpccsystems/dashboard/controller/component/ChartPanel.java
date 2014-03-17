@@ -91,6 +91,7 @@ public class ChartPanel extends Panel {
 
 		textbox.setInplace(true);
 		textbox.setVflex("1");
+		textbox.setStyle("border: none;	color: black;");
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
@@ -178,7 +179,9 @@ public class ChartPanel extends Panel {
 		if(portlet.getChartType().equals(Constants.BAR_CHART) || 
 				portlet.getChartType().equals(Constants.LINE_CHART)){
 			return "createChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
-		} else {
+		}else if(Constants.TREE_LAYOUT.equals(portlet.getChartType())){
+			return "drawTreeLayout('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+		}else {
 			return "createPieChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
 		}
 	}
@@ -255,7 +258,8 @@ public class ChartPanel extends Panel {
 			final Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put(Constants.PARENT, ChartPanel.this);
 			parameters.put(Constants.PORTLET, portlet);
-			if(Constants.TREE_LAYOUT == portlet.getChartType()){
+			if(Constants.TREE_LAYOUT == portlet.getChartType() 
+					&& Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
 				onTreeInclude();
 			}else{
 			final Window window = (Window) Executions.createComponents(
@@ -353,10 +357,9 @@ public class ChartPanel extends Panel {
 	 */
 	public void onTreeInclude() {
 		TreeData treeData = new TreeData();
-		treeData.setHpccConnection(constructHpccObj());
-		//portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+		treeData.setHpccConnection(constructHpccObj());		
 		portlet.setTreeData(treeData);
-		constructTreeSearchDiv();
+		constructTreeSearchDiv();		
 	}
 	
 	private HpccConnection constructHpccObj(){
@@ -369,7 +372,7 @@ public class ChartPanel extends Panel {
 	/**
 	 * Method to create root key search div for Tree layout
 	 */
-	private void constructTreeSearchDiv(){
+	public void constructTreeSearchDiv(){
 		Hbox hbox = new Hbox();
 		Label searchLabel = new Label();
 		searchLabel.setValue("Root Key :");
@@ -377,6 +380,9 @@ public class ChartPanel extends Panel {
 		searchButton.setLabel("DrawTree");
 		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
 		hbox.appendChild(searchLabel);
+		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+			treetextBox.setValue(portlet.getTreeData().getRootKey());
+		}
 		hbox.appendChild(treetextBox);
 		hbox.appendChild(searchButton);
 		final Div treeDiv = new Div();
@@ -395,12 +401,16 @@ public class ChartPanel extends Panel {
 
 		@Override
 		public void onEvent(Event event) throws Exception {
-			ChartRenderer renderer = (ChartRenderer)SpringUtil.getBean("chartRenderer");
+			ChartRenderer chartRenderer = (ChartRenderer)SpringUtil.getBean("chartRenderer");
 			String[] rootArray = treetextBox.getValue().split("\\s+");
-			String treeJSON = renderer.constructTreeJSON(rootArray[0], rootArray[1], portlet.getTreeData().getHpccConnection());
+			String treeJSON = chartRenderer.constructTreeJSON(rootArray[0], rootArray[1], portlet.getTreeData().getHpccConnection());
 			portlet.setChartDataJSON(treeJSON);
 			Clients.evalJavaScript("drawTreeLayout('" + chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ); 
-			
+			portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+			WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+			portlet.getTreeData().setRootKey(treetextBox.getValue());
+			portlet.setChartDataXML(chartRenderer.convertTreeDataToXML(portlet.getTreeData()));
+			widgetService.updateWidget(portlet);
 		}
 	};
 	

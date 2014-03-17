@@ -23,6 +23,7 @@ import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Group;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
+import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
 import org.hpccsystems.dashboard.entity.chart.tree.Node;
@@ -445,7 +446,64 @@ public class ChartRenderer {
 		
 	    return sw.toString();
 	}
+	
+	/**
+	 * Constructs XML string from the TreeData Object
+	 * @param chartData
+	 * @return String
+	 */
+	public String convertTreeDataToXML(TreeData treeData) {		
+		//encrypt password
+		String rawPassword = treeData.getHpccConnection().getPassword();
+		
+		EncryptDecrypt encrypter = new EncryptDecrypt("");
+		String encrypted = encrypter.encrypt(rawPassword);
+		treeData.getHpccConnection().setPassword(encrypted);
+		java.io.StringWriter sw = new StringWriter();
+		JAXBContext jaxbContext;
+		try {
+			jaxbContext = JAXBContext.newInstance(TreeData.class);
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			marshaller.marshal(treeData, sw);
+		} catch (JAXBException e) {
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
+		}
+		//reset raw password again to the object
+		treeData.getHpccConnection().setPassword(rawPassword);
+	    return sw.toString();		
+	}
 
+	/**
+	 * Parses the XML string and returns as TreeData Object
+	 * @param xml
+	 * @return
+	 * 	TreeData object
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
+	 */
+	public TreeData parseXMLToTreeData(String xml) throws ParserConfigurationException, SAXException, IOException {
+		String encryptedpassWord="";
+		String decryptedPassword="";
+		EncryptDecrypt decrypter = new EncryptDecrypt("");
+		TreeData treeData = null;
+		JAXBContext jaxbContext;
+		try {
+			jaxbContext = JAXBContext.newInstance(TreeData.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			treeData = (TreeData) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+			//decrypt password
+			encryptedpassWord = treeData.getHpccConnection().getPassword();
+			decryptedPassword = decrypter.decrypt(encryptedpassWord);
+			treeData.getHpccConnection().setPassword(decryptedPassword);
+		} catch (JAXBException e) {
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
+		} catch (Exception e) {
+			LOG.error(Labels.getLabel("exceptioninParseXML()"),e);
+		}		
+		return treeData;
+	}
 	/**
 	 * Method to construct JSON data to draw tree layout
 	 * @param fName
