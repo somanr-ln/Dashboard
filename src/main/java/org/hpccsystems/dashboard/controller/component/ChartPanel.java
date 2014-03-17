@@ -273,7 +273,6 @@ public class ChartPanel extends Panel {
 	//Reset button listener
 	EventListener<Event> resetListener = new EventListener<Event>() { 
         public void onEvent(final Event event)throws Exception {
-        	try{
         	portlet.setWidgetState(Constants.STATE_EMPTY);
         	portlet.setChartDataJSON(null);
         	portlet.setChartDataXML(null);
@@ -292,9 +291,18 @@ public class ChartPanel extends Panel {
     		//Clears all chart data from DB
     		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
     		widgetService.updateWidget(portlet);
-        	}catch(DataAccessException ex){
-        		LOG.error("Exception in resetListener()", ex);
-        	}
+        	
+    		//Calling listener in Dashboard - This listener resets portlet object
+    		Window window =  null;
+    		Session session = Sessions.getCurrent();
+			final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component)session.getAttribute(Constants.NAVBAR)).getPage(), "window");
+			for (final Component component : list) {
+				if(component instanceof Window){
+					window = (Window) component;
+					Events.sendEvent(new Event("onPanelReset", window, portlet));
+				}
+			}
+			
         } 
 	};
 	
@@ -390,7 +398,6 @@ public class ChartPanel extends Panel {
 		holderDiv.getChildren().clear();
 		holderDiv.appendChild(treeDiv);
 		holderDiv.appendChild(chartDiv);
-		holderDiv.setHeight("620px");
 		removeStaticImage();
 	}
 			

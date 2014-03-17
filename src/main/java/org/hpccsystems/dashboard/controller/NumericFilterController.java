@@ -1,6 +1,7 @@
 package org.hpccsystems.dashboard.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -110,8 +111,8 @@ public class NumericFilterController extends SelectorComposer<Component>{
 		
 		if(filter.getStartValue() != null && filter.getEndValue() != null) {
 			//Updating slider positions for already applied filters
-			sliderStart = filter.getStartValue().subtract(min).divide(rangeFactor).intValue();
-			sliderEnd = filter.getEndValue().subtract(min).divide(rangeFactor).intValue();
+			sliderStart = filter.getStartValue().subtract(min).divide(rangeFactor, RoundingMode.DOWN).intValue();
+			sliderEnd = filter.getEndValue().subtract(min).divide(rangeFactor, RoundingMode.CEILING).intValue();
 		} else {
 			filter.setStartValue(min);
 			filter.setEndValue(max);

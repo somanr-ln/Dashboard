@@ -1,6 +1,7 @@
 package org.hpccsystems.dashboard.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,7 +12,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -52,6 +52,8 @@ import org.zkoss.zkmax.zul.Navitem;
 import org.zkoss.zkmax.zul.Portalchildren;
 import org.zkoss.zkmax.zul.Portallayout;
 import org.zkoss.zkplus.spring.SpringUtil;
+import org.zkoss.zul.Anchorchildren;
+import org.zkoss.zul.Anchorlayout;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Div;
@@ -345,7 +347,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			
 			constructFilterItem(commonFilterFieldSet);
 
-			 commonFiltersPanel.setVisible(true);
+			commonFiltersPanel.setVisible(true);
 		}
 		
 		this.getSelf().addEventListener("onDrawingLiveChart", onDrawingLiveChart);
@@ -515,7 +517,9 @@ public class DashboardController extends SelectorComposer<Window>{
 		button.addEventListener(Events.ON_CLICK, removeGlobalFilter);
 		div.appendChild(button);
 		
-		Hbox hbox = new Hbox();
+		Anchorlayout anchorlayout = new Anchorlayout();
+		anchorlayout.setHflex("1");
+		
 		Set<String> values = new LinkedHashSet<String>();
 		//A set of Datasets used in dashboard, for avoiding multiple fetches to the same dataset
 		Set<String> dataFiles = new HashSet<String>();
@@ -533,14 +537,27 @@ public class DashboardController extends SelectorComposer<Window>{
 				}
 			}
 		}
+		
+		Boolean showApplyButton = false;
+		if(values.size() > 5){
+			showApplyButton = true;
+		}
+		
 		//Generating Checkboxes
+		Anchorchildren anchorchildren;
 		Checkbox checkbox;
 		for (String value : values) {
+			anchorchildren = new Anchorchildren();
 			checkbox = new Checkbox(value);
 			checkbox.setZclass("checkbox");
 			checkbox.setStyle("margin: 0px; padding-right: 5px;");
-			checkbox.addEventListener(Events.ON_CHECK, stringFilterCheckListener);
-			hbox.appendChild(checkbox);
+			if(showApplyButton){
+				checkbox.addEventListener(Events.ON_CHECK, stringFilterMultiCheckListener);
+			} else {
+				checkbox.addEventListener(Events.ON_CHECK, stringFilterCheckListener);
+			}
+			anchorchildren.appendChild(checkbox);
+			anchorlayout.appendChild(anchorchildren);
 			//To display previously selected filter values
 			if(filter != null && filter.getValues() != null && filter.getValues().contains(value)){
 				checkbox.setChecked(true);
@@ -549,10 +566,84 @@ public class DashboardController extends SelectorComposer<Window>{
 		}
 		
 		row.appendChild(div);
+		
+		Hbox hbox = new Hbox();
+		hbox.appendChild(anchorlayout);
+		
+		if(showApplyButton) {
+			Button applyButton = new Button("Apply");
+			applyButton.setZclass("btn btn-xs");
+			applyButton.setSclass("btn-default");
+			applyButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+
+				@Override
+				public void onEvent(Event event) throws Exception {
+					Button button = (Button) event.getTarget();
+					Row row = (Row) button.getParent().getParent();
+
+					row.setAttribute(Constants.ROW_CHECKED, true);
+					
+					Filter filter = (Filter) row.getAttribute(Constants.FILTER);
+					Field field = (Field) row.getAttribute(Constants.FIELD);
+					if(filter.getValues() != null) {
+						updateStringFilterToPortlets(filter, field);
+						button.setSclass("btn-default");
+					} else {
+						Clients.showNotification(Labels.getLabel("selectValueToApply"), "warning", row, "after_center", 2000);
+					}
+				}
+				
+			});
+			hbox.appendChild(applyButton);
+		}
+				
 		row.appendChild(hbox);
 		return row;
 	}	
 	
+	/**
+	 * Event listener for string filters when there's a separate apply button.
+	 */
+	EventListener<Event> stringFilterMultiCheckListener = new EventListener<Event>() {
+		
+		@Override
+		public void onEvent(Event event) throws Exception {
+			Anchorlayout anchorlayout = (Anchorlayout) event.getTarget().getParent().getParent();
+			Hbox hbox = (Hbox) anchorlayout.getParent();
+			Row row = (Row) hbox.getParent();
+			Filter filter = (Filter) row.getAttribute(Constants.FILTER);
+			
+			//Instantiating Value list if empty
+			if(filter.getValues() == null){
+				List<String> values = new ArrayList<String>();
+				filter.setValues(values);
+			}
+			
+			//Updating change to filter object
+			for (Component component : anchorlayout.getChildren()) {
+				Checkbox checkbox = (Checkbox) component.getFirstChild();
+				String value = checkbox.getLabel();
+				if(checkbox.isChecked()){
+					if(!filter.getValues().contains(value))
+						filter.getValues().add(value);
+				} else {
+					filter.getValues().remove(value);
+				}
+			}
+			
+			Button button = (Button) hbox.getLastChild();
+			button.setSclass("btn-warning");
+		}
+	};
+	
+	/**
+	 * Creates a row with Slider for Numeric Filters
+	 * 
+	 * @param field
+	 * @param filter
+	 * @return
+	 * @throws Exception
+	 */
 	private Row createNumericFilterRow(Field field, Filter filter) throws Exception {
 		Row row = new Row();
 		row.setAttribute(Constants.ROW_CHECKED, false);
@@ -589,7 +680,7 @@ public class DashboardController extends SelectorComposer<Window>{
 					dataFiles.add(portlet.getChartData().getFileName());
 					Map<Integer, BigDecimal> map = hpccService.getMinMax(filter.getColumn(), portlet.getChartData(), false);
 					
-					if(min==null || min.compareTo(map.get(Constants.FILTER_MINIMUM)) > 0) {
+					if(min == null || min.compareTo(map.get(Constants.FILTER_MINIMUM)) > 0) {
 						min = map.get(Constants.FILTER_MINIMUM);
 					}
 					if(max==null || max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
@@ -610,8 +701,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		
 		if(filter.getStartValue() != null && filter.getEndValue() != null) {
 			//Updating slider positions for already applied filters
-			sliderStart = filter.getStartValue().subtract(min).divide(rangeFactor).intValue();
-			sliderEnd = filter.getEndValue().subtract(min).divide(rangeFactor).intValue();
+			sliderStart = filter.getStartValue().subtract(min).divide(rangeFactor, RoundingMode.DOWN).intValue();
+			sliderEnd = filter.getEndValue().subtract(min).divide(rangeFactor, RoundingMode.CEILING).intValue();
 		} else {
 			filter.setStartValue(min);
 			filter.setEndValue(max);
@@ -681,12 +772,14 @@ public class DashboardController extends SelectorComposer<Window>{
 		return row;
 	}
 	
+	/**
+	 * Listener event, to be triggered by Slider from Client
+	 * Event is triggered onSlide
+	 * 
+	 * @param event
+	 */
 	@Listen("onSlide = #dashboardWin")
 	public void onSlide(Event event) {
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("On Slide Event - Data -- " + event.getData());
-		}
-		
 		String[] data = ((String) event.getData()).split(",");
 		
 		Hbox hbox = (Hbox) this.getSelf().getFellow(data[0]);
@@ -707,6 +800,11 @@ public class DashboardController extends SelectorComposer<Window>{
 		maxLabel.setValue(String.valueOf(rangeFactor.multiply(new BigDecimal(endPosition)).add(min).intValue()));
 	}
 
+	/**
+	 * Listener event, to be triggered by Slider from Client
+	 * Event is triggered when the slider id stopped after sliding
+	 * @param event
+	 */
 	@Listen("onSlideStop = #dashboardWin")
 	public void onSlideStop(Event event) {
 		if(LOG.isDebugEnabled()) {
@@ -793,8 +891,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		
 		@Override
 		public void onEvent(CheckEvent event) throws Exception {
-			Hbox hbox = (Hbox) event.getTarget().getParent();
-			Row row = (Row) hbox.getParent();
+			Anchorlayout anchorlayout = (Anchorlayout) event.getTarget().getParent().getParent();
+			Row row = (Row) anchorlayout.getParent().getParent();
 			Filter filter = (Filter) row.getAttribute(Constants.FILTER);
 			Field field = (Field) row.getAttribute(Constants.FIELD);
 			row.setAttribute(Constants.ROW_CHECKED, true);
@@ -805,16 +903,14 @@ public class DashboardController extends SelectorComposer<Window>{
 			}
 			
 			//Updating change to filter object
-			for (Component component : hbox.getChildren()) {
-				if(component instanceof Checkbox){
-					Checkbox checkbox = (Checkbox) component;
-					String value = checkbox.getLabel();
-					if(checkbox.isChecked()){
-						if(!filter.getValues().contains(value))
-							filter.getValues().add(value);
-					} else {
-						filter.getValues().remove(value);
-					}
+			for (Component component : anchorlayout.getChildren()) {
+				Checkbox checkbox = (Checkbox) component.getFirstChild();
+				String value = checkbox.getLabel();
+				if(checkbox.isChecked()){
+					if(!filter.getValues().contains(value))
+						filter.getValues().add(value);
+				} else {
+					filter.getValues().remove(value);
 				}
 			}
 			
@@ -823,46 +919,56 @@ public class DashboardController extends SelectorComposer<Window>{
 				LOG.debug("Selected Filter Values -> " + filter.getValues());
 			}
 			
-			for (Portlet portlet : dashboard.getPortletList()) {
-				if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+			updateStringFilterToPortlets(filter, field);
+		}
+	};
+	
+	/**
+	 * Updates portlet objects on the dashboard according to the filter object passed.
+	 * 
+	 * @param filter
+	 * @param field
+	 */
+	private void updateStringFilterToPortlets(Filter filter, Field field) {
+		for (Portlet portlet : dashboard.getPortletList()) {
+			if(!Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
 					 || Constants.TREE_LAYOUT.equals(portlet.getChartType())){
-					continue;
+				continue;
+			}
+			
+			XYChartData chartData = portlet.getChartData();
+			if(filter.getValues().size() < 1) {
+				//Removing Filter if no values selected
+				if(chartData.getIsFiltered()){
+					chartData.getFilterSet().remove(filter);
+					if(chartData.getFilterSet().size() < 1)
+						chartData.setIsFiltered(false);
 				}
-				
-				XYChartData chartData = portlet.getChartData();
-				if(filter.getValues().size() < 1) {
-					//Removing Filter if no values selected
-					if(chartData.getIsFiltered()){
+			} else {
+				// Adding Filter to Portlets
+				if(chartData.getFields().contains(field)) {
+					//Overriding filter if applied already
+					if(chartData.getIsFiltered() && chartData.getFilterSet().contains(filter)){
 						chartData.getFilterSet().remove(filter);
-						if(chartData.getFilterSet().size() < 1)
-							chartData.setIsFiltered(false);
+						chartData.getFilterSet().add(filter);
+					} else {
+						chartData.setIsFiltered(true);
+						chartData.getFilterSet().add(filter);
 					}
-				} else {
-					// Adding Filter to Portlets
-					if(chartData.getFields().contains(field)) {
-						//Overriding filter if applied already
-						if(chartData.getIsFiltered() && chartData.getFilterSet().contains(filter)){
-							chartData.getFilterSet().remove(filter);
-							chartData.getFilterSet().add(filter);
-						} else {
-							chartData.setIsFiltered(true);
-							chartData.getFilterSet().add(filter);
-						}
-						
-					}
+					
 				}
-				
-				if(chartData.getFields().contains(field)){
-					try {
-						updateWidgets(portlet);
-					} catch (Exception e) {
-						LOG.error("Error Updating Charts", e);
-						//TODO: Show Notification
-					}
+			}
+			
+			if(chartData.getFields().contains(field)){
+				try {
+					updateWidgets(portlet);
+				} catch (Exception e) {
+					LOG.error("Error Updating Charts", e);
+					//TODO: Show Notification
 				}
 			}
 		}
-	};
+	}
 	
 	/**
 	 * Event to be triggered onClick of 'Add Widget' Button
