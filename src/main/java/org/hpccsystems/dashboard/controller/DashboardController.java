@@ -1326,22 +1326,25 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Refreshing filters
 			Row row;
 			{
-				List<Row> rowsToDelete = new ArrayList<Row>();
 				Filter filter;
 				Field field;
+				List<Row> rowsToDelete = new ArrayList<Row>();
+				List<Row> rowsToReplace = new ArrayList<Row>();
 				for (Component component : filterRows.getChildren()) {
 					row = (Row) component;
 					filter = (Filter) row.getAttribute(Constants.FILTER);
 					field = (Field) row.getAttribute(Constants.FIELD);
 					if(filtersToRefresh.contains(filter)) {
-						filterRows.insertBefore(createStringFilterRow(field, filter), row);
 						rowsToDelete.add(row);
+						rowsToReplace.add(createStringFilterRow(field, filter));
 					}
 				}
 				
-				//Deleting refreshed rows
-				for(int i=0; i < rowsToDelete.size(); i++) {
-					rowsToDelete.get(i).detach();
+				for (Row row2 : rowsToDelete) {
+					row2.detach();
+				}
+				for (Row row2 : rowsToReplace) {
+					filterRows.appendChild(row2);
 				}
 			}
 			
