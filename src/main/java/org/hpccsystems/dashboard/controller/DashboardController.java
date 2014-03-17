@@ -538,6 +538,12 @@ public class DashboardController extends SelectorComposer<Window>{
 				}
 			}
 		}
+		
+		Boolean showApplyButton = false;
+		if(values.size() > 5){
+			showApplyButton = true;
+		}
+		
 		//Generating Checkboxes
 		Anchorchildren anchorchildren;
 		Checkbox checkbox;
@@ -676,7 +682,7 @@ public class DashboardController extends SelectorComposer<Window>{
 					if(min == null || min.compareTo(map.get(Constants.FILTER_MINIMUM)) > 0) {
 						min = map.get(Constants.FILTER_MINIMUM);
 					}
-					if(max == null || max.compareTo(map.get(Constants.FILTER_MAXIMUM)) < 0 ) {
+					if(max==null || max.compareTo(map.get(Constants.FILTER_MAXIMUM)) <0 ) {
 						max = map.get(Constants.FILTER_MAXIMUM);
 					}
 				}
