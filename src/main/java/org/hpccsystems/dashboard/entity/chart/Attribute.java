@@ -62,7 +62,7 @@ public class Attribute {
 
 	@Override
 	public String toString() {
-		return "Attribute [columnName=" + columnName + ", displayXColumnName="
+		return "Attribute [columnName=" + columnName + ", displayName="
 				+ displayName + "]";
 	}
 	

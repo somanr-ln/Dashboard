@@ -35,6 +35,7 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.ListModel;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.SimpleListModel;
@@ -410,10 +411,20 @@ public class ChartPanel extends Panel {
 	 */
 	private void getRootKeyList() {
 		try{
-		HPCCService hpccService = (HPCCService)SpringUtil.getBean("hpccService");
-		treetextBox.setAutodrop(true);
-		treetextBox.setButtonVisible(false);
-		treetextBox.setModel(new SimpleListModel(hpccService.getRootKeyList(portlet.getTreeData().getHpccConnection())));
+			HPCCService hpccService = (HPCCService)SpringUtil.getBean("hpccService");
+			treetextBox.setAutodrop(true);
+			treetextBox.setButtonVisible(false);
+			
+			treetextBox.setModel(new SimpleListModel<Object>(hpccService.getRootKeyList(portlet.getTreeData().getHpccConnection())){
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public ListModel<Object> getSubModel(Object arg0, int arg1) {
+					String str = (String) arg0;
+					str = str.toUpperCase();
+					return super.getSubModel(str, arg1);
+				}
+			});
 		}catch(Exception ex){
 			LOG.error("Exception while getting root key list", ex);
 		}
