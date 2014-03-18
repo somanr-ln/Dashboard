@@ -1277,15 +1277,12 @@ public class DashboardController extends SelectorComposer<Window>{
 		public void onEvent(Event event) throws Exception {
 			Portlet deletedPortlet = (Portlet) event.getData();
 			dashboard.getPortletList().remove(deletedPortlet);
-			
 			//Remove applied filters
 			Set<Filter> filtersToRemove = new HashSet<Filter>();
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
-			System.out.println(deletedPortlet);
-			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
-					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+			if(Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+					&& deletedPortlet.getChartData() != null
 					&& deletedPortlet.getChartData().getIsFiltered())  {
-				
 				
 				for (Filter filter : deletedPortlet.getChartData().getFilterSet()) {
 					if(filter.getIsCommonFilter()){
@@ -1320,6 +1317,10 @@ public class DashboardController extends SelectorComposer<Window>{
 			deletedPortlet.setName(null);
 			deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 			
+			//Clears all chart data from DB
+    		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
+    		widgetService.updateWidget(deletedPortlet);
+    		
 			filtersToRemove.removeAll(filtersToRefresh);
 			
 			if(LOG.isDebugEnabled()){

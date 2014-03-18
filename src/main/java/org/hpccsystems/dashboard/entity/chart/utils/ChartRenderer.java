@@ -522,16 +522,10 @@ public class ChartRenderer {
 		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,hpccConnection);
 		List<Node> nodeChildrenL1 = new ArrayList<Node>();
 		StringBuilder nameBuilder;
+		String nodeName;
 		for (List<String> list : childrenL1) {
-			nameBuilder = new StringBuilder();
-			ListIterator<String> iterator = list.listIterator();
-			while(iterator.hasNext()){
-				nameBuilder.append(iterator.next());
-				if(iterator.hasNext()){
-					nameBuilder.append(", ");
-				}
-			}				
-			nodeChildrenL1.add(new Node(nameBuilder.toString()));
+			nodeName = list.get(3);			
+			nodeChildrenL1.add(new Node(nodeName));
 		}
 		parent.setChildren(nodeChildrenL1);
 
@@ -539,8 +533,7 @@ public class ChartRenderer {
 		List<Node> nodeChildrenL2;
 		int i = 0;
 		for (List<String> list : childrenL1) {
-			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
-			
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);			
 
 			nodeChildrenL2 = new ArrayList<Node>();
 			for (List<String> list2 : childrenL2) {

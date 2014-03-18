@@ -289,11 +289,7 @@ public class ChartPanel extends Panel {
         	addBtn.setSclass(ADD_STYLE);
         	resetBtn.setDisabled(true);
         	addBtn.removeEventListener(Events.ON_CLICK, editListener);
-    		addBtn.addEventListener(Events.ON_CLICK, addListener);
-    		
-    		//Clears all chart data from DB
-    		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
-    		widgetService.updateWidget(portlet);
+    		addBtn.addEventListener(Events.ON_CLICK, addListener); 
     		
     		//Calling listener in Dashboard - This listener resets portlet object
     		Window window =  null;

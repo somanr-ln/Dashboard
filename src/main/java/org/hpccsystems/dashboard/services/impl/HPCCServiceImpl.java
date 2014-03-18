@@ -32,6 +32,7 @@ import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.hpccsystems.dashboard.util.DashboardUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -502,71 +503,79 @@ public class HPCCServiceImpl implements HPCCService{
 			locator.setWs_sqlServiceSoapAddress("http://" + tableData.getHpccConnection().getHostIp()+ ":" + WS_SQL_ENDPOINT);
 		}
 		LinkedHashMap<String, List<Attribute>> tableDataMap = new LinkedHashMap<String, List<Attribute>>();
-		try
-		{
-		final Ws_sqlServiceSoap soap = locator.getws_sqlServiceSoap();
-		final ExecuteSQLRequest req = new ExecuteSQLRequest();
-
-		List<Attribute> listData = tableData.getTableColumns();
-		int index = 0;
-		for (Attribute data : listData) {
-			if (index != listData.size() - 1) {
-				queryTxt.append(data.getColumnName()).append(",");
-			} else if (index == listData.size() - 1) {
-				queryTxt.append(data.getColumnName());
+		try	{
+			final Ws_sqlServiceSoap soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+	
+			List<Attribute> listData = tableData.getTableColumns();
+			int index = 0;
+			for (Attribute data : listData) {
+				if (index != listData.size() - 1) {
+					queryTxt.append(data.getColumnName()).append(",");
+				} else if (index == listData.size() - 1) {
+					queryTxt.append(data.getColumnName());
+				}
+				index++;
 			}
-			index++;
-		}
-		queryTxt.append(" from ");
-		queryTxt.append(tableData.getFileName());
-		if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
-			queryTxt.append(constructWhereClause(tableData));
-		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("queryTxt --> " + queryTxt);
-		}
-		req.setSqlText(queryTxt.toString());
-		req.setTargetCluster("thor");
-		final ExecuteSQLResponse result = soap.executeSQL(req);
-		final String resultString = result.getResult();
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Hitting URL for filter - "+ locator.getws_sqlServiceSoapAddress());
-			LOG.debug("Result String: " + resultString);
-		}
-
-		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		final DocumentBuilder db = dbf.newDocumentBuilder();
-		final InputSource inStream = new InputSource();
-		inStream.setCharacterStream(new StringReader(resultString));
-		final Document doc = db.parse(inStream);
-		Node fstNode = null;
-		Element fstElmnt = null, lstNmElmnt = null;
-		NodeList lstNmElmntLst = null;
-		List<Attribute> columnListvalue =null;
-		for (Attribute columnName : tableData.getTableColumns()) {
-			columnListvalue = new ArrayList<Attribute>();
-			tableDataMap.put(columnName.getColumnName(), columnListvalue);
-		}
-		final NodeList nodeList = doc.getElementsByTagName("Row");
-		if (nodeList != null) {
-			for (int count = 0; count < nodeList.getLength(); count++) {
-				fstNode = nodeList.item(count);
-				if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-					fstElmnt = (Element) fstNode;
-					for (Attribute data : tableData.getTableColumns()) {
-						lstNmElmntLst = fstElmnt.getElementsByTagName(data.getColumnName());
-						lstNmElmnt = (Element) lstNmElmntLst.item(0);
-						String str = lstNmElmnt.getTextContent();
-						columnListvalue = tableDataMap.get(lstNmElmnt.getNodeName());
-						columnListvalue.add(new Attribute(str));
+			queryTxt.append(" from ");
+			queryTxt.append(tableData.getFileName());
+			if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
+				queryTxt.append(constructWhereClause(tableData));
+			}
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryTxt --> " + queryTxt);
+			}
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Hitting URL for filter - "+ locator.getws_sqlServiceSoapAddress());
+				LOG.debug("Result String: " + resultString);
+			}
+	
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			Node fstNode = null;
+			Element fstElmnt = null, lstNmElmnt = null;
+			NodeList lstNmElmntLst = null;
+			List<Attribute> columnListvalue =null;
+			for (Attribute columnName : tableData.getTableColumns()) {
+				columnListvalue = new ArrayList<Attribute>();
+				tableDataMap.put(columnName.getColumnName(), columnListvalue);
+			}
+			final NodeList nodeList = doc.getElementsByTagName("Row");
+			if (nodeList != null) {
+				String str;
+				for (int count = 0; count < nodeList.getLength(); count++) {
+					fstNode = nodeList.item(count);
+					if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+						fstElmnt = (Element) fstNode;
+						for (Attribute data : tableData.getTableColumns()) {
+							lstNmElmntLst = fstElmnt.getElementsByTagName(data.getColumnName());
+							lstNmElmnt = (Element) lstNmElmntLst.item(0);
+							// Rounding off Numeric values
+							if(DashboardUtil.checkNumeric(
+									tableData.getFields().get(
+											tableData.getFields().indexOf(new Field(data.getColumnName(), null)))
+											.getDataType())) {
+								str = new BigDecimal(lstNmElmnt.getTextContent()).setScale(2, RoundingMode.HALF_EVEN).toPlainString();
+							} else {
+								str = lstNmElmnt.getTextContent();
+							}
+							columnListvalue = tableDataMap.get(lstNmElmnt.getNodeName());
+							columnListvalue.add(new Attribute(str));
+						}
 					}
 				}
 			}
-		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(("tableDataMap -->" + tableDataMap));
-		}
-		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(("tableDataMap -->" + tableDataMap));
+			}
+		} catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);
 			throw ex;
 		}		
@@ -680,11 +689,13 @@ public class HPCCServiceImpl implements HPCCService{
 			soap = locator.getws_sqlServiceSoap();
 			final ExecuteSQLRequest req = new ExecuteSQLRequest();
 			
-			final StringBuilder queryTxt=new StringBuilder("select prim_range, prim_name, addr_suffix, v_city_name, st  from test::providers where lname = '");
+			final StringBuilder queryTxt = new StringBuilder(
+					"select t1.prim_range, t1.prim_name, t1.addr_suffix, t1.v_city_name, t1.st, t2.cname from test::providers as t1")
+					.append(" inner join test::facility as t2").append(" on (t2.lnpid = t1.lnpid AND t1.lname ='");
 			queryTxt.append(lName);
-			queryTxt.append("' and fname = '");
+			queryTxt.append("' AND t1.fname = '");
 			queryTxt.append(fName);
-			queryTxt.append("'");
+			queryTxt.append("')");
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Query for First level -> " + queryTxt.toString());
@@ -718,6 +729,7 @@ public class HPCCServiceImpl implements HPCCService{
 					row.add(eElement.getElementsByTagName("prim_range").item(0).getTextContent());
 					row.add(eElement.getElementsByTagName("prim_name").item(0).getTextContent());
 					row.add(eElement.getElementsByTagName("addr_suffix").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("cname").item(0).getTextContent());
 				}
 				
 				list.add(row);
