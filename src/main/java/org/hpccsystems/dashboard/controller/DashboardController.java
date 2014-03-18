@@ -694,6 +694,10 @@ public class DashboardController extends SelectorComposer<Window>{
 		Integer sliderStart = 0;
 		Integer sliderEnd = 100;
 		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Min & Max - " + min + max);
+		}
+		
 		//Translating min & max to a scale of 0 to 100 using Linear equation 
 		//((actualVal - actualMin)/(actualMax- actualMin)) = ((sliderVal - sliderMin)/(sliderMax- sliderMin))
 		// Range Factor = (actualMax- actualMin)/(sliderMax- sliderMin)
@@ -1177,7 +1181,8 @@ public class DashboardController extends SelectorComposer<Window>{
 				public void onEvent(ClickEvent event) throws Exception {
 					if (Messagebox.Button.YES.equals(event.getButton()) &&appliedCommonFilterSet != null) {							
 						for (Portlet portlet : dashboard.getPortletList()) {
-							if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+							if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+									Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
 								for (Filter filter : appliedCommonFilterSet) {
 									// removing global filter object from filterlist
 									if (portlet.getChartData().getIsFiltered()
@@ -1276,11 +1281,11 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Remove applied filters
 			Set<Filter> filtersToRemove = new HashSet<Filter>();
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
+			System.out.println(deletedPortlet);
 			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
 					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
 					&& deletedPortlet.getChartData().getIsFiltered())  {
 				
-				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				
 				for (Filter filter : deletedPortlet.getChartData().getFilterSet()) {
 					if(filter.getIsCommonFilter()){
@@ -1289,7 +1294,8 @@ public class DashboardController extends SelectorComposer<Window>{
 						}
 						filtersToRemove.add(filter);
 						for (Portlet portlet : dashboard.getPortletList()) {
-							if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
+							if(!Constants.TREE_LAYOUT.equals(portlet.getChartType())
+									&& Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 									! deletedPortlet.getChartData().getFileName().equals(portlet.getChartData().getFileName()) &&
 									portlet.getChartData().getIsFiltered()) {
 								for (Filter portletFilter : portlet.getChartData().getFilterSet()) {
@@ -1297,7 +1303,8 @@ public class DashboardController extends SelectorComposer<Window>{
 										filtersToRefresh.add(filter);
 									}
 								}
-							} else if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
+							} else if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+									Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
 									deletedPortlet.getChartData().getFileName().equals(portlet.getChartData().getFileName())) {
 								filtersToRemove.remove(filter);
 							}
@@ -1311,6 +1318,7 @@ public class DashboardController extends SelectorComposer<Window>{
 			deletedPortlet.setChartDataXML(null);
 			deletedPortlet.setChartType(null);
 			deletedPortlet.setName(null);
+			deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 			
 			filtersToRemove.removeAll(filtersToRefresh);
 			
@@ -1322,22 +1330,25 @@ public class DashboardController extends SelectorComposer<Window>{
 			//Refreshing filters
 			Row row;
 			{
-				List<Row> rowsToDelete = new ArrayList<Row>();
 				Filter filter;
 				Field field;
+				List<Row> rowsToDelete = new ArrayList<Row>();
+				List<Row> rowsToReplace = new ArrayList<Row>();
 				for (Component component : filterRows.getChildren()) {
 					row = (Row) component;
 					filter = (Filter) row.getAttribute(Constants.FILTER);
 					field = (Field) row.getAttribute(Constants.FIELD);
 					if(filtersToRefresh.contains(filter)) {
-						filterRows.insertBefore(createStringFilterRow(field, filter), row);
 						rowsToDelete.add(row);
+						rowsToReplace.add(createStringFilterRow(field, filter));
 					}
 				}
 				
-				//Deleting refreshed rows
-				for(int i=0; i < rowsToDelete.size(); i++) {
-					rowsToDelete.get(i).detach();
+				for (Row row2 : rowsToDelete) {
+					row2.detach();
+				}
+				for (Row row2 : rowsToReplace) {
+					filterRows.appendChild(row2);
 				}
 			}
 			
@@ -1371,7 +1382,8 @@ public class DashboardController extends SelectorComposer<Window>{
 				commonFilterFieldSet = new LinkedHashSet<Field>(); 
 				//Generating New List
 				for (Portlet portlet : dashboard.getPortletList()) {
-					if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+					if(!Constants.TREE_LAYOUT.equals(portlet.getChartType())
+							&& Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
 						for (Field field : portlet.getChartData().getFields()) {
 							fieldFilter = new Filter();
 							fieldFilter.setColumn(field.getColumnName());
@@ -1403,7 +1415,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		Filter filter = (Filter) rowToRemove.getAttribute(Constants.FILTER);
 		Field field = (Field) rowToRemove.getAttribute(Constants.FIELD);
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+			if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
 					&& portlet.getChartData().getIsFiltered()) {
 				// removing global filter object from filter list
 				if (portlet.getChartData().getFilterSet().contains(filter)) {
