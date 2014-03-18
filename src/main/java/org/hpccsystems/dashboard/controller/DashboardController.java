@@ -732,6 +732,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		html.append("<div id=\"");
 			html.append(field.getColumnName());
 			html.append("_sdiv\" style=\"margin: 8px;\" class=\"slider-grey\">");
+			html.append("</div>");
 		
 		html.append("<script type=\"text/javascript\">");
 			html.append("$('#").append(field.getColumnName()).append("_sdiv').slider({")
