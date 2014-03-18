@@ -70,7 +70,7 @@ import org.zkoss.zul.Popup;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 import org.zkoss.zul.Toolbar;
-import org.zkoss.zul.Window;
+import org.zkoss.zul.Window; 
 
 /**
  * DashboardController class is used to add new dashboard into sidebar and 
@@ -732,6 +732,7 @@ public class DashboardController extends SelectorComposer<Window>{
 		html.append("<div id=\"");
 			html.append(field.getColumnName());
 			html.append("_sdiv\" style=\"margin: 8px;\" class=\"slider-grey\">");
+			html.append("</div>");
 		
 		html.append("<script type=\"text/javascript\">");
 			html.append("$('#").append(field.getColumnName()).append("_sdiv').slider({")

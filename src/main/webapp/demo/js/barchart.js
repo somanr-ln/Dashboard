@@ -35,7 +35,7 @@ function createChart(divId, chartData) {
 						"</script>";
 			}
 			
-			container.append(jq("<div style='margin-top: 3px; margin-left: 5px; height: 15px;'>"+ response.title + filter_desc + " </div>" ));
+			container.append(jq("<div style='margin-top: 3px; margin-left: 5px; height: 15px;'>"+ filter_desc + " </div>" ));
 			
 			container.append(
 						jq( "<table> <tr>" +

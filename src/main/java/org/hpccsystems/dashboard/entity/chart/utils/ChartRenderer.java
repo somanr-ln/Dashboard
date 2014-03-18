@@ -71,7 +71,6 @@ public class ChartRenderer {
 		
 		final JsonObject header = new JsonObject();
 		StringBuilder yName = new StringBuilder();
-		StringBuilder title = new StringBuilder();
 		StringBuilder filterDescription = new StringBuilder();
 		
 		
@@ -93,11 +92,6 @@ public class ChartRenderer {
 			}
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
-		}
-		if (chartData.getxColumnNames().get(0).getDisplayName() == null) {
-			title.append(chartData.getxColumnNames().get(0).getColumnName() + " BY " + yName.toString());
-		}else{
-			title.append(chartData.getxColumnNames().get(0).getDisplayName() + " BY " + yName.toString());
 		}
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
@@ -223,7 +217,6 @@ public class ChartRenderer {
 			//Adding a default pading of 5 and 10px per digit
 			header.addProperty("yWidth", (yLength<2)? yLength*10 + 30:(yLength<3)? yLength*10 + 10: yLength*10);
 			header.addProperty("xWidth", xLength*15 + 5);
-			header.addProperty("title", title.toString());
 			header.addProperty("filterDescription", filterDescription.toString());
 			
 			header.add("chartData", array);
@@ -291,7 +284,6 @@ public class ChartRenderer {
 				}
 			}
 				
-			header.addProperty("title", title.toString());
 			header.addProperty("filterDescription", filterDescription.toString());
 			
 			header.add("yValues", rows);
