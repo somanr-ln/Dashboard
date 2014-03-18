@@ -15,7 +15,7 @@
 	<div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-         <img src="demo/images/logo.png" alt="Lexis Nexis" class="logo"/>
+         <img src="demo/images/logo.png" alt="Lexis Nexis" class="logo" style="width: 300px"/>
         </div>
       </div>
     </div>

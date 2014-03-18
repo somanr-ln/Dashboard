@@ -289,11 +289,7 @@ public class ChartPanel extends Panel {
         	addBtn.setSclass(ADD_STYLE);
         	resetBtn.setDisabled(true);
         	addBtn.removeEventListener(Events.ON_CLICK, editListener);
-    		addBtn.addEventListener(Events.ON_CLICK, addListener);
-    		
-    		//Clears all chart data from DB
-    		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
-    		widgetService.updateWidget(portlet);
+    		addBtn.addEventListener(Events.ON_CLICK, addListener); 
     		
     		//Calling listener in Dashboard - This listener resets portlet object
     		Window window =  null;
@@ -385,10 +381,12 @@ public class ChartPanel extends Panel {
 	 */
 	public void constructTreeSearchDiv(){
 		Hbox hbox = new Hbox();
+		hbox.setAlign("center");
+		hbox.setStyle("margin: 5px;");
 		Label searchLabel = new Label();
-		searchLabel.setValue("Root Key :");
+		searchLabel.setValue("Physician  name:");
 		Button searchButton = new Button();
-		searchButton.setLabel("DrawTree");
+		searchButton.setLabel("Submit");
 		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
 		hbox.appendChild(searchLabel);
 		getRootKeyList();		

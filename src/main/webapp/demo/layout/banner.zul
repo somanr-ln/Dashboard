@@ -2,7 +2,6 @@
 	<hbox hflex="1" vflex="1" align="center">
 		<vbox align="center" width="200px">
 			<image src="/demo/images/logo_white.png" width="180px"/>
-			<label value="${labels.dashboard}" style="color:white; font-size: larger;"></label>
 		</vbox>
 		
 		<hbox 
