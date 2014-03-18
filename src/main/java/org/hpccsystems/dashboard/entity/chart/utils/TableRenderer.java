@@ -68,11 +68,19 @@ public class TableRenderer {
 		listBox.setMold("paging");
 		listBox.setSizedByContent(true);
 		listBox.setHflex("1");
-
-		if (isEditing) {
-			listBox.setHeight("490px"); // .. 542 - 30 -22
+		//Adjusting height of the Holder Div based on Filter selection
+		if(!chartData.getIsFiltered()){		
+			if (isEditing) {
+				listBox.setHeight("512px"); // .. 542 - 30
+			} else {
+				listBox.setHeight("355px"); // .. 385 - 30
+			}
 		} else {
-			listBox.setHeight("330px"); // .. 385 - 30 -25
+			if (isEditing) {
+				listBox.setHeight("490px"); // .. 542 - 30 -22
+			} else {
+				listBox.setHeight("330px"); // .. 385 - 30 -25
+			}
 		}
 		listBox.setAutopaging(true);
 
@@ -142,15 +150,13 @@ public class TableRenderer {
 		//Appending Chart Title as Data file name
 		final Div div = new Div();			
 		div.setStyle("margin-top: 3px; margin-left: 5px; height: 15px;");
-		final Label title = new Label();
-		title.setWidth("100%");
-		title.setValue(chartData.getFileName());
-		div.appendChild(title);	
+		
 		
 		if(chartData.getIsFiltered()){				
 			constructFilterTitle(div,chartData);
+			vbox.appendChild(div);
 		}
-		vbox.appendChild(div);
+		
 		vbox.appendChild(listBox);
 		vbox.appendChild(hbox);
 		if (LOG.isDebugEnabled()) {
