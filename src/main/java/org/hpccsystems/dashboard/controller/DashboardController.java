@@ -1181,7 +1181,8 @@ public class DashboardController extends SelectorComposer<Window>{
 				public void onEvent(ClickEvent event) throws Exception {
 					if (Messagebox.Button.YES.equals(event.getButton()) &&appliedCommonFilterSet != null) {							
 						for (Portlet portlet : dashboard.getPortletList()) {
-							if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+							if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+									Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
 								for (Filter filter : appliedCommonFilterSet) {
 									// removing global filter object from filterlist
 									if (portlet.getChartData().getIsFiltered()
@@ -1276,15 +1277,12 @@ public class DashboardController extends SelectorComposer<Window>{
 		public void onEvent(Event event) throws Exception {
 			Portlet deletedPortlet = (Portlet) event.getData();
 			dashboard.getPortletList().remove(deletedPortlet);
-			
 			//Remove applied filters
 			Set<Filter> filtersToRemove = new HashSet<Filter>();
 			Set<Filter> filtersToRefresh = new HashSet<Filter>();
-			if(!Constants.TREE_LAYOUT.equals(deletedPortlet.getChartType()) && 
-					Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+			if(Constants.STATE_LIVE_CHART.equals(deletedPortlet.getWidgetState()) 
+					&& deletedPortlet.getChartData() != null
 					&& deletedPortlet.getChartData().getIsFiltered())  {
-				
-				deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 				
 				for (Filter filter : deletedPortlet.getChartData().getFilterSet()) {
 					if(filter.getIsCommonFilter()){
@@ -1293,7 +1291,8 @@ public class DashboardController extends SelectorComposer<Window>{
 						}
 						filtersToRemove.add(filter);
 						for (Portlet portlet : dashboard.getPortletList()) {
-							if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
+							if(!Constants.TREE_LAYOUT.equals(portlet.getChartType())
+									&& Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) && 
 									! deletedPortlet.getChartData().getFileName().equals(portlet.getChartData().getFileName()) &&
 									portlet.getChartData().getIsFiltered()) {
 								for (Filter portletFilter : portlet.getChartData().getFilterSet()) {
@@ -1301,7 +1300,8 @@ public class DashboardController extends SelectorComposer<Window>{
 										filtersToRefresh.add(filter);
 									}
 								}
-							} else if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
+							} else if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+									Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState()) &&
 									deletedPortlet.getChartData().getFileName().equals(portlet.getChartData().getFileName())) {
 								filtersToRemove.remove(filter);
 							}
@@ -1315,7 +1315,12 @@ public class DashboardController extends SelectorComposer<Window>{
 			deletedPortlet.setChartDataXML(null);
 			deletedPortlet.setChartType(null);
 			deletedPortlet.setName(null);
+			deletedPortlet.setWidgetState(Constants.STATE_EMPTY);
 			
+			//Clears all chart data from DB
+    		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
+    		widgetService.updateWidget(deletedPortlet);
+    		
 			filtersToRemove.removeAll(filtersToRefresh);
 			
 			if(LOG.isDebugEnabled()){
@@ -1378,7 +1383,8 @@ public class DashboardController extends SelectorComposer<Window>{
 				commonFilterFieldSet = new LinkedHashSet<Field>(); 
 				//Generating New List
 				for (Portlet portlet : dashboard.getPortletList()) {
-					if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
+					if(!Constants.TREE_LAYOUT.equals(portlet.getChartType())
+							&& Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
 						for (Field field : portlet.getChartData().getFields()) {
 							fieldFilter = new Filter();
 							fieldFilter.setColumn(field.getColumnName());
@@ -1410,7 +1416,8 @@ public class DashboardController extends SelectorComposer<Window>{
 		Filter filter = (Filter) rowToRemove.getAttribute(Constants.FILTER);
 		Field field = (Field) rowToRemove.getAttribute(Constants.FIELD);
 		for (Portlet portlet : dashboard.getPortletList()) {
-			if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
+			if (!Constants.TREE_LAYOUT.equals(portlet.getChartType()) &&
+					Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())
 					&& portlet.getChartData().getIsFiltered()) {
 				// removing global filter object from filter list
 				if (portlet.getChartData().getFilterSet().contains(filter)) {
