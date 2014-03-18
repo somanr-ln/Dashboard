@@ -112,6 +112,9 @@ public void getChartList(HttpServletRequest request, HttpServletResponse respons
 				JsonArray jsonArray = new JsonArray();
 				Map<Integer, ChartDetails> chartdetailsMap = Constants.CHART_MAP;
 				for (Map.Entry<Integer, ChartDetails> entry : chartdetailsMap.entrySet()) {
+					//Excluding Tree Layout
+					if(entry.getKey().equals(Constants.TREE_LAYOUT))
+						continue;
 					
 					jsonObject = new JsonObject();
 					jsonObject.addProperty(Constants.VALUE, entry.getValue().getChartId());

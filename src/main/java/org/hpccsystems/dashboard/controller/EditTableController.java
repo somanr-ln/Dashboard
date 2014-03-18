@@ -103,7 +103,9 @@ public class EditTableController extends SelectorComposer<Component> {
 						throw new Exception("Column doesn't exist");
 					}
 				}
-				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
+				if(tableData.getTableColumns() != null && tableData.getTableColumns().size() > 0) {
+					tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
+				}
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
 			}
@@ -146,7 +148,9 @@ public class EditTableController extends SelectorComposer<Component> {
 			}
 			
 			//TODO: Add else part
-			tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
+			if(tableData.getTableColumns() != null && tableData.getTableColumns().size() > 0) {
+				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
+			}
 		} else { 
 			for (Field field : columnSet) {
 				listItem = new Listitem(field.getColumnName());
@@ -187,6 +191,7 @@ public class EditTableController extends SelectorComposer<Component> {
 				newListItem.setParent(targetList);
 			}
 			draggedItem.detach();
+			
 			if (Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())
 					&& targetList.getChildren().size() > 1)
 				doneButton.setDisabled(false);
@@ -199,7 +204,8 @@ public class EditTableController extends SelectorComposer<Component> {
 			for (Component component : targetList.getChildren()) {
 				if (component instanceof Listitem) {
 					listitem = (Listitem) component;
-					selectedTableColumns.add(new Attribute(listitem.getLabel()));
+					Attribute attribute = (Attribute) listitem.getAttribute(Constants.ATTRIBUTE);
+					selectedTableColumns.add(attribute);
 				}
 			}
 		}
@@ -208,6 +214,10 @@ public class EditTableController extends SelectorComposer<Component> {
 	// Event Listener for Change of tableColumn title text
 		private EventListener<Event> titleChangeLisnr = new EventListener<Event>() {
 			public void onEvent(final Event event) throws Exception {
+				//Circuit API
+				if (Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId()))
+					doneButton.setDisabled(false);
+				
 				Listitem listItem = (Listitem) event.getTarget().getParent().getParent();
 				Attribute attribute = (Attribute) listItem.getAttribute(Constants.ATTRIBUTE);
 				Textbox textBox = (Textbox) event.getTarget();
