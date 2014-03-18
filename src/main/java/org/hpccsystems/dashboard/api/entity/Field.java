@@ -4,7 +4,13 @@ public class Field {
 	
 	String columnName;
 	String dataType;
-	String displayColumnName;
+	
+	public Field() {}
+	
+	public Field(String columnName, String datType){
+		this.columnName = columnName;
+		this.dataType = datType;
+	}
 	
 	public String getColumnName() {
 		return columnName;
@@ -17,13 +23,6 @@ public class Field {
 	}
 	public void setDataType(String dataType) {
 		this.dataType = dataType;
-	}
-	
-	public String getDisplayColumnName() {
-		return displayColumnName;
-	}
-	public void setDisplayColumnName(String displayColumnName) {
-		this.displayColumnName = displayColumnName;
 	}
 	
 	@Override
