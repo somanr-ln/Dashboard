@@ -264,9 +264,11 @@ public class ChartPanel extends Panel {
 			final Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put(Constants.PARENT, ChartPanel.this);
 			parameters.put(Constants.PORTLET, portlet);
-			if(Constants.TREE_LAYOUT == portlet.getChartType() 
-					&& Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
-				onTreeInclude();
+			if(Constants.TREE_LAYOUT == portlet.getChartType()){
+				if(Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
+				onTreeInclude();}
+				else if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+				}
 			}else{
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
