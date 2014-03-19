@@ -248,7 +248,8 @@ public class DashboardController extends SelectorComposer<Window>{
 				panel = new ChartPanel(portlet);
 				portalChildren.get(portlet.getColumn()).appendChild(panel);
 				//creating search textbox for tree layout
-				if(Constants.TREE_LAYOUT.equals(portlet.getChartType())){
+				if(Constants.TREE_LAYOUT.equals(portlet.getChartType())
+						&& Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 					panel.constructTreeSearchDiv();
 				}
 									

@@ -688,14 +688,12 @@ public class HPCCServiceImpl implements HPCCService{
 		try {
 			soap = locator.getws_sqlServiceSoap();
 			final ExecuteSQLRequest req = new ExecuteSQLRequest();
-			
-			final StringBuilder queryTxt = new StringBuilder(
-					"select t1.prim_range, t1.prim_name, t1.addr_suffix, t1.v_city_name, t1.st, t2.cname from test::providers as t1")
-					.append(" inner join test::facility as t2").append(" on (t2.lnpid = t1.lnpid AND t1.lname ='");
+
+			final StringBuilder queryTxt=new StringBuilder("select prim_range, prim_name, addr_suffix, v_city_name, st  from test::providers where lname = '");
 			queryTxt.append(lName);
-			queryTxt.append("' AND t1.fname = '");
+			queryTxt.append("' and fname = '");
 			queryTxt.append(fName);
-			queryTxt.append("')");
+			queryTxt.append("'");
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Query for First level -> " + queryTxt.toString());
@@ -729,7 +727,6 @@ public class HPCCServiceImpl implements HPCCService{
 					row.add(eElement.getElementsByTagName("prim_range").item(0).getTextContent());
 					row.add(eElement.getElementsByTagName("prim_name").item(0).getTextContent());
 					row.add(eElement.getElementsByTagName("addr_suffix").item(0).getTextContent());
-					row.add(eElement.getElementsByTagName("cname").item(0).getTextContent());
 				}
 				
 				list.add(row);

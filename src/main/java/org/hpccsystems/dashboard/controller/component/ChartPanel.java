@@ -67,6 +67,8 @@ public class ChartPanel extends Panel {
 	final Textbox textbox = new Textbox();	
 	final Box imageContainer = new Box();	
 	final Combobox treetextBox = new Combobox();
+	Div treeDiv;
+	
 	Portlet portlet;
 
 	public ChartPanel(final Portlet argPortlet) {
@@ -285,7 +287,9 @@ public class ChartPanel extends Panel {
         	Components.removeAllChildren(chartDiv);
         	Components.removeAllChildren(imageContainer);
         	chartDiv.detach();
-        	
+        	if(treeDiv != null){
+        	treeDiv.detach();}
+        	holderDiv.setHeight("385px");
         	addBtn.setSclass(ADD_STYLE);
         	resetBtn.setDisabled(true);
         	addBtn.removeEventListener(Events.ON_CLICK, editListener);
@@ -389,13 +393,14 @@ public class ChartPanel extends Panel {
 		searchButton.setLabel("Submit");
 		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
 		hbox.appendChild(searchLabel);
-		getRootKeyList();		
+		getRootKeyList();
+		treetextBox.setValue("");
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 			treetextBox.setValue(portlet.getTreeData().getRootKey());
 		}
 		hbox.appendChild(treetextBox);
 		hbox.appendChild(searchButton);
-		final Div treeDiv = new Div();
+		treeDiv = new Div();
 		treeDiv.appendChild(hbox);		
 		holderDiv.getChildren().clear();
 		holderDiv.appendChild(treeDiv);

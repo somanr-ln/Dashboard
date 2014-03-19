@@ -513,11 +513,18 @@ public class ChartRenderer {
 		Node parent = new Node(fName + " " + lName);		
 		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,hpccConnection);
 		List<Node> nodeChildrenL1 = new ArrayList<Node>();
+		
 		StringBuilder nameBuilder;
-		String nodeName;
 		for (List<String> list : childrenL1) {
-			nodeName = list.get(3);			
-			nodeChildrenL1.add(new Node(nodeName));
+			nameBuilder = new StringBuilder();
+			ListIterator<String> iterator = list.listIterator();
+			while(iterator.hasNext()){
+				nameBuilder.append(iterator.next());
+				if(iterator.hasNext()){
+					nameBuilder.append(", ");
+				}
+			}				
+			nodeChildrenL1.add(new Node(nameBuilder.toString()));
 		}
 		parent.setChildren(nodeChildrenL1);
 
