@@ -550,7 +550,7 @@ body{
 
 /*
  * Form Elements
- */
+ */ 
 
 .form-group {
 	min-height: 76px;
@@ -563,6 +563,19 @@ body{
 	background-color: #fafafa;
 	border-bottom-color: #d9d9d9;
 }
+
+.form-control {
+	border-radius: 0;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+}
+
+.form-control:focus {
+	border-color: #34495e !important;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(52, 73, 94, 0.3) !important;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(52, 73, 94, 0.3) !important;
+}
+
 .form-group > .form-group-inner > .label {
 	font-weight: bold;
 	color: #555555;
