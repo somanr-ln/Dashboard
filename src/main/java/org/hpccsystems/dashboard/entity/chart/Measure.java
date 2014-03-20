@@ -5,6 +5,17 @@ import javax.xml.bind.annotation.XmlRootElement;
  
 @XmlRootElement 
 public class Measure {
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Measure [column=").append(column)
+				.append( ", aggregateFunction=").append(aggregateFunction)
+				.append(", displayYColumnName=").append(displayYColumnName).append("]");
+		
+		return  buffer.toString();
+	}
+
+
 	private String column;
 	private String aggregateFunction;
 	private String displayYColumnName;
