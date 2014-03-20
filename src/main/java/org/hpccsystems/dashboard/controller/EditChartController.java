@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log; 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
 import org.hpccsystems.dashboard.api.entity.Field;
@@ -164,7 +164,15 @@ public class EditChartController extends SelectorComposer<Component> {
 				}
 			}
 		}
+//removing the second column If chartType is PieChart while changing the chart Type. 
 
+		if (portlet.getChartType() == 3) {
+			if (chartData.getYColumns().size() > 1) {
+				chartData.getYColumns().remove(1);
+			} else if (chartData.getxColumnNames().size() > 1) {
+				chartData.getxColumnNames().remove(1);
+			}
+		}
 		// When live chart is present in ChartPanel
 		if (Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
 			List<String> columnList = new ArrayList<String>();
