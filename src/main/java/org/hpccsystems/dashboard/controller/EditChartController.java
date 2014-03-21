@@ -166,7 +166,7 @@ public class EditChartController extends SelectorComposer<Component> {
 		}
 //removing the second column If chartType is PieChart while changing the chart Type. 
 
-		if (portlet.getChartType() == 3) {
+		if (portlet.getChartType() == Constants.PIE_CHART) {
 			if (chartData.getYColumns().size() > 1) {
 				chartData.getYColumns().remove(1);
 			} else if (chartData.getxColumnNames().size() > 1) {
