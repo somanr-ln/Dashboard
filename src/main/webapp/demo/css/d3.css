@@ -35,4 +35,17 @@
        display: none;
   }
   
-  /*-- CSS for Tree layout --*/
+  /*-- CSS for Tree layout End--*/
+  
+   /*-- CSS for Chord Diagram start--*/
+  body {
+  font: 10px sans-serif;
+}
+
+.chord path {
+  fill-opacity: .67;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+/*-- CSS for Chord Diagram End--*/
