@@ -45,14 +45,11 @@ public class Constants {
 	public static final Integer TREE_LAYOUT = 5;
 	public static final Integer CHORD_DIAGRAM = 6;
 	public static final Integer BUBBLE_CHART = 7;
-	
 	public static final String COLUMN_DATA_TYPE = "dataType";
 	public static final Integer NUMERIC_DATA = 1;
 	public static final Integer STRING_DATA = 2;
-	
 	public static final short ReorderPotletPanels = 20;
 	public static final short ResizePotletPanels = 30;
-	
 	public static final String STATE_LIVE_CHART = "L";
 	public static final String STATE_GRAYED_CHART = "G";
 	public static final String STATE_EMPTY = "E";

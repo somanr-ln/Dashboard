@@ -272,14 +272,17 @@ public class ChartPanel extends Panel {
 			}else if(Constants.CHORD_DIAGRAM == portlet.getChartType()){
 				drawChordDiagram();				
 			}else if(Constants.BUBBLE_CHART == portlet.getChartType()){
-				drawbubbleChart();				
-			}
-			else{
+				drawbubbleChart();	
+			}else{	
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
 			window.doModal();
+			
 			}
 		}
+	};	
+		
+
 
 		/**
 		 * Renders Chord Diagram
@@ -297,7 +300,6 @@ public class ChartPanel extends Panel {
 			
 		}
 
-	};
 	
 	private void drawbubbleChart(){
 		removeStaticImage();

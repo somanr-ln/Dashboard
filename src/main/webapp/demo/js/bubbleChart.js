@@ -1,5 +1,4 @@
 function createBubbleChart(divId){
-	console.log("Inside Buble.js");
 jq.getScript('js/lib/d3.v3.min.js', function() {
 var json = {
 		    "name": "flare",

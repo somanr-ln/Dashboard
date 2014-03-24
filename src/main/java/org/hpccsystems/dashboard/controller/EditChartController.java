@@ -122,12 +122,6 @@ public class EditChartController extends SelectorComposer<Component> {
 		doneButton = (Button) execution	.getAttribute(Constants.EDIT_WINDOW_DONE_BUTTON);
 
 		this.getSelf().addEventListener("onDrawChart", drawChart);
-		//For Bubble Chart
-		
-		if(portlet.getChartType()==Constants.BUBBLE_CHART){
-			//Clients.evalJavaScript("createChart('" + chartDiv.getId() + "')" );
-			
-		}
 		// API chart config flow without chart
 		if (authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) execution.getAttribute(Constants.CIRCUIT_CONFIG);
