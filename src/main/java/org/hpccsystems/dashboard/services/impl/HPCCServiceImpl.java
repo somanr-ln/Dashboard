@@ -731,14 +731,12 @@ public class HPCCServiceImpl implements HPCCService{
 				
 				list.add(row);
 			}
-			
 		
 		}
 		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
 			throw ex;
 		} 
-		System.out.println("list=============" +list);
 		return list;
 	}
 	

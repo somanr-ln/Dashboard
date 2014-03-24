@@ -1,5 +1,7 @@
 package org.hpccsystems.dashboard.util;
 
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
+
 
 public class DashboardUtil {	
 	/**
@@ -18,6 +20,16 @@ public class DashboardUtil {
 				numericColumn = true;
 			}
 		return numericColumn;
+	}
+	/**Method constructs Hpcc Object
+	 * @return HpccConnection
+	 */
+	public HpccConnection constructHpccObj(){
+		HpccConnection hpccConnection = new HpccConnection(
+				"216.19.105.2", 18010, "", "generic_dashboard",
+				"Lexis123!", true, false);	
+		return hpccConnection;
+			
 	}
 
 }

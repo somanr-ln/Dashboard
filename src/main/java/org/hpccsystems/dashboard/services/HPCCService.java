@@ -105,5 +105,13 @@ public interface HPCCService {
 	 * @return String[]
 	 */
 	String[] getRootKeyList(HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * Service returns data to draw chord diagram
+	 * @param hpccConnection
+	 * @return List<Map<String,Integer>>
+	 * @throws Exception
+	 */
+	List<Map<String,Integer>> getChordData(HpccConnection hpccConnection) throws Exception;
 
 }
