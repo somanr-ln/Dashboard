@@ -61,7 +61,9 @@ public class Constants {
 	public static final String EDIT_URL =  "getColumnSchema::url:";
 	public static final String EDIT_SQL =  "getColumnSchema::Sql:";
 	public static final String DELETE_DASHBOARD = "You are about to delete the Active Dashboard. Do you want to proceed?";
+	public static final String DELETE_WIDGET = "You are about to delete the Widget. Do you want to proceed?";
 	public static final String DELETE_DASHBOARD_TITLE = "Delete Dashboard";
+	public static final String DELETE_WIDGET_TITLE = "Delete Widget";
 	public static final String TREE_DIRECTORY = "Directory";
 	public static final String TREE_FILE = "File";
 	public static final String TREE_IS_DIRECTORY = "isDirectory";
