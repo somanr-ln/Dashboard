@@ -13,6 +13,7 @@
 <?script src="js/piechart.js"?>
 <?script src="js/treelayout.js"?>
 <?script src="js/chorddiagram.js"?>
+<?script src="js/bubbleChart.js"?>
 <?style src="css/c3.css"?>
 <?style src="css/d3.css"?>
 

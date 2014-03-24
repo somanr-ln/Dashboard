@@ -7,8 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
-import org.hpccsystems.dashboard.entity.chart.HpccConnection;
-import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.ChordRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
@@ -36,10 +34,8 @@ import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.ListModel;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
-import org.zkoss.zul.SimpleListModel;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
@@ -190,7 +186,11 @@ public class ChartPanel extends Panel {
 			return "drawTreeLayout('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
 		}else if(Constants.CHORD_DIAGRAM.equals(portlet.getChartType())){
 			return "drawChordDiagram('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
-		}else {
+		}else if(portlet.getChartType()==Constants.BUBBLE_CHART){
+			return "drawbubbleChart('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+			//Clients.evalJavaScript("createChart('" + chartDiv.getId() + "')" );
+					}
+		else {
 			return "createPieChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
 		}
 	}
@@ -271,7 +271,10 @@ public class ChartPanel extends Panel {
 				onTreeInclude();				
 			}else if(Constants.CHORD_DIAGRAM == portlet.getChartType()){
 				drawChordDiagram();				
-			}else{
+			}else if(Constants.BUBBLE_CHART == portlet.getChartType()){
+				drawbubbleChart();				
+			}
+			else{
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
 			window.doModal();
@@ -295,6 +298,11 @@ public class ChartPanel extends Panel {
 		}
 
 	};
+	
+	private void drawbubbleChart(){
+		removeStaticImage();
+		Clients.evalJavaScript("createBubbleChart('" + chartDiv.getId()+  "')" ); 
+	}
 
 	//Reset button listener
 	EventListener<Event> resetListener = new EventListener<Event>() { 
@@ -382,7 +390,6 @@ public class ChartPanel extends Panel {
 			}
 		}
 	};
-	
 	/**
 	 * Decides window to open based on widget state
 	 */
@@ -390,15 +397,10 @@ public class ChartPanel extends Panel {
 		if(Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
 			TreeRenderer treeRenderer = (TreeRenderer) SpringUtil.getBean("treeRenderer");
 			portlet = treeRenderer.drawLiveTree(portlet);
-		constructTreeSearchDiv();		
-	}
-	
-	private HpccConnection constructHpccObj(){
-		HpccConnection hpccConnection = new HpccConnection(
-				"216.19.105.2", 18010, "", "generic_dashboard",
-				"Lexis123!", true, false);	
-		return hpccConnection;
-			
+			constructTreeSearchDiv();				
+		}
+		else if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+		}
 	}
 	/**
 	 * Method to create root key search div for Tree layout
@@ -420,7 +422,7 @@ public class ChartPanel extends Panel {
 			treetextBox.setValue(portlet.getTreeData().getRootKey());
 		}
 		hbox.appendChild(treetextBox);
-		hbox.appendChild(searchButton);
+		hbox.appendChild(searchButton);	
 		treeDiv = new Div();
 		treeDiv.appendChild(hbox);		
 		holderDiv.getChildren().clear();

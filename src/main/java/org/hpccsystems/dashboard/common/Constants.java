@@ -112,9 +112,8 @@ public class Constants {
 			put(PIE_CHART, new ChartDetails(PIE_CHART, "chart/PieChart_black.jpg" ,"Pie Chart", "PieDescription", 1, 1));
 			put(TABLE_WIDGET, new ChartDetails(TABLE_WIDGET, "chart/table_black.png" ,"Table Widget", "TableWidgetDescription", 0, 0));
 			put(TREE_LAYOUT, new ChartDetails(TREE_LAYOUT, "chart/TreeLayout_black.jpg" ,"Tree Layout", "Tree layout description", 0, 0));
-			put(BUBBLE_CHART, new ChartDetails(BUBBLE_CHART, "chart/Bubblechart_black.jpg" ,"Bubble Chart", "Bubble Chart description", 0, 0));
-			put(TREE_LAYOUT, new ChartDetails(TREE_LAYOUT, "chart/TreeLayout_black.jpg" ,"Tree Layout", "Tree layout description", 0, 0));
 			put(CHORD_DIAGRAM, new ChartDetails(CHORD_DIAGRAM, "chart/Chorddiagram_black.jpg" ,"Chord Diagram", "Chord Diagram description", 0, 0));
+			put(BUBBLE_CHART, new ChartDetails(BUBBLE_CHART, "chart/Bubblechart_black.jpg" ,"Bubble Chart", "Bubble Chart description", 0, 0));
 		}
 		
 	};

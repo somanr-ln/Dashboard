@@ -532,7 +532,7 @@ public class ChartRenderer {
 		List<Node> nodeChildrenL2;
 		int i = 0;
 		for (List<String> list : childrenL1) {
-			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);			
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
 
 			nodeChildrenL2 = new ArrayList<Node>();
 			for (List<String> list2 : childrenL2) {

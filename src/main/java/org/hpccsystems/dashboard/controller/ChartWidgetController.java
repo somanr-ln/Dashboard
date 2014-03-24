@@ -43,7 +43,6 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 	Button treeLayout;
 	@Wire
 	Button bubbleChartButton;
-	@Wire
 	Button chordDiagram;
 	@Wire
 	Window idWindow;

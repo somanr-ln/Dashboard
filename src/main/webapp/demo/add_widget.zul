@@ -56,7 +56,7 @@
 					<vbox align="center">
 						<image src="chart/Bubblechart.jpg" sclass="addwidget-img"/>
 						${labels.bubbleChart}
-						<button label="Add" disabled="true" sclass="btn btn-default"/>
+						<button id="bubbleChartButton" label="Add"  sclass="btn btn-default"/>
 					</vbox>
 				</row>
 			</rows>
