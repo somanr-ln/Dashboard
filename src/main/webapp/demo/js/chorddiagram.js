@@ -9,7 +9,7 @@ function drawChordDiagram(divId, chartData) {
 		
 		var matrix = chordData.matrix;
 		console.log(matrix);	
-		            var chord = d3.layout.chord()
+		var chord = d3.layout.chord()
 		                .padding(.05)
 		                .sortSubgroups(d3.descending)
 		                .matrix(matrix);
@@ -29,7 +29,7 @@ function drawChordDiagram(divId, chartData) {
 		 var svg = divToDraw.append("svg")
 		                .attr("width", width)
 		                .attr("height", height)
-		              .append("g")
+		                .append("g")
 		                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
 		            svg.append("g").selectAll("path")
