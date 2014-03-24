@@ -731,12 +731,14 @@ public class HPCCServiceImpl implements HPCCService{
 				
 				list.add(row);
 			}
+			
 		
 		}
 		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
 			throw ex;
 		} 
+		System.out.println("list=============" +list);
 		return list;
 	}
 	
@@ -873,6 +875,80 @@ public class HPCCServiceImpl implements HPCCService{
 		return fnameLnameArray;
 	}
 
+
+	@Override
+	public List<Map<String, Integer>> getChordData(HpccConnection hpccConnection)
+			throws Exception {
+		 List<Map<String, Integer>> dataMap = new  ArrayList<Map<String, Integer>>();
+		 Map<String, Integer> indiaMap = new HashMap<String, Integer>();
+		 Map<String, Integer> usMap = new HashMap<String, Integer>();
+		 Map<String, Integer> UkMap = new HashMap<String, Integer>();
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select peoplecount,lives,prefers from birt::lifechoice");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("queryTxt in getChordData() -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String in getChordData() --> " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);				
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					if("India".equalsIgnoreCase(eElement.getElementsByTagName("lives").item(0).getTextContent())){
+						indiaMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}else if("us".equalsIgnoreCase(eElement.getElementsByTagName("lives").item(0).getTextContent())){
+						usMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}else {
+						UkMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}
+				}
+			}
+			if(LOG.isDebugEnabled()){
+				LOG.debug("indiaMap -->"+indiaMap);
+				LOG.debug("usMap -->"+usMap);
+				LOG.debug("UkMap -->"+UkMap);
+			}
+			dataMap.add(indiaMap);
+			dataMap.add(usMap);
+			dataMap.add(UkMap);
+		return dataMap;
+	}catch(ServiceException | ParserConfigurationException | SAXException | IOException ex){
+		LOG.error("Exception occurred while fetching data for Chord diagram in getChordData()", ex);
+		throw ex;
+	}
+	}
 
 	
 }

@@ -10,9 +10,10 @@ import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
+import org.hpccsystems.dashboard.entity.chart.utils.ChordRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
+import org.hpccsystems.dashboard.entity.chart.utils.TreeRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
-import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
 import org.zkoss.util.resource.Labels;
@@ -66,7 +67,7 @@ public class ChartPanel extends Panel {
 	final Div chartDiv = new Div();
 	final Textbox textbox = new Textbox();	
 	final Box imageContainer = new Box();	
-	final Combobox treetextBox = new Combobox();
+	Combobox treetextBox = new Combobox();
 	Div treeDiv;
 	
 	Portlet portlet;
@@ -187,6 +188,8 @@ public class ChartPanel extends Panel {
 			return "createChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
 		}else if(Constants.TREE_LAYOUT.equals(portlet.getChartType())){
 			return "drawTreeLayout('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+		}else if(Constants.CHORD_DIAGRAM.equals(portlet.getChartType())){
+			return "drawChordDiagram('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
 		}else {
 			return "createPieChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
 		}
@@ -265,15 +268,30 @@ public class ChartPanel extends Panel {
 			parameters.put(Constants.PARENT, ChartPanel.this);
 			parameters.put(Constants.PORTLET, portlet);
 			if(Constants.TREE_LAYOUT == portlet.getChartType()){
-				if(Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
-				onTreeInclude();}
-				else if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
-				}
+				onTreeInclude();				
+			}else if(Constants.CHORD_DIAGRAM == portlet.getChartType()){
+				drawChordDiagram();				
 			}else{
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
 			window.doModal();
 			}
+		}
+
+		/**
+		 * Renders Chord Diagram
+		 */
+		private void drawChordDiagram() {
+			ChordRenderer	chordRenderer = (ChordRenderer) SpringUtil.getBean("chordRenderer");
+			portlet = chordRenderer.constructChordJSON(portlet);
+			removeStaticImage();
+			Clients.evalJavaScript("drawChordDiagram('" + chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ); 
+			portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+			WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+			portlet.setChartDataXML(
+					((ChartRenderer)SpringUtil.getBean("chartRenderer")).convertToXML(portlet.getChartData()));
+			//widgetService.updateWidget(portlet);
+			
 		}
 
 	};
@@ -366,12 +384,12 @@ public class ChartPanel extends Panel {
 	};
 	
 	/**
-	 * Method to enable Tree layout window
+	 * Decides window to open based on widget state
 	 */
-	public void onTreeInclude() {
-		TreeData treeData = new TreeData();
-		treeData.setHpccConnection(constructHpccObj());		
-		portlet.setTreeData(treeData);
+	private void onTreeInclude(){		
+		if(Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
+			TreeRenderer treeRenderer = (TreeRenderer) SpringUtil.getBean("treeRenderer");
+			portlet = treeRenderer.drawLiveTree(portlet);
 		constructTreeSearchDiv();		
 	}
 	
@@ -395,7 +413,8 @@ public class ChartPanel extends Panel {
 		searchButton.setLabel("Submit");
 		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
 		hbox.appendChild(searchLabel);
-		getRootKeyList();
+		TreeRenderer treeRenderer = (TreeRenderer) SpringUtil.getBean("treeRenderer");
+		treetextBox = treeRenderer.getRootKeyList(treetextBox);
 		treetextBox.setValue("");
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
 			treetextBox.setValue(portlet.getTreeData().getRootKey());
@@ -410,32 +429,6 @@ public class ChartPanel extends Panel {
 		holderDiv.setHeight("620px");
 		removeStaticImage();
 	}
-			
-	/**
-	 * Method to generate Root Key List for TreeLayout Autocomplete function
-	 */
-	private void getRootKeyList() {
-		try{
-			HPCCService hpccService = (HPCCService)SpringUtil.getBean("hpccService");
-			treetextBox.setAutodrop(true);
-			treetextBox.setButtonVisible(false);
-			
-			treetextBox.setModel(new SimpleListModel<Object>(hpccService.getRootKeyList(portlet.getTreeData().getHpccConnection())){
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public ListModel<Object> getSubModel(Object arg0, int arg1) {
-					String str = (String) arg0;
-					str = str.toUpperCase();
-					return super.getSubModel(str, arg1);
-				}
-			});
-		}catch(Exception ex){
-			LOG.error("Exception while getting root key list", ex);
-		}
-		
-	}
-
 	/**
 	 * Listener to draw tree layout
 	 */

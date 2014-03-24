@@ -42,6 +42,10 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 	@Wire
 	Button treeLayout;
 	@Wire
+	Button bubbleChartButton;
+	@Wire
+	Button chordDiagram;
+	@Wire
 	Window idWindow;
 	
 		
@@ -53,6 +57,8 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 		pieChartButton.setAttribute(Constants.CHART_TYPE, Constants.PIE_CHART);
 		tableWidget.setAttribute(Constants.CHART_TYPE, Constants.TABLE_WIDGET);
 		treeLayout.setAttribute(Constants.CHART_TYPE, Constants.TREE_LAYOUT);
+		bubbleChartButton.setAttribute(Constants.CHART_TYPE, Constants.BUBBLE_CHART);
+		chordDiagram.setAttribute(Constants.CHART_TYPE, Constants.CHORD_DIAGRAM);
 		
 		final Portlet portlet = (Portlet) Executions.getCurrent().getArg()
 				.get(Constants.PORTLET);
@@ -84,7 +90,6 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 				Events.sendEvent(new Event("onCloseDialog", parentDiv, 
 						paramMap));
 				idWindow.detach();
-				
 			}
 		};		
 		barChartButton.addEventListener(Events.ON_CLICK, closeClick);
@@ -92,6 +97,8 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 		pieChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		tableWidget.addEventListener(Events.ON_CLICK, closeClick);
 		treeLayout.addEventListener(Events.ON_CLICK, closeClick);
+		bubbleChartButton.addEventListener(Events.ON_CLICK, closeClick);
+		chordDiagram.addEventListener(Events.ON_CLICK, closeClick);
 	}
 
 }
