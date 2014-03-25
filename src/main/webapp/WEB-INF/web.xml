@@ -13,7 +13,7 @@
         /WEB-INF/dispatcher-servlet.xml
         /WEB-INF/applicationContext.xml
         </param-value>
-    </context-param>
+    </context-param> 
     
 	<!-- Spring configuration -->
 	<!-- Initialize spring context -->
@@ -235,4 +235,27 @@
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
 	</welcome-file-list>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Circuits</web-resource-name>
+			<url-pattern>/demo/*</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>			
+			
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>user</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<realm-name>Circuit</realm-name>
+		<form-login-config>
+	      <form-login-page>/login.zhtml</form-login-page>
+	      <form-error-page>/login_fail.zul</form-error-page>
+	   	</form-login-config>			
+	</login-config>
+		<security-role>
+			<role-name>user</role-name>
+		</security-role>
 </web-app>

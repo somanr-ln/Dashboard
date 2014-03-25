@@ -5,21 +5,27 @@
     <title>Dashboard</title>
 
     <!-- styles -->
-    <link href="demo/css/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="demo/css/login.css" />
+    <link href="/Dashboard/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/Dashboard/login.css" />
 	
   </head>
 
   <body>
-	
+	<zscript>
+    org.apache.commons.logging.LogFactory.getLog("Login page").error( 
+			"Arg : " + Executions.getCurrent().getArg() +
+			" Parameter Map : " + Executions.getCurrent().getParameterMap() +
+			" Attributes : " + Executions.getCurrent().getAttributes() + 
+			" User Principal: " +  Executions.getCurrent().getUserPrincipal() );
+    </zscript>
 	<div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-         <img src="demo/images/logo.png" alt="Lexis Nexis" class="logo"/>
+         <img src="/Dashboard/imgs/logo.png" alt="Lexis Nexis" class="logo"/>
         </div>
       </div>
     </div>
-    
+    <form method="POST" action="j_security_check">
     <div class="container">
 
         <div id="login-wraper">
@@ -39,23 +45,28 @@
 	            
 	            <div class="form-group">
 				   <label for="account">Username</label >
-				   <zul:textbox type="text" sclass="form-control" id="account" style="display:inline"/> 
+				   <zul:textbox type="text" sclass="form-control" id="account" name="j_username" style="display:inline"/> 
 				 </div>
 				 
 				 <div class="form-group">
 				   <label for="password">Password</label >
-				   <zul:textbox type="password" class="form-control" id="password" style="display:inline"/>
+				   <zul:textbox type="password" class="form-control" id="password" name="j_password" style="display:inline"/>
 				 </div>
                 
                 <div class="footer"> 
-                	<zul:label id="message" sclass="warn" value="&#160;" />
-                    <zul:button type="button" id="login" sclass="btn btn-success" label="Login" />
+                	<zul:label id="message" sclass="warn" value=" "/>
+                	<zscript ><![CDATA[
+	                	if(Executions.getCurrent().getParameter("auth") != null && Executions.getCurrent().getParameter("auth").equals("failed"))
+					        message.value = "Login failed. Provide valid credentials";
+	                	]]></zscript>
+                    <button type="submit" class="btn btn-success" value="Login"> Login </button>
                 </div>
             
             </zul:div>
         </div>
 
     </div>
+    </form>
     
     <footer class="white navbar-fixed-bottom">
       Don't have an account yet? <a href="#" class="btn btn-black">Register</a>
