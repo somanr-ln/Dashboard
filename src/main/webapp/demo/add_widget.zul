@@ -3,7 +3,7 @@
 	width="900px"
 	sclass="panel">
 	<caption iconSclass="glyphicon glyphicon-th-large">
-		<label zclass="h5"> Add Widget</label>
+		<label zclass="h5" value="${labels.addWidget }" />
 	</caption>
 	<div hflex="1" vflex="1" sclass="banner">
 	<custom-attributes org.zkoss.zul.image.preload="true" />
@@ -39,9 +39,14 @@
 				</row>
 				<row zclass="div">
 					<vbox align="center">
+						<image src="chart/TreeLayout.jpg" sclass="addwidget-img"/>
+						${labels.treeLayout}
+						<button label="Add" id="treeLayout" sclass="btn btn-default"/>
+					</vbox>
+					<vbox align="center">
 						<image src="chart/Chorddiagram.jpg" sclass="addwidget-img"/>
 						${labels.chordDiagram}
-						<button label="Add" disabled="true" sclass="btn btn-default"/>
+						<button label="Add" id="chordDiagram" sclass="btn btn-default"/>
 					</vbox>
 					<vbox align="center">
 						<image src="chart/Timeline.jpg" sclass="addwidget-img"/>
@@ -49,14 +54,9 @@
 						<button label="Add" disabled="true" sclass="btn btn-default"/>
 					</vbox>
 					<vbox align="center">
-						<image src="chart/TreeLayout.jpg" sclass="addwidget-img"/>
-						${labels.treeLayout}
-						<button label="Add" disabled="true" sclass="btn btn-default"/>
-					</vbox>
-					<vbox align="center">
 						<image src="chart/Bubblechart.jpg" sclass="addwidget-img"/>
 						${labels.bubbleChart}
-						<button label="Add" disabled="true" sclass="btn btn-default"/>
+						<button id="bubbleChartButton" label="Add"  sclass="btn btn-default"/>
 					</vbox>
 				</row>
 			</rows>

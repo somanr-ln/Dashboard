@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.hpccsystems.dashboard.entity.ChartDetails;
  
+
 /**
  * Constants class is used to maintain the constant's for Dashboard project.
  *
@@ -15,8 +16,10 @@ public class Constants {
 	
 	public static final String PORTLET = "portlet";
 	public static final String FILTER = "filter";
+	public static final String FIELD = "field";
 	public static final String CHART_DATA = "chartData";
 	public static final String MEASURE = "measure";
+	public static final String ATTRIBUTE = "attribute";
 	public static final String DASHBOARD = "dashboard"; 
 	
 	public static final String EDIT_WINDOW_DONE_BUTTON = "doneButton";
@@ -39,15 +42,14 @@ public class Constants {
 	public static final Integer LINE_CHART = 2;
 	public static final Integer PIE_CHART = 3;
 	public static final Integer TABLE_WIDGET = 4;
-	
+	public static final Integer TREE_LAYOUT = 5;
+	public static final Integer CHORD_DIAGRAM = 6;
+	public static final Integer BUBBLE_CHART = 7;
 	public static final String COLUMN_DATA_TYPE = "dataType";
 	public static final Integer NUMERIC_DATA = 1;
 	public static final Integer STRING_DATA = 2;
-	
 	public static final short ReorderPotletPanels = 20;
 	public static final short ResizePotletPanels = 30;
-	
-	public static final String STATE_DELETE = "D";
 	public static final String STATE_LIVE_CHART = "L";
 	public static final String STATE_GRAYED_CHART = "G";
 	public static final String STATE_EMPTY = "E";
@@ -59,9 +61,9 @@ public class Constants {
 	public static final String EDIT_URL =  "getColumnSchema::url:";
 	public static final String EDIT_SQL =  "getColumnSchema::Sql:";
 	public static final String DELETE_DASHBOARD = "You are about to delete the Active Dashboard. Do you want to proceed?";
+	public static final String DELETE_WIDGET = "You are about to delete the Widget. Do you want to proceed?";
 	public static final String DELETE_DASHBOARD_TITLE = "Delete Dashboard";
-	public static final String TREE_NAME = "name";
-	public static final String TREE_TYPE = "type";
+	public static final String DELETE_WIDGET_TITLE = "Delete Widget";
 	public static final String TREE_DIRECTORY = "Directory";
 	public static final String TREE_FILE = "File";
 	public static final String TREE_IS_DIRECTORY = "isDirectory";
@@ -98,6 +100,8 @@ public class Constants {
 	public static final String SOURCEID="sourceid"; 
 	public static final String NAME_SMALL = "name";
 	public static final String DASHBOARDS =  "dashboards";
+	public static final String REMOVE_GLOBAL_FILTERS = "Are you sure,Want to remove Dashboard filters?";
+	public static final String REMOVE_GLOBAL_FILTERS_TITLE = "Remove Dashboard Filter";
 	
 	public static final Map<Integer, ChartDetails> CHART_MAP = new HashMap<Integer, ChartDetails>(){
 		private static final long serialVersionUID = 1L;
@@ -106,6 +110,9 @@ public class Constants {
 			put(LINE_CHART, new ChartDetails(LINE_CHART, "chart/Linechart_black.jpg" ,"Line Chart", "LineChartDescription", 2,0));
 			put(PIE_CHART, new ChartDetails(PIE_CHART, "chart/PieChart_black.jpg" ,"Pie Chart", "PieDescription", 1, 1));
 			put(TABLE_WIDGET, new ChartDetails(TABLE_WIDGET, "chart/table_black.png" ,"Table Widget", "TableWidgetDescription", 0, 0));
+			put(TREE_LAYOUT, new ChartDetails(TREE_LAYOUT, "chart/TreeLayout_black.jpg" ,"Tree Layout", "Tree layout description", 0, 0));
+			put(CHORD_DIAGRAM, new ChartDetails(CHORD_DIAGRAM, "chart/Chorddiagram_black.jpg" ,"Chord Diagram", "Chord Diagram description", 0, 0));
+			put(BUBBLE_CHART, new ChartDetails(BUBBLE_CHART, "chart/Bubblechart_black.jpg" ,"Bubble Chart", "Bubble Chart description", 0, 0));
 		}
 		
 	};
@@ -139,5 +146,9 @@ public class Constants {
 	public static final String LAST_UPDATED_DATE = "lastUpdatedDate";
 	public static final String CHART_TITLE = "Chart Title";
 	public static final String DASHBOARD_NOT_EXISTS = "The Provided Dashboard doesn't exists";
+
+	public static final String COMMON_FILTERS = "commonFilters";
+	public static final String ROW_CHECKED = "rowChecked";
+	
 	
 }

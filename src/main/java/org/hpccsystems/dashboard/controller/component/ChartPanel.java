@@ -3,15 +3,18 @@ package org.hpccsystems.dashboard.controller.component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
+import org.hpccsystems.dashboard.entity.chart.utils.ChordRenderer;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
+import org.hpccsystems.dashboard.entity.chart.utils.TreeRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Components;
 import org.zkoss.zk.ui.Executions;
@@ -21,19 +24,25 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.Selectors;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zkplus.spring.SpringUtil;
 import org.zkoss.zul.Box;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Caption;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Image;
+import org.zkoss.zul.Label;
+import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Messagebox.ClickEvent;
 import org.zkoss.zul.Panel;
 import org.zkoss.zul.Panelchildren;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
 import org.zkoss.zul.Window;
+
 
 /**
  * ChartPanel class is used to create,edit and delete the Dashboard portlet's.
@@ -54,9 +63,10 @@ public class ChartPanel extends Panel {
 	final Button deleteBtn = new Button();
 	final Div holderDiv = new Div();
 	final Div chartDiv = new Div();
-	final Textbox textbox = new Textbox();
-	
-	final Box imageContainer = new Box();
+	final Textbox textbox = new Textbox();	
+	final Box imageContainer = new Box();	
+	Combobox treetextBox = new Combobox();
+	Div treeDiv;
 	
 	Portlet portlet;
 
@@ -86,12 +96,19 @@ public class ChartPanel extends Panel {
 
 		textbox.setInplace(true);
 		textbox.setVflex("1");
+		textbox.setStyle("border: none;	color: black;");
 		if(portlet.getName() != null){
 			textbox.setValue(portlet.getName());			
 		} else {
-			textbox.setValue("Chart Title");
+			Session session = Sessions.getCurrent();
+			String lang = (String)session.getAttribute("lang");
+			if(lang!=null && lang.equalsIgnoreCase("Chinese")){
+			textbox.setValue(Labels.getLabel("chartTitle"));
+			}else{
+				textbox.setValue("Chart Title");
+			}
 		}
-		textbox.setWidth("300px");
+		textbox.setWidth("250px");
 		textbox.setMaxlength(30);
 		textbox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
 
@@ -167,21 +184,30 @@ public class ChartPanel extends Panel {
 		if(portlet.getChartType().equals(Constants.BAR_CHART) || 
 				portlet.getChartType().equals(Constants.LINE_CHART)){
 			return "createChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
-		} else {
+		}else if(Constants.TREE_LAYOUT.equals(portlet.getChartType())){
+			return "drawTreeLayout('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+		}else if(Constants.CHORD_DIAGRAM.equals(portlet.getChartType())){
+			return "drawChordDiagram('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+		}else if(portlet.getChartType()==Constants.BUBBLE_CHART){
+			return "drawbubbleChart('" +chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ;
+			//Clients.evalJavaScript("createChart('" + chartDiv.getId() + "')" );
+					}
+		else {
 			return "createPieChart('" + chartDiv.getId() +  "','"+ portlet.getChartDataJSON() +"')" ;
 		}
 	}
 	
 	//To construct Table Widget
 	public void drawTableWidget(){
-		if(portlet.getTableDataMap()!=null && portlet.getTableDataMap().size()>0){
-			TableRenderer tableRenderer = new TableRenderer();
-			Vbox vbox = tableRenderer.constructTableWidget(portlet.getTableDataMap(), false,portlet.getName());
-			chartDiv.getChildren().clear();
-			chartDiv.appendChild(vbox);
-		}
+		TableRenderer tableRenderer = (TableRenderer) SpringUtil.getBean("tableRenderer");
+		Vbox vbox = tableRenderer.constructTableWidget(portlet, portlet.getChartData(), false);
+		chartDiv.getChildren().clear();
+		chartDiv.appendChild(vbox);
 	}
 
+	/**
+	 * Adds static image
+	 */
 	private void setStaticImage() {
 		createChartHolder();
 		Image image = new Image();
@@ -192,6 +218,9 @@ public class ChartPanel extends Panel {
 		portlet.setWidgetState(Constants.STATE_GRAYED_CHART);
 	}
 	
+	/**
+	 * Creates div for chart
+	 */
 	private void createChartHolder() {
 		String divId;
 		Integer seq = 0;
@@ -240,48 +269,111 @@ public class ChartPanel extends Panel {
 			final Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put(Constants.PARENT, ChartPanel.this);
 			parameters.put(Constants.PORTLET, portlet);
-			
+			if(Constants.TREE_LAYOUT == portlet.getChartType()){
+				onTreeInclude();				
+			}else if(Constants.CHORD_DIAGRAM == portlet.getChartType()){
+				drawChordDiagram();				
+			}else if(Constants.BUBBLE_CHART == portlet.getChartType()){
+				drawbubbleChart();	
+			}else{	
 			final Window window = (Window) Executions.createComponents(
 					"/demo/layout/edit_portlet.zul", holderDiv, parameters);
 			window.doModal();
+			
+			}
+		}
+	};	
+		
+
+
+		/**
+		 * Renders Chord Diagram
+		 */
+		private void drawChordDiagram() {
+			ChordRenderer	chordRenderer = (ChordRenderer) SpringUtil.getBean("chordRenderer");
+			portlet = chordRenderer.constructChordJSON(portlet);
+			removeStaticImage();
+			Clients.evalJavaScript("drawChordDiagram('" + chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ); 
+			portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+			WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+			portlet.setChartDataXML(
+					((ChartRenderer)SpringUtil.getBean("chartRenderer")).convertToXML(portlet.getChartData()));
+			//widgetService.updateWidget(portlet);
+			
 		}
 
-	};
+	
+	private void drawbubbleChart(){
+		removeStaticImage();
+		Clients.evalJavaScript("createBubbleChart('" + chartDiv.getId()+  "')" ); 
+	}
 
 	//Reset button listener
-	EventListener<Event> resetListener = new EventListener<Event>() { 
-        public void onEvent(final Event event)throws Exception {
-        	try{
-        	portlet.setWidgetState(Constants.STATE_EMPTY);
-        	portlet.setChartDataJSON(null);
-        	portlet.setChartDataXML(null);
-        	portlet.setChartType(null);
-        	portlet.setName(null);
-        	
-        	Components.removeAllChildren(chartDiv);
-        	Components.removeAllChildren(imageContainer);
-        	chartDiv.detach();
-        	
-        	addBtn.setSclass(ADD_STYLE);
-        	resetBtn.setDisabled(true);
-        	addBtn.removeEventListener(Events.ON_CLICK, editListener);
-    		addBtn.addEventListener(Events.ON_CLICK, addListener);
-    		
-    		//Clears all chart data from DB
-    		WidgetService widgetService =(WidgetService) SpringUtil.getBean("widgetService");
-    		widgetService.updateWidget(portlet);
-        	}catch(DataAccessException ex){
-        		LOG.error("Exception in resetListener()", ex);
-        	}
-        } 
-	};
 	
+	EventListener<Event> resetListener = new EventListener<Event>() {
+		public void onEvent(final Event event) throws Exception {
+			deleteDashboard();
+		}
+	};
+
+	/**
+	 * deletes widget with confirmation message
+	 */
+	private void deleteDashboard() {
+		try {
+			// ask confirmation before deleting widget
+			EventListener<ClickEvent> clickListener = new EventListener<Messagebox.ClickEvent>() {
+				public void onEvent(ClickEvent event) {
+					if (Messagebox.Button.YES.equals(event.getButton())) {
+						portlet.setChartDataJSON(null);
+						portlet.setChartDataXML(null);
+						portlet.setChartType(null);
+						portlet.setName(null);
+						Components.removeAllChildren(chartDiv);
+						Components.removeAllChildren(imageContainer);
+						chartDiv.detach();
+						if (treeDiv != null) {
+							treeDiv.detach();
+						}
+						holderDiv.setHeight("385px");
+						addBtn.setSclass(ADD_STYLE);
+						resetBtn.setDisabled(true);
+						addBtn.removeEventListener(Events.ON_CLICK,	editListener);
+						addBtn.addEventListener(Events.ON_CLICK, addListener);
+
+						// Calling listener in Dashboard - This listener resets
+						// portlet object
+						Window window = null;
+						Session session = Sessions.getCurrent();
+						final ArrayList<Component> list = (ArrayList<Component>) Selectors.find(((Component) session
+										.getAttribute(Constants.NAVBAR)).getPage(), "window");
+						for (final Component component : list) {
+							if (component instanceof Window) {
+								window = (Window) component;
+								Events.sendEvent(new Event("onPanelReset", window, portlet));
+							}
+						}
+					}
+
+				}
+			};
+
+			Messagebox.show(Constants.DELETE_WIDGET, Constants.DELETE_WIDGET_TITLE, new Messagebox.Button[] {
+							Messagebox.Button.YES, Messagebox.Button.NO },Messagebox.QUESTION, clickListener);
+		} catch (Exception ex) {
+			Clients.showNotification(Labels.getLabel("unableToDeletewidget"));
+			LOG.error("Exception while deleting Widget in ChartPanel", ex);
+			return;
+		}
+	}
+	
+	
+
 	//Delete panel listener
 	EventListener<Event> deleteListener = new EventListener<Event>() {
 
 		public void onEvent(final Event event)throws Exception  {
 			try{
-			portlet.setWidgetState(Constants.STATE_DELETE);
 			WidgetService widgetService = (WidgetService) SpringUtil.getBean("widgetService");
 			widgetService.deleteWidget(portlet.getId());
 			ChartPanel.this.detach();
@@ -328,6 +420,66 @@ public class ChartPanel extends Panel {
 			}catch(DataAccessException ex){
 				LOG.error("Exception while updating chart title", ex);
 			}
+		}
+	};
+	/**
+	 * Decides window to open based on widget state
+	 */
+	private void onTreeInclude(){		
+		if(Constants.STATE_GRAYED_CHART.equals(portlet.getWidgetState())){
+			TreeRenderer treeRenderer = (TreeRenderer) SpringUtil.getBean("treeRenderer");
+			portlet = treeRenderer.drawLiveTree(portlet);
+			constructTreeSearchDiv();				
+		}
+		else if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+		}
+	}
+	/**
+	 * Method to create root key search div for Tree layout
+	 */
+	public void constructTreeSearchDiv(){
+		Hbox hbox = new Hbox();
+		hbox.setAlign("center");
+		hbox.setStyle("margin: 5px;");
+		Label searchLabel = new Label();
+		searchLabel.setValue("Physician  name:");
+		Button searchButton = new Button();
+		searchButton.setLabel("Submit");
+		searchButton.addEventListener(Events.ON_CLICK, drawTreeListener);
+		hbox.appendChild(searchLabel);
+		TreeRenderer treeRenderer = (TreeRenderer) SpringUtil.getBean("treeRenderer");
+		treetextBox = treeRenderer.getRootKeyList(treetextBox);
+		treetextBox.setValue("");
+		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())){
+			treetextBox.setValue(portlet.getTreeData().getRootKey());
+		}
+		hbox.appendChild(treetextBox);
+		hbox.appendChild(searchButton);	
+		treeDiv = new Div();
+		treeDiv.appendChild(hbox);		
+		holderDiv.getChildren().clear();
+		holderDiv.appendChild(treeDiv);
+		holderDiv.appendChild(chartDiv);
+		holderDiv.setHeight("620px");
+		removeStaticImage();
+	}
+	/**
+	 * Listener to draw tree layout
+	 */
+	EventListener<Event> drawTreeListener = new EventListener<Event>() {
+
+		@Override
+		public void onEvent(Event event) throws Exception {
+			ChartRenderer chartRenderer = (ChartRenderer)SpringUtil.getBean("chartRenderer");
+			String[] rootArray = treetextBox.getValue().split("\\s+");
+			String treeJSON = chartRenderer.constructTreeJSON(rootArray[0], rootArray[1], portlet.getTreeData().getHpccConnection());
+			portlet.setChartDataJSON(treeJSON);
+			Clients.evalJavaScript("drawTreeLayout('" + chartDiv.getId()+  "','"+ portlet.getChartDataJSON() +"')" ); 
+			portlet.setWidgetState(Constants.STATE_LIVE_CHART);
+			WidgetService widgetService = (WidgetService)SpringUtil.getBean("widgetService");
+			portlet.getTreeData().setRootKey(treetextBox.getValue());
+			portlet.setChartDataXML(chartRenderer.convertTreeDataToXML(portlet.getTreeData()));
+			widgetService.updateWidget(portlet);
 		}
 	};
 	

@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,14 +22,17 @@ import javax.xml.rpc.ServiceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.FileMeta;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.hpccsystems.dashboard.util.DashboardUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,21 +55,11 @@ public class HPCCServiceImpl implements HPCCService{
 		
 	final static String WS_SQL_ENDPOINT = "8009/ws_sql?ver_=1";
 	final static String DFU_ENDPOINT = "8010/WsDfu?ver_=1.2";
-	 /**
-	  * getColumnSchema() is used to retrieve the ColumnSchema details from HPCC systems 
-	  * to pass column data details to Edit Chart page to generate the D3 charts. 
-	 * @param sql
-	 * @param userName
-	 * @param password
-	 * @param url
-	 * @return Map<String,String>
-	 */
 	
-	public Map<String,String> getColumnSchema(final String Sql, final HpccConnection hpccConnection) throws Exception
+	public Set<Field> getColumnSchema(final String Sql, final HpccConnection hpccConnection) throws Exception
 	{
-		final HashMap<String, String> schemaMap=new HashMap<String, String>();
-		
-		String[] rowObj=null,columnObj=null;
+		final Set<Field> columnSet = new HashSet<Field>();
+		String[] rowObj=null,columnObj=null;Field fieldObj=null;
 		try 
 		{
 			final WsDfuLocator locator = new WsDfuLocator();
@@ -79,6 +75,12 @@ public class HPCCServiceImpl implements HPCCService{
 			final DFUInfoRequest req = new DFUInfoRequest();
 			req.setName(Sql);
 			req.setCluster("mythor");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Fetching Column Schema --> FileName: " + Sql );
+				LOG.debug("Hpcc Connection : " + hpccConnection);
+			}
+			
 			final DFUInfoResponse result = soap.DFUInfo(req);	
 			
 			//Two types of column schema results been parsed here to 
@@ -102,10 +104,12 @@ public class HPCCServiceImpl implements HPCCService{
 					rowString=rowString.trim();
 					if(rowString!=null && rowString.length()>0)
 					{
+						fieldObj = new Field();
 						columnObj=rowString.split(" ");
 						if(columnObj!=null && columnObj.length>1){
-						//put columnName as map 'key' and column datatype as map 'value'
-						schemaMap.put(columnObj[1], columnObj[0]);
+						fieldObj.setColumnName(columnObj[1]);
+						fieldObj.setDataType(columnObj[0]);
+						columnSet.add(fieldObj);
 						}
 					}
 				}
@@ -115,17 +119,15 @@ public class HPCCServiceImpl implements HPCCService{
 			}
 		} catch (ServiceException e) {
 			LOG.error("ServiceException in getColumnSchema()", e);
-			schemaMap.put(Constants.ERROR,Constants.ERROR_HPCC_SERVER);
 			throw e;
 		} catch (RemoteException e) {
 			LOG.error("RemoteException in getColumnSchema()", e);
-			schemaMap.put(Constants.ERROR,Constants.ERROR_HPCC_SERVER);
 			throw e;
 		}		
 		if(LOG.isDebugEnabled()){
-			LOG.debug(schemaMap);
+			LOG.debug("columnSet -->"+columnSet);
 		}	
-		return schemaMap;
+		return columnSet;
 	}
 	
 
@@ -135,9 +137,7 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return List<BarChart>
 	 * 
 	 */
-	
-	public List<XYModel> getChartData(XYChartData chartData) throws Exception
-	{
+	public List<XYModel> getChartData(XYChartData chartData) throws Exception {
 		final List<XYModel> dataList=new ArrayList<XYModel>();
 		XYModel dataObj=null;
 		try {
@@ -153,8 +153,8 @@ public class HPCCServiceImpl implements HPCCService{
 			
 			if(LOG.isDebugEnabled()){
 				LOG.debug("Inside getChartData");
-				if(chartData.getXColumnNames() != null && chartData.getXColumnNames().size() > 0)				{
-				LOG.debug("Column names --> " + chartData.getXColumnNames().get(0) + chartData.getYColumns().get(0));
+				if(chartData.getxColumnNames()!= null && chartData.getxColumnNames().size() > 0)				{
+				LOG.debug("Column names --> " + chartData.getxColumnNames().get(0) + chartData.getYColumns().get(0));
 				}
 			}
 			
@@ -190,8 +190,8 @@ public class HPCCServiceImpl implements HPCCService{
 					    
 						fstElmnt = (Element) fstNode;
 					    valueList = new ArrayList<Object>();
-					    for(String xColumnName : chartData.getXColumnNames()){
-					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName);
+					    for(Attribute xColumnName : chartData.getxColumnNames()){
+					    	lstNmElmntLst = fstElmnt.getElementsByTagName(xColumnName.getColumnName());
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
 					    	lstNm = lstNmElmnt.getChildNodes();
 					    	if(lstNm.item(0) == null){
@@ -204,7 +204,7 @@ public class HPCCServiceImpl implements HPCCService{
 					    dataObj.setxAxisValues(valueList);
 					    
 					    valueList = new ArrayList<Object>();
-					    int outCount = chartData.getXColumnNames().size() + 1;
+					    int outCount = chartData.getxColumnNames().size() + 1;
 					    for (Measure measure : chartData.getYColumns()) {
 					    	lstNmElmntLst = fstElmnt.getElementsByTagName( measure.getAggregateFunction() + "out" + outCount);
 					    	lstNmElmnt = (Element) lstNmElmntLst.item(0);
@@ -229,7 +229,7 @@ public class HPCCServiceImpl implements HPCCService{
 	}
 	
 	@Override
-	public List<String> getDistinctValues(String fieldName, XYChartData chartData, Boolean applyFilter) throws Exception{
+	public List<String> getDistinctValues(String fieldName, XYChartData chartData, Boolean applyFilter) throws Exception {
 		List<String> filterDataList = new ArrayList<String>();
 		
 		final Ws_sqlLocator locator = new Ws_sqlLocator();
@@ -385,7 +385,7 @@ public class HPCCServiceImpl implements HPCCService{
 		if(chartData.getIsFiltered()){
 			queryTxt.append(" where ");
 			
-			Iterator<Filter> iterator = chartData.getFilterList().iterator();
+			Iterator<Filter> iterator = chartData.getFilterSet().iterator();
 			while (iterator.hasNext()) {
 				Filter filter = iterator.next();
 				
@@ -412,12 +412,12 @@ public class HPCCServiceImpl implements HPCCService{
 					queryTxt.append(" )");
 				} else if(Constants.NUMERIC_DATA.equals(filter.getType())) {
 					queryTxt.append(filter.getColumn());
-					queryTxt.append(" > ");
-					queryTxt.append(filter.getStartValue());
+					queryTxt.append(" >= ");
+					queryTxt.append(filter.getStartValue().setScale(0, RoundingMode.DOWN));
 					queryTxt.append(" and ");
 					queryTxt.append(filter.getColumn());
-					queryTxt.append(" < ");
-					queryTxt.append(filter.getEndValue());
+					queryTxt.append(" <= ");
+					queryTxt.append(filter.getEndValue().setScale(0, RoundingMode.CEILING));
 				}
 				
 				queryTxt.append(")");
@@ -427,7 +427,6 @@ public class HPCCServiceImpl implements HPCCService{
 				}
 			}
 		}
-		
 		return queryTxt.toString();
 	}
 	
@@ -437,46 +436,50 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return StringBuilder
 	 * 
 	 */
-	private String constructQuery(XYChartData chartData)
-	{
-		StringBuilder queryTxt=new StringBuilder("select ");
-		try	{
-			if(LOG.isDebugEnabled()) {
+	private String constructQuery(XYChartData chartData) {
+		StringBuilder queryTxt = new StringBuilder("select ");
+		try {
+			if (LOG.isDebugEnabled()) {
 				LOG.debug("Building Query");
 				LOG.debug("isFiltered -> " + chartData.getIsFiltered());
 			}
-			
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(", ");
 			}
-			
+
 			for (Measure measure : chartData.getYColumns()) {
 				queryTxt.append(measure.getAggregateFunction());
 				queryTxt.append("(");
 				queryTxt.append(measure.getColumn());
 				queryTxt.append("),");
 			}
-			//Deleting last comma
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
-			
 			queryTxt.append(" from ");
 			queryTxt.append(chartData.getFileName());
-				
 			queryTxt.append(constructWhereClause(chartData));
-			
 			queryTxt.append(" group by ");
-			for (String columnName : chartData.getXColumnNames()) {
-				queryTxt.append(columnName);
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
 				queryTxt.append(",");
 			}
-			//Deleting last comma
+			// Deleting last comma
+			queryTxt.deleteCharAt(queryTxt.length() - 1);
+
+			queryTxt.append(" order by ");
+			
+			for (Attribute columnName : chartData.getxColumnNames()) {
+				queryTxt.append(columnName.getColumnName());
+				queryTxt.append(",");
+			}
+			// Deleting last comma
 			queryTxt.deleteCharAt(queryTxt.length() - 1);
 			
-			queryTxt.append(" order by ");
-			queryTxt.append(chartData.getXColumnNames().get(0));
-		}catch(Exception e)	{
-			LOG.error("Exception while constructing query in constructQuery()", e);
+		} catch (Exception e) {
+			LOG.error("Exception while constructing query in constructQuery()",	e);
 		}
 		return queryTxt.toString();
 	}
@@ -488,9 +491,8 @@ public class HPCCServiceImpl implements HPCCService{
 	 * @return
 	 * @throws Exception
 	 */
-	public LinkedHashMap<String, List<String>> fetchTableData(XYChartData tableData)
+	public LinkedHashMap<String, List<Attribute>> fetchTableData(XYChartData tableData)
 			throws Exception {
-
 		final StringBuilder queryTxt = new StringBuilder("select ");
 		final Ws_sqlLocator locator = new Ws_sqlLocator();
 		locator.setWs_sqlServiceSoap_userName(tableData.getHpccConnection().getUsername());
@@ -500,69 +502,83 @@ public class HPCCServiceImpl implements HPCCService{
 		} else {
 			locator.setWs_sqlServiceSoapAddress("http://" + tableData.getHpccConnection().getHostIp()+ ":" + WS_SQL_ENDPOINT);
 		}
-		LinkedHashMap<String, List<String>> tableDataMap = new LinkedHashMap<String, List<String>>();
-		try
-		{
-		final Ws_sqlServiceSoap soap = locator.getws_sqlServiceSoap();
-		final ExecuteSQLRequest req = new ExecuteSQLRequest();
-
-		List<String> listData = tableData.getTableColumns();
-		int index = 0;
-		for (String data : listData) {
-			if (index != listData.size() - 1) {
-				queryTxt.append(data).append(",");
-			} else if (index == listData.size() - 1) {
-				queryTxt.append(data);
+		LinkedHashMap<String, List<Attribute>> tableDataMap = new LinkedHashMap<String, List<Attribute>>();
+		try	{
+			final Ws_sqlServiceSoap soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+	
+			List<Attribute> listData = tableData.getTableColumns();
+			int index = 0;
+			for (Attribute data : listData) {
+				if (index != listData.size() - 1) {
+					queryTxt.append(data.getColumnName()).append(",");
+				} else if (index == listData.size() - 1) {
+					queryTxt.append(data.getColumnName());
+				}
+				index++;
 			}
-			index++;
-		}
-		queryTxt.append(" from ");
-		queryTxt.append(tableData.getFileName());
-		req.setSqlText(queryTxt.toString());
-		req.setTargetCluster("thor");
-		final ExecuteSQLResponse result = soap.executeSQL(req);
-		final String resultString = result.getResult();
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Hitting URL for filter - "+ locator.getws_sqlServiceSoapAddress());
-			LOG.debug("Result String: " + resultString);
-		}
-
-		final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		final DocumentBuilder db = dbf.newDocumentBuilder();
-		final InputSource inStream = new InputSource();
-		inStream.setCharacterStream(new StringReader(resultString));
-		final Document doc = db.parse(inStream);
-		Node fstNode = null;
-		Element fstElmnt = null, lstNmElmnt = null;
-		NodeList lstNmElmntLst = null;
-		List<String> columnListvalue = null;
-		for (String columnName : tableData.getTableColumns()) {
-			columnListvalue = new ArrayList<String>();
-			tableDataMap.put(columnName, columnListvalue);
-		}
-		final NodeList nodeList = doc.getElementsByTagName("Row");
-		if (nodeList != null) {
-			for (int count = 0; count < nodeList.getLength(); count++) {
-				fstNode = nodeList.item(count);
-				if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
-					fstElmnt = (Element) fstNode;
-					for (String data : tableData.getTableColumns()) {
-						lstNmElmntLst = fstElmnt.getElementsByTagName(data);
-						lstNmElmnt = (Element) lstNmElmntLst.item(0);
-						String str = lstNmElmnt.getTextContent();
-						columnListvalue = tableDataMap.get(lstNmElmnt.getNodeName());
-						columnListvalue.add(str);
+			queryTxt.append(" from ");
+			queryTxt.append(tableData.getFileName());
+			if(tableData.getIsFiltered() && tableData.getFilterSet().size() > 0){
+				queryTxt.append(constructWhereClause(tableData));
+			}
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryTxt --> " + queryTxt);
+			}
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Hitting URL for filter - "+ locator.getws_sqlServiceSoapAddress());
+				LOG.debug("Result String: " + resultString);
+			}
+	
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			Node fstNode = null;
+			Element fstElmnt = null, lstNmElmnt = null;
+			NodeList lstNmElmntLst = null;
+			List<Attribute> columnListvalue =null;
+			for (Attribute columnName : tableData.getTableColumns()) {
+				columnListvalue = new ArrayList<Attribute>();
+				tableDataMap.put(columnName.getColumnName(), columnListvalue);
+			}
+			final NodeList nodeList = doc.getElementsByTagName("Row");
+			if (nodeList != null) {
+				String str;
+				for (int count = 0; count < nodeList.getLength(); count++) {
+					fstNode = nodeList.item(count);
+					if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+						fstElmnt = (Element) fstNode;
+						for (Attribute data : tableData.getTableColumns()) {
+							lstNmElmntLst = fstElmnt.getElementsByTagName(data.getColumnName());
+							lstNmElmnt = (Element) lstNmElmntLst.item(0);
+							// Rounding off Numeric values
+							if(DashboardUtil.checkNumeric(
+									tableData.getFields().get(
+											tableData.getFields().indexOf(new Field(data.getColumnName(), null)))
+											.getDataType())) {
+								str = new BigDecimal(lstNmElmnt.getTextContent()).setScale(2, RoundingMode.HALF_EVEN).toPlainString();
+							} else {
+								str = lstNmElmnt.getTextContent();
+							}
+							columnListvalue = tableDataMap.get(lstNmElmnt.getNodeName());
+							columnListvalue.add(new Attribute(str));
+						}
 					}
 				}
 			}
-		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(("filterDataList -->" + tableDataMap));
-		}
-		}catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(("tableDataMap -->" + tableDataMap));
+			}
+		} catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
 			LOG.error("Exception occurred while fetching TAble Data data in fetchTableData()", ex);
 			throw ex;
-		}			
+		}		
 		return tableDataMap;
 	}
 
@@ -653,6 +669,284 @@ public class HPCCServiceImpl implements HPCCService{
 		return results;
 	}
 
+
+	@Override
+	public List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception {
+
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+
+			final StringBuilder queryTxt=new StringBuilder("select prim_range, prim_name, addr_suffix, v_city_name, st  from test::providers where lname = '");
+			queryTxt.append(lName);
+			queryTxt.append("' and fname = '");
+			queryTxt.append(fName);
+			queryTxt.append("'");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("prim_range").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("prim_name").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("addr_suffix").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+		
+		}
+		catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
+	}
+	
+	@Override
+	public List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception {
+		
+		List<List<String>> list = new ArrayList<List<String>>();
+		
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select t1.lname, t1.fname from test::providers as t1 inner join test::facility as t2 on (t2.lnpid = t1.lnpid AND t2.prim_range = t1.prim_range and t2.prim_name = t1.prim_name AND (t2.prim_range = '");
+			queryTxt.append(primRange);
+			queryTxt.append("' AND t2.prim_name = '");
+			queryTxt.append(primName);
+			queryTxt.append("'))");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Query for First level -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String: " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			
+			List<String> row;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);
+				
+				row = new ArrayList<String>();
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					
+					row.add(eElement.getElementsByTagName("fname").item(0).getTextContent());
+					row.add(eElement.getElementsByTagName("lname").item(0).getTextContent());
+				}
+				
+				list.add(row);
+			}
+			
+		} catch (ServiceException | ParserConfigurationException | SAXException | IOException ex) {
+			LOG.error("Exception occurred while fetching String filter data in fetchFilterData()", ex);
+			throw ex;
+		} 
+		return list;
+	}
+
+
+	@Override 
+	public String[] getRootKeyList(HpccConnection hpccConnection) throws Exception {
+		
+		List<String> fnameLnameList = new ArrayList<String>();
+		String[] fnameLnameArray = null;
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select fname,lname from test::providers group by fname,lname");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("queryTxt in getRootKeyList() -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String in getRootKeyList() --> " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			StringBuilder fnameLname=null;
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);				
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					fnameLname = new StringBuilder();
+					fnameLname.append(eElement.getElementsByTagName("fname").item(0).getTextContent());
+					fnameLname.append(" ");
+					fnameLname.append(eElement.getElementsByTagName("lname").item(0).getTextContent());
+				}
+				fnameLnameList.add(fnameLname.toString());
+			}
+			fnameLnameArray = fnameLnameList.toArray((new String[fnameLnameList.size()]));
+			if(LOG.isDebugEnabled()){
+				LOG.debug("fnameLnameList in getRootKeyList() --> " + fnameLnameList);
+			}
+		}catch(ServiceException | ParserConfigurationException | SAXException | IOException ex){
+			LOG.error("Exception occurred while fetching Root key List in getRootKeyList()", ex);
+			throw ex;
+		}
+		return fnameLnameArray;
+	}
+
+
+	@Override
+	public List<Map<String, Integer>> getChordData(HpccConnection hpccConnection)
+			throws Exception {
+		 List<Map<String, Integer>> dataMap = new  ArrayList<Map<String, Integer>>();
+		 Map<String, Integer> indiaMap = new HashMap<String, Integer>();
+		 Map<String, Integer> usMap = new HashMap<String, Integer>();
+		 Map<String, Integer> UkMap = new HashMap<String, Integer>();
+		final Ws_sqlLocator locator = new Ws_sqlLocator();
+		locator.setWs_sqlServiceSoap_userName(hpccConnection.getUsername());
+		locator.setWs_sqlServiceSoap_password(hpccConnection.getPassword());
+		if(hpccConnection.getIsSSL()) {
+			locator.setWs_sqlServiceSoapAddress("https://" + hpccConnection.getHostIp()+ ":1" + WS_SQL_ENDPOINT);
+		} else {
+			locator.setWs_sqlServiceSoapAddress("http://" + hpccConnection.getHostIp()+ ":" + WS_SQL_ENDPOINT);
+		}
+		
+		Ws_sqlServiceSoap soap;
+		try {
+			soap = locator.getws_sqlServiceSoap();
+			final ExecuteSQLRequest req = new ExecuteSQLRequest();
+			
+			final StringBuilder queryTxt=new StringBuilder("select peoplecount,lives,prefers from birt::lifechoice");
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("queryTxt in getChordData() -> " + queryTxt.toString());
+			}
+			
+			req.setSqlText(queryTxt.toString());
+			req.setTargetCluster("thor");
+			final ExecuteSQLResponse result = soap.executeSQL(req);
+			final String resultString = result.getResult();
+			
+			if(LOG.isDebugEnabled()){
+				LOG.debug("Result String in getChordData() --> " + resultString);
+			}
+			
+			final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder db = dbf.newDocumentBuilder();
+			final InputSource inStream = new InputSource();
+			inStream.setCharacterStream(new StringReader(resultString));
+			final Document doc = db.parse(inStream);
+			
+			NodeList nList = doc.getElementsByTagName("Row");
+			for (int i = 0; i < nList.getLength(); i++) {
+				Node nNode = nList.item(i);				
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					if("India".equalsIgnoreCase(eElement.getElementsByTagName("lives").item(0).getTextContent())){
+						indiaMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}else if("us".equalsIgnoreCase(eElement.getElementsByTagName("lives").item(0).getTextContent())){
+						usMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}else {
+						UkMap.put(eElement.getElementsByTagName("prefers").item(0).getTextContent(),
+								Integer.valueOf(eElement.getElementsByTagName("peoplecount").item(0).getTextContent()));
+					}
+				}
+			}
+			if(LOG.isDebugEnabled()){
+				LOG.debug("indiaMap -->"+indiaMap);
+				LOG.debug("usMap -->"+usMap);
+				LOG.debug("UkMap -->"+UkMap);
+			}
+			dataMap.add(indiaMap);
+			dataMap.add(usMap);
+			dataMap.add(UkMap);
+		return dataMap;
+	}catch(ServiceException | ParserConfigurationException | SAXException | IOException ex){
+		LOG.error("Exception occurred while fetching data for Chord diagram in getChordData()", ex);
+		throw ex;
+	}
+	}
 
 	
 }

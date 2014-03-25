@@ -14,6 +14,7 @@ import org.hpccsystems.dashboard.entity.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.zkoss.util.resource.Labels;
 
 /**
  * Dao class to do Application related DB hits
@@ -53,7 +54,7 @@ public class ApplicationDaoImpl implements ApplicationDao {
 		}
 		
 		if(LOG.isDebugEnabled()){
-			LOG.debug("Selected Application list -> " + applications);
+			LOG.debug(Labels.getLabel("selectedApplicationList") + applications);
 		}
 		
 		return applications;

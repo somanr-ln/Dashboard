@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
+import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.entity.FileMeta;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
@@ -21,7 +23,7 @@ public interface HPCCService {
 	 * 	Map with Column name as Key and Data type as result
 	 * @throws Exception
 	 */
-	Map<String,String> getColumnSchema(final String fileName, final HpccConnection hpccConnection) throws Exception;
+	Set<Field> getColumnSchema(final String fileName, final HpccConnection hpccConnection) throws Exception;
 	
 	 /**
 	  * getChartData() is used the retrieve the ChartData details and render the D3 charts.
@@ -67,7 +69,7 @@ public interface HPCCService {
 	 * @return
 	 * @throws Exception
 	 */
-	LinkedHashMap<String, List<String>> fetchTableData(XYChartData data) throws Exception;
+	LinkedHashMap<String, List<Attribute>> fetchTableData(XYChartData data) throws Exception;
 	
 	
 	/**
@@ -78,5 +80,38 @@ public interface HPCCService {
 	 * @throws Exception
 	 */
 	List<FileMeta> getFileList(String scope, HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * @param fName
+	 * @param lName
+	 * @param hpccConnection
+	 * @return List<List<String>>
+	 * @throws Exception
+	 */
+	List<List<String>> getFirstLevel(String fName, String lName, HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * @param primRange
+	 * @param primName
+	 * @param hpccConnection
+	 * @return List<List<String>>
+	 * @throws Exception
+	 */
+	List<List<String>> getSecondLevel(String primRange, String primName, HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * Service to get list of Root keys from HPcc for Tree Layout
+	 * @param hpccConnection
+	 * @return String[]
+	 */
+	String[] getRootKeyList(HpccConnection hpccConnection) throws Exception;
+	
+	/**
+	 * Service returns data to draw chord diagram
+	 * @param hpccConnection
+	 * @return List<Map<String,Integer>>
+	 * @throws Exception
+	 */
+	List<Map<String,Integer>> getChordData(HpccConnection hpccConnection) throws Exception;
 
 }

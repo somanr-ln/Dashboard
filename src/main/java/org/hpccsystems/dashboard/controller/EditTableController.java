@@ -1,9 +1,9 @@
 package org.hpccsystems.dashboard.controller;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap; 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,14 +11,17 @@ import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
 import org.hpccsystems.dashboard.api.entity.Field;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.TableRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.DropEvent;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -30,7 +33,10 @@ import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Listbox;
+import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
+import org.zkoss.zul.Textbox;
+
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
 public class EditTableController extends SelectorComposer<Component> {
@@ -71,59 +77,85 @@ public class EditTableController extends SelectorComposer<Component> {
 		sourceList.addEventListener(Events.ON_DROP, dropListener);
 		targetList.addEventListener(Events.ON_DROP, dropListener);
 		
-		Map<String,String> columnSchemaMap;
+		Set<Field> columnSet ;
 		if(authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_CONFIG_CHART)) {
 			ChartConfiguration configuration = (ChartConfiguration) Executions.getCurrent().getAttribute(Constants.CIRCUIT_CONFIG);
-			columnSchemaMap = new HashMap<String, String>();
+			columnSet = new HashSet<Field>();
 			for (Field field : configuration.getFields()) {
-				columnSchemaMap.put(field.getColumnName(), field.getDataType());
+				columnSet.add(field);
 			}
 		} else {
-			columnSchemaMap = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
+			columnSet = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
 		}
 		
 		if(Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())) {
 			try {
-				Map<String,String> schemaMap = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
-				for (String column : tableData.getTableColumns()) {
-					if(!schemaMap.containsKey(column)){
+				Set<Field> schemaSet = hpccService.getColumnSchema(tableData.getFileName(), tableData.getHpccConnection());
+				for (Attribute column : tableData.getTableColumns()) {
+					boolean columnExist = false;
+					for(Field field : schemaSet){
+						if(column.getColumnName().equals(field.getColumnName().trim())){
+							columnExist =true;
+							break;
+						}
+					}
+					if(!columnExist){
 						throw new Exception("Column doesn't exist");
 					}
 				}
-				tableHolder.appendChild(tableRenderer.constructTableWidget(hpccService.fetchTableData(tableData), true, portlet.getName()));
+				if(tableData.getTableColumns() != null && tableData.getTableColumns().size() > 0) {
+					tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
+				}
 			} catch (Exception e) {
 				LOG.error(e.getMessage());
 			}
 			
 		}
 		
+		//Setting fields to ChartData
+		List<Field> fields = new ArrayList<Field>();
+		fields.addAll(columnSet);
+		tableData.setFields(fields);
+		
+		
 		Listitem listItem;
+		Listcell listCell ;
+		Textbox textBox ;
 		if(Constants.STATE_LIVE_CHART.equals(portlet.getWidgetState())) {
-			for (Map.Entry<String, String> entry : columnSchemaMap.entrySet()) {
-				listItem = new Listitem(entry.getKey());
+			for(Attribute attribute : tableData.getTableColumns()){
+				listCell =new Listcell();
+				listItem = new Listitem();
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				listItem.addEventListener(Events.ON_DROP, dropListener);
-				
-				if(tableData.getTableColumns().contains(entry.getKey())) {
-					listItem.setParent(targetList);
-				} else {
+				textBox = new Textbox();
+				textBox.setValue(attribute.getDisplayName());
+				textBox.setInplace(true);
+				textBox.setStyle("border: none;	color: black; width: 150px;");
+				textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
+				textBox.setParent(listCell);
+				listCell.setParent(listItem);
+				listItem.setAttribute(Constants.ATTRIBUTE, attribute);
+				listItem.setParent(targetList);
+			}
+			for (Field field : columnSet) {
+				if(!tableData.getTableColumns().contains(new Attribute(field.getColumnName()))) {
+					listItem = new Listitem();
+					listItem.setDraggable("true");
+					listItem.setDroppable("true");
+					listItem.setLabel(field.getColumnName());
 					listItem.setParent(sourceList);
 				}
 			}
 			
 			//TODO: Add else part
-			if(portlet.getTableDataMap() != null){
-				tableHolder.appendChild(
-						tableRenderer.constructTableWidget(portlet.getTableDataMap(), true,portlet.getName())
-					);
+			if(tableData.getTableColumns() != null && tableData.getTableColumns().size() > 0) {
+				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
 			}
-		} else {
-			for (Map.Entry<String, String> entry : columnSchemaMap.entrySet()) {
-				listItem = new Listitem(entry.getKey());
+		} else { 
+			for (Field field : columnSet) {
+				listItem = new Listitem(field.getColumnName());
 				listItem.setDraggable("true");
 				listItem.setDroppable("true");
-				listItem.addEventListener(Events.ON_DROP, dropListener);
 				listItem.setParent(sourceList);
 			}
 		}
@@ -137,68 +169,91 @@ public class EditTableController extends SelectorComposer<Component> {
 		public void onEvent(DropEvent event) throws Exception {
 			Component dragged = event.getDragged();
 			Component dropped = event.getTarget();
-			
-			if(dropped instanceof Listitem) {
-				dropped.getParent().insertBefore(dragged, dropped);
-			} else {
-				//When dropped in list box
-				dropped.appendChild(dragged);
+			Listitem draggedItem = (Listitem) dragged;
+			Listitem newListItem = new Listitem();
+			newListItem.setDraggable("true");
+			if (draggedItem.getAttribute(Constants.ATTRIBUTE) != null && sourceList.equals(dropped)) {
+				Attribute attribute = (Attribute) draggedItem.getAttribute(Constants.ATTRIBUTE);
+				newListItem.setLabel(attribute.getColumnName());
+				newListItem.setParent(sourceList);
+			} else if (targetList.equals(dropped)) {
+				Listcell listCell = new Listcell();
+				Attribute attribute = new Attribute(draggedItem.getLabel());
+				attribute.setColumnName(draggedItem.getLabel());
+				newListItem.setAttribute(Constants.ATTRIBUTE, attribute);
+				Textbox textBox = new Textbox();
+				textBox.setInplace(true);
+				textBox.setStyle("border: none;	color: black; width: 150px;");
+				textBox.setValue(draggedItem.getLabel());
+				textBox.addEventListener(Events.ON_CHANGE, titleChangeLisnr);
+				textBox.setParent(listCell);
+				listCell.setParent(newListItem);
+				newListItem.setParent(targetList);
 			}
-			if(Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId()) && targetList.getChildren().size() > 1)
+			draggedItem.detach();
+			
+			if (Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId())
+					&& targetList.getChildren().size() > 1)
 				doneButton.setDisabled(false);
 			else
 				doneButton.setDisabled(true);
-			//Code to update the selected columns since the draw table is not applicaple for circuit config flow
-			List<String> selectedTableColumns=tableData.getTableColumns();
+			// Code to update the selected columns since the draw table is not  applicaple for circuit config flow
+			List<Attribute> selectedTableColumns = tableData.getTableColumns();
 			Listitem listitem;
 			selectedTableColumns.clear();
 			for (Component component : targetList.getChildren()) {
-				if(component instanceof Listitem){
+				if (component instanceof Listitem) {
 					listitem = (Listitem) component;
-					selectedTableColumns.add(
-								listitem.getLabel()
-							);
+					Attribute attribute = (Attribute) listitem.getAttribute(Constants.ATTRIBUTE);
+					selectedTableColumns.add(attribute);
 				}
 			}
 		}
-		
 	};
+	
+	// Event Listener for Change of tableColumn title text
+		private EventListener<Event> titleChangeLisnr = new EventListener<Event>() {
+			public void onEvent(final Event event) throws Exception {
+				//Circuit API
+				if (Constants.CIRCUIT_APPLICATION_ID.equals(authenticationService.getUserCredential().getApplicationId()))
+					doneButton.setDisabled(false);
+				
+				Listitem listItem = (Listitem) event.getTarget().getParent().getParent();
+				Attribute attribute = (Attribute) listItem.getAttribute(Constants.ATTRIBUTE);
+				Textbox textBox = (Textbox) event.getTarget();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("TableColumn Title is being changed");
+				}
+				attribute.setDisplayName(textBox.getValue());
+			}
+		};
+	
 	
 	@Listen("onClick = #drawTable")
 	public void drawTable() {
 		tableData.getTableColumns().clear();
-		if(targetList.getChildren().size() > 1) {
-			tableData.getTableColumns().clear();
+		if (targetList.getChildren().size() > 1) {
 			Listitem listitem;
 			for (Component component : targetList.getChildren()) {
-				if(component instanceof Listitem){
+				if (component instanceof Listitem) {
 					listitem = (Listitem) component;
-					tableData.getTableColumns().add(
-								listitem.getLabel()
-							);
+					Attribute attribute = (Attribute) listitem.getAttribute(Constants.ATTRIBUTE);
+					tableData.getTableColumns().add(attribute);
 				}
 			}
-			
-			LinkedHashMap<String, List<String>> tableValues = null;
 			try {
-				tableValues = hpccService.fetchTableData(tableData);
-				
+
 				tableHolder.getChildren().clear();
-				tableHolder.appendChild(
-						tableRenderer.constructTableWidget(tableValues, true,portlet.getName())
-						);
+				tableHolder.appendChild(tableRenderer.constructTableWidget(portlet, tableData, true));
 			} catch (Exception e) {
-				Clients.showNotification("Table Creation failed. Please try again.", "error", tableHolder, "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("tableCreationFailed"), "error", tableHolder, "middle_center", 3000, true);
 				LOG.error("Table creation failed", e);
 				return;
 			}
-			
 			doneButton.setDisabled(false);
-			
-			portlet.setTableDataMap(tableValues);
 		} else {
-			Clients.showNotification("Move some columns over here to draw a Table", "error", targetList, "middle_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("moveSomeColumn"),
+					"error", targetList, "middle_center", 3000, true);
 		}
 	}
-
 }

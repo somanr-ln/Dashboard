@@ -8,6 +8,7 @@ import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.FileListTreeModel;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -87,7 +88,7 @@ public class SelectDataController extends SelectorComposer<Component>{
 					hpccService.getFileList(fileMeta.getScope(), chartData.getHpccConnection())
 				);
 		} catch (Exception e) {
-			Clients.showNotification("Please check provided HPCC Credentials", "error", username.getParent().getParent(), "after_center", 3000, true);
+			Clients.showNotification(Labels.getLabel("plzCheckProvidedHPCCCrendentials"), "error", username.getParent().getParent(), "after_center", 3000, true);
 			LOG.error("Exception while browsing files for selcted Scope", e);
 			return;
 		}
@@ -122,7 +123,7 @@ public class SelectDataController extends SelectorComposer<Component>{
 			chartData.setFileName(selectedFileName.getValue());
 			Events.sendEvent("onIncludeDetach", parentWindow, Constants.EDIT_WINDOW_TYPE_DATA_SELECTION);
 		} else {
-			Clients.showNotification("Please choose a file", "warning", tree, "middle_center", 2000, false);
+			Clients.showNotification(Labels.getLabel("plzChooseaFile"), "warning", tree, "middle_center", 2000, false);
 		}
 	}
 }

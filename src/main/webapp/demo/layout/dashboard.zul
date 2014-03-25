@@ -1,26 +1,76 @@
 <window 
-	border="none"
+	border="none" 
 	id="dashboardWin"
 	apply="org.hpccsystems.dashboard.controller.DashboardController"
 	zclass="dashboard-container"
 	contentStyle="overflow:hidden"
-	vflex="1">
+	vflex="1"> 
 
 <caption sclass="panel-heading" zclass="dashboard-header">
 	<div style="padding:0">
 		<hbox pack="stretch" width="100%" style="font-size:12px">
 			<label zclass="h1" vflex="1" id="nameLabel" maxlength="40"></label>
 			<toolbar id="dashboardToolbar" align="end" style="float:right; border-style: none; margin-right:25px;" height="46px" zclass="btn-group" visible="false">
-				<button id="addWidget" iconSclass="glyphicon glyphicon-plus" zclass="btn btn-sm btn-primary" label=" Add Widget" ></button>
-				<button id="configureDashboard" iconSclass="glyphicon glyphicon-cog" zclass="btn btn-sm btn-primary" label=" Configure Dashboard"></button>
-				<button id="deleteDashboard" iconSclass="glyphicon glyphicon-trash" zclass="btn btn-sm btn-danger" label=" Delete Dashboard"></button>
+				<button id="addWidget" iconSclass="glyphicon glyphicon-plus" zclass="btn btn-sm btn-primary" label="${labels.addWidget}" ></button>
+				<button id="configureDashboard" iconSclass="glyphicon glyphicon-cog" zclass="btn btn-sm btn-primary" label="${labels.configureDashboard}"></button>
+				<button id="deleteDashboard" iconSclass="glyphicon glyphicon-trash" zclass="btn btn-sm btn-danger" label=" ${labels.deleteDashboard}"></button>
 			</toolbar>
 			
-		</hbox>
+		</hbox> 
 	</div>
 </caption>
 
+<style>
+	.popup {
+		border: 1px solid rgb(240, 240, 240);
+		background-color: rgb(235, 235, 235);
+	}
+	.popup-content {
+		padding: 3px;
+	}
+	
+	.ui-slider .ui-slider-handle {
+		border-color: #979797;
+	}
+	
+	.ui-slider .ui-slider-range {
+		background-color: #B3B3B3;
+	}
+	
+</style>
+
 <vlayout vflex="1" hflex="1" zclass="dashboard-body" style="overflow:auto; margin-top: 30px; margin-left: 5px;">
+	<panel id="commonFiltersPanel" zclass="panel" border="normal" style="margin-bottom: 0px;" visible="false">
+		<caption>
+			<div hflex="1">
+				<hbox align="center" pack="stretch" hflex="1">
+					<div>
+						<label sclass="h5"> Common Filters </label>
+					</div>
+					
+					<toolbar align="end" style="float:right; border-style: none;">
+						<popup id="filterColumnPopup" zclass="popup">
+							<listbox width="200px"  multiple="false" id="commonFilterList" rows="10">
+								
+							</listbox>
+						</popup>
+						<button sclass="glyphicon glyphicon-plus btn btn-link img-btn" popup="filterColumnPopup, position=start_before"></button>
+					</toolbar>
+				</hbox>
+			</div>
+		</caption>
+		<panelchildren>
+			<grid style="border:none;" emptyMessage="Choose a Column to apply Filters">
+				<columns>
+					<column width="200px"></column>
+					<column></column>
+				</columns>
+				<rows id="filterRows">
+					
+				</rows>
+			</grid>
+		</panelchildren>
+	</panel>
 	<portallayout>
 		<portalchildren visible="false"/>
 		<portalchildren visible="false"/>

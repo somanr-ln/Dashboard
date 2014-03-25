@@ -1,6 +1,7 @@
 package org.hpccsystems.dashboard.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -12,9 +13,10 @@ import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.event.ScrollEvent;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
@@ -22,8 +24,9 @@ import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Html;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Slider;
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
 public class NumericFilterController extends SelectorComposer<Component>{
@@ -46,16 +49,21 @@ public class NumericFilterController extends SelectorComposer<Component>{
 	AuthenticationService  authenticationService;
 	
 	@Wire
-	Slider minimumSlider;
-	@Wire
 	Label minimumLabel;
 	
 	@Wire
-	Slider maximumSlider;
-	@Wire
 	Label maximumLabel;
+	
+	@Wire
+	Div sliderDiv;
+	
 	@Wire
 	Button filtersSelectedBtn;
+	
+	BigDecimal min;
+	BigDecimal max;
+
+	BigDecimal rangeFactor;
 	
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -65,79 +73,120 @@ public class NumericFilterController extends SelectorComposer<Component>{
 		filter = (Filter) Executions.getCurrent().getAttribute(Constants.FILTER);
 		chartData = (XYChartData) Executions.getCurrent().getAttribute(Constants.CHART_DATA);
 		doneButton = (Button) Executions.getCurrent().getAttribute(Constants.EDIT_WINDOW_DONE_BUTTON);
-		
-		BigDecimal min;
-		BigDecimal max;
-		if(filter.getStartValue() != null && filter.getEndValue() != null ) {
-			min = new BigDecimal(filter.getStartValue().toString());
-			max = new BigDecimal(filter.getEndValue().toString());
-		} else {
-			Map<Integer, BigDecimal> map = null;
-			try	{
-				if(chartData.getXColumnNames().contains(filter.getColumn()) ||
-						chartData.getYColumns().contains(filter.getColumn())){
-					map = hpccService.getMinMax(filter.getColumn(), chartData, true);
-				} else {
-					map = hpccService.getMinMax(filter.getColumn(), chartData, false);
-				}
-			} catch(Exception e) {
-				if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
-						authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_VIEW_DASHBOARD)){
-					Clients.showNotification("Unable to fetch data to Filter for the column dropped", 
-							"error", doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
-				}else{
-					Clients.showNotification("Unable to fetch column data from HPCC", true);
-				}
-				LOG.error("Exception while fetching data from Hpcc for selected Numeric filter", e);
-				return;
+	
+		Map<Integer, BigDecimal> map = null;
+		try	{
+			if(chartData.getxColumnNames().contains(filter.getColumn()) ||
+					chartData.getYColumns().contains(filter.getColumn())){
+				map = hpccService.getMinMax(filter.getColumn(), chartData, true);
+			} else {
+				map = hpccService.getMinMax(filter.getColumn(), chartData, false);
 			}
-			
-			min = map.get(Constants.FILTER_MINIMUM);
-			max = map.get(Constants.FILTER_MAXIMUM);
+		} catch(Exception e) {
+			if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
+					authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_VIEW_DASHBOARD)){
+				Clients.showNotification(Labels.getLabel("unableToFetchDataForFilterColumn"), 
+						"error", doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
+			}else{
+				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
+			}
+			LOG.error("Exception while fetching data from Hpcc for selected Numeric filter", e);
+			return;
 		}
+		
+		min = map.get(Constants.FILTER_MINIMUM);
+		max = map.get(Constants.FILTER_MAXIMUM);
 			
 		minimumLabel.setValue(min.toString());
 		maximumLabel.setValue(max.toString());
 		
-		//TODO Add minimum positions after upgrading to zk 7.0.1 
-		minimumSlider.setMaxpos(max.intValue());
-		minimumSlider.setCurpos(min.intValue());
+		//Intitialising Slider positions
+		Integer sliderStart = 0;
+		Integer sliderEnd = 100;
 		
-		maximumSlider.setMaxpos(max.intValue());
-		maximumSlider.setCurpos(max.intValue());
+		//Translating min & max to a scale of 0 to 100 using Linear equation 
+		//((actualVal - actualMin)/(actualMax- actualMin)) = ((sliderVal - sliderMin)/(sliderMax- sliderMin))
+		// Range Factor = (actualMax- actualMin)/(sliderMax- sliderMin)
+		rangeFactor = max.subtract(min).divide(new BigDecimal(100));
 		
-		chartData.getFilterList().add(filter);
-	}
-	
-	@Listen("onScroll = #minimumSlider")
-	public void onMinSliderScroll(ScrollEvent event) {
-		minimumLabel.setValue(String.valueOf(minimumSlider.getCurpos()));
-	}
-	
-	@Listen("onScroll = #maximumSlider")
-	public void onMaxSliderScroll(ScrollEvent event) {
-		int currentMinimumPos = minimumSlider.getCurpos();
-		
-		maximumLabel.setValue(String.valueOf(maximumSlider.getCurpos()));
-		
-		minimumSlider.setMaxpos(maximumSlider.getCurpos());
-		minimumSlider.setCurpos(currentMinimumPos);
-		
-		if(currentMinimumPos > maximumSlider.getCurpos()){
-			minimumSlider.setCurpos(maximumSlider.getCurpos());
-			minimumLabel.setValue(String.valueOf(maximumSlider.getCurpos()));
+		if(filter.getStartValue() != null && filter.getEndValue() != null) {
+			//Updating slider positions for already applied filters
+			sliderStart = filter.getStartValue().subtract(min).divide(rangeFactor, RoundingMode.DOWN).intValue();
+			sliderEnd = filter.getEndValue().subtract(min).divide(rangeFactor, RoundingMode.CEILING).intValue();
+		} else {
+			filter.setStartValue(min);
+			filter.setEndValue(max);
 		}
+		
+		StringBuilder html = new StringBuilder();
+		html.append("<div id=\"");
+			html.append(filter.getColumn());
+			html.append("_sdiv\" style=\"margin: 8px;\" class=\"slider-grey\">");
+		
+		html.append("<script type=\"text/javascript\">");
+			html.append("$('#").append(filter.getColumn()).append("_sdiv').slider({")
+				.append("range: true,")
+				.append("values: [").append(sliderStart).append(", ").append(sliderEnd).append("]")
+				.append("});");
+	
+			html.append("$('#").append(filter.getColumn()).append("_sdiv').on( \"slide\", function( event, ui ) {")
+				.append("payload = \"").append(filter.getColumn()).append("_hbox,\" + ui.values;")
+				.append("zAu.send(new zk.Event(zk.Widget.$('$")
+					.append("numericFilterPopup").append("'), 'onSlide', payload, {toServer:true}));")
+				.append("});");
+			
+			html.append("$('#").append(filter.getColumn()).append("_sdiv').on( \"slidestop\", function( event, ui ) {")
+				.append("payload = \"").append(filter.getColumn()).append("_hbox,\" + ui.values;")
+				.append("zAu.send(new zk.Event(zk.Widget.$('$")
+					.append("numericFilterPopup").append("'), 'onSlideStop', payload, {toServer:true}));")
+				.append("});");
+		html.append("</script>");
+		
+		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Generated HTML " + html.toString());
+		}
+		
+		sliderDiv.appendChild(new Html(html.toString()));
+	}
+	
+	@Listen("onSlide = #numericFilterPopup")
+	public void onSlide(Event event) {
+		String[] data = ((String) event.getData()).split(",");
+		
+		Integer startPosition = Integer.valueOf(data[1]);
+		Integer endPosition = Integer.valueOf(data[2]);
+		
+		//Converting position into value
+		// value = pos . rangeFactor + min  
+		minimumLabel.setValue(String.valueOf(rangeFactor.multiply(new BigDecimal(startPosition)).add(min).intValue()));
+		maximumLabel.setValue(String.valueOf(rangeFactor.multiply(new BigDecimal(endPosition)).add(min).intValue()));
+	}
+
+	@Listen("onSlideStop = #numericFilterPopup")
+	public void onSlideStop(Event event) {
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("On Slide Stop Event - Data -- " + event.getData());
+		}
+		
+		String[] data = ((String) event.getData()).split(",");
+		
+		Integer startPosition = Integer.valueOf(data[1]);
+		Integer endPosition = Integer.valueOf(data[2]);
+		
+		//Updating Change to filter object
+		// value = pos . rangeFactor + min  
+		filter.setStartValue(rangeFactor.multiply(new BigDecimal(startPosition)).add(min));
+		filter.setEndValue(rangeFactor.multiply(new BigDecimal(endPosition)).add(min));
+		
 	}
 	
 	@Listen("onClick = button#filtersSelectedBtn")
 	public void onfiltersSelected() {
 				
-		filter.setStartValue((double) minimumSlider.getCurpos());
-		filter.setEndValue((double) maximumSlider.getCurpos());
-		
 		chartData.setIsFiltered(true);
-		if(!chartData.getFilterList().contains(filter)){
-			chartData.getFilterList().add(filter);
+		if(!chartData.getFilterSet().contains(filter)){
+			chartData.getFilterSet().add(filter);
 		}
 		
 		try	{
@@ -146,10 +195,10 @@ public class NumericFilterController extends SelectorComposer<Component>{
 		} catch(Exception ex) {
 			if(!authenticationService.getUserCredential().getApplicationId().equals(Constants.CIRCUIT_APPLICATION_ID) || 
 					authenticationService.getUserCredential().hasRole(Constants.CIRCUIT_ROLE_VIEW_DASHBOARD)){
-				Clients.showNotification("Unable to fetch column data from HPCC", "error", 
+				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), "error", 
 						doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);			
 			}else{
-				Clients.showNotification("Unable to fetch column data from HPCC", true);
+				Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), true);
 			}
 			LOG.error("Exception while fetching column data from Hpcc", ex);
 			return;

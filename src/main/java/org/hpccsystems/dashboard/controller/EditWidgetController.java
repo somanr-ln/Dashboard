@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -20,7 +19,7 @@ import org.hpccsystems.dashboard.services.DashboardService;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.springframework.dao.DataAccessException;
-import org.zkoss.lang.Threads;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
@@ -29,6 +28,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.MouseEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -172,7 +172,6 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			}
 		}
 		
-		
 		holderInclude.setDynamicProperty(Constants.CHART_DATA, chartData);
 		holderInclude.setDynamicProperty(Constants.PORTLET, portlet);
 		holderInclude.setDynamicProperty(Constants.EDIT_WINDOW_DONE_BUTTON, doneButton);
@@ -255,13 +254,13 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					widgetService.updateWidget(portlet);
 				}
 			} catch (DataAccessException e) {
-				Clients.showNotification("Error occured while saving your changes");
+				Clients.showNotification(Labels.getLabel("errorOnSavingChanges"));
 			}
 			
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
-				Clients.showNotification("Error occured while logging out");
+				Clients.showNotification(Labels.getLabel("logoutError"));
 				LOG.error("Logout error", e);
 			}
 			
@@ -277,7 +276,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			try {
 				authenticationService.logout(null);
 			} catch (Exception e) {
-				Clients.showNotification("Error occured while logging out");
+				Clients.showNotification(Labels.getLabel("logoutError"));
 				LOG.error("Logout error", e);
 			}
 			
@@ -287,6 +286,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			
 		} else {
 			//General flow
+			portlet.setChartData(chartData);
 			try {
 				Div div = chartPanel.removeStaticImage();
 
@@ -295,7 +295,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
 					div.getChildren().clear();
 					div.appendChild(
 							tableRenderer.constructTableWidget(
-									portlet.getTableDataMap(), false,portlet.getName())
+									portlet, portlet.getChartData(), false)
 							);
 				} else {
 					//For Chart Widgets
@@ -317,10 +317,14 @@ public class EditWidgetController extends SelectorComposer<Component> {
 			}catch(DataAccessException e){
 				LOG.error("Exception in closeEditWindow() while updating Live chart data into DB", e);
 			}catch(Exception ex) {
-				Clients.showNotification("Unable to fetch column data from HPCC to draw chart", "error", this.getSelf(), "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("unableToFetchHpccData"), "error", this.getSelf(), "middle_center", 3000, true);
 				LOG.error("Exception in closeEditWindow()", ex);
 				return;
 			}
+			
+			final Include include = (Include) Selectors.iterable(this.getSelf().getPage(), "#mainInclude").iterator().next();
+			Window window = (Window) include.getChildren().iterator().next();
+			Events.sendEvent("onDrawingLiveChart", window, portlet);
 			editPortletWindow.detach();
 		}
 	}
@@ -344,7 +348,7 @@ public class EditWidgetController extends SelectorComposer<Component> {
     			              		   editPortletWindow.detach();
     			              		   Clients.evalJavaScript("window.open('','_self',''); window.close();");
     			              	   } catch (Exception ex) {
-    			              		   LOG.error("Error while Log out", ex);
+    			              		 LOG.error("Error while Log out", ex);
     			              	   }
     			                }
     			            }

@@ -1,29 +1,33 @@
 package org.hpccsystems.dashboard.entity.chart;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
-
+import java.util.Set;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+import org.hpccsystems.dashboard.api.entity.Field;
+
+@XmlRootElement 
 public class XYChartData {
 	
 	private HpccConnection hpccConnection;
 	
 	private String fileName;
 	
-	private List<String> xColumnNames;
+	private List<Attribute> xColumnNames;
 	private List<Measure> yColumns;
-	private List<String> tableColumns;
+	private List<Attribute> tableColumns;
 	
 	
 	private Boolean isFiltered = false;
-	private List<Filter> filterList;
+	private Set<Filter> filterSet;
 	
 	private Boolean isGrouped = false;
-	
 	private Group group;
+	
+	private List<Field> fields;
 	
 	@XmlElement
 	public String getFileName() {
@@ -32,18 +36,6 @@ public class XYChartData {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
-	}
-
-	@XmlElement
-	public List<String> getXColumnNames() {
-		if(xColumnNames == null) {
-			xColumnNames = new ArrayList<String>();
-		}
-		return xColumnNames;
-	}
-
-	public void setXColumnNames(List<String> xColumnNames) {
-		this.xColumnNames = xColumnNames;
 	}
 
 	@XmlElement
@@ -59,6 +51,18 @@ public class XYChartData {
 	}
 
 	@XmlElement
+	public List<Attribute> getTableColumns() {
+		if(tableColumns == null) {
+			tableColumns = new ArrayList<Attribute>();
+		}
+		return tableColumns;
+	}
+
+	public void setTableColumns(List<Attribute> tableColumns) {
+		this.tableColumns = tableColumns;
+	}
+
+	@XmlElement
 	public Boolean getIsFiltered() {
 		return isFiltered;
 	}
@@ -67,17 +71,6 @@ public class XYChartData {
 		this.isFiltered = isFiltered;
 	}
 
-	@XmlElement
-	public final List<String> getTableColumns() {
-		if(tableColumns == null) {
-			tableColumns = new ArrayList<String>();
-		}
-		return tableColumns;
-	}
-
-	public final void setTableColumns(List<String> tableColumnName) {
-		this.tableColumns = tableColumnName;
-	}
 
 	@XmlElement
 	public HpccConnection getHpccConnection() {
@@ -108,25 +101,47 @@ public class XYChartData {
 	}
 
 	@XmlElement
-	public List<Filter> getFilterList() {
-		if(filterList == null){
-			filterList = new ArrayList<Filter>();
+	public Set<Filter> getFilterSet() {
+		if(filterSet == null){
+			filterSet = new LinkedHashSet<Filter>();
 		}
-		return filterList;
+		return filterSet;
 	}
 
-	public void setFilterList(List<Filter> filterList) {
-		this.filterList = filterList;
+	public void setFilterSet(Set<Filter> filterSet) {
+		this.filterSet = filterSet;
+	}
+	
+	@XmlElement
+	public List<Field> getFields() {
+		return fields;
+	}
+	
+	public void setFields(List<Field> fields) {
+		this.fields = fields;
 	}
 
 	@Override
 	public String toString() {
 		return "XYChartData [hpccConnection=" + hpccConnection + ", fileName="
-				+ fileName + ", xColumnNames=" + xColumnNames
-				+ ", yColumnNames=" + yColumns + ", tableColumns="
-				+ tableColumns + ", isFiltered=" + isFiltered + ", filterList="
-				+ filterList + ", isGrouped=" + isGrouped + ", group=" + group
-				+ "]";
+				+ fileName + ", xColumnNames=" + xColumnNames + ", yColumns="
+				+ yColumns + ", tableColumns=" + tableColumns + ", isFiltered="
+				+ isFiltered + ", filterSet=" + filterSet + ", isGrouped="
+				+ isGrouped + ", group=" + group + ", fields=" + fields + "]";
+	}
+	
+	@XmlElement
+	public List<Attribute> getxColumnNames() {
+		
+		if(xColumnNames == null) {
+			xColumnNames = new ArrayList<Attribute>();
+		} 
+		return xColumnNames;
 	}
 
+	public void setxColumnNames(List<Attribute> xColumnNames) {
+		this.xColumnNames = xColumnNames;
+	}
+
+	
 }

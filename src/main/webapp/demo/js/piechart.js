@@ -10,19 +10,40 @@ function createPieChart(divId, jsonArrayData) {
 		if(fullWidth < 50 ){ fullWidth = 400; }
 		if(fullHeight < 50 ){ fullHeight = 385; }
 		
+		var yColumnMargin = 20;
+		
+		var container = jq("#" + divElement.attr("id"));
+		
+		var filter_desc = "";
+		
+		
+		if(response.isFiltered){
+			filter_desc = "<span class='btn-link btn-sm' style='float: right; padding: 0px 10px;' id='"+ response.portletId +"_title'> Filters </span>" +
+					"<div id='"+ response.portletId +"_filter_content' style='line-height: initial;position: absolute;padding: 2px;border: 1px solid rgb(124, 124, 124);margin: 5px;background-color: rgb(177, 177, 177);font-size: small;color: white;z-index: 2; display: none'>"+ response.filterDescription +"</div>" +
+					"<script type='text/javascript'>" +
+						"jq('#"+ response.portletId +"_title').mouseenter(function() {" +
+								"jq('#"+ response.portletId +"_filter_content').show();" +
+										"})" +
+						".mouseleave(function() { " +
+								"jq('#"+ response.portletId +"_filter_content').hide();});" +
+					"</script>";
+		}
+		
+		container.append(jq("<div style='margin-top: 3px; margin-left: 5px; height: 15px;'>"+ filter_desc + " </div>" ));
+		
 		divElement.append(jq("<div id='chartHolder'/>" ));
 		
 		var divToDraw = d3.select(divElement.get(0)).select("div");		
 		
 		//preparing text/header for chart
-		divToDraw.append('text').text(
+		/*divToDraw.append('text').text(
 			response.yName + ' by ' + response.xName);
 		if(response.filterColumn != null && response.from != null)
 			{
 				divToDraw.append('text').text( ' where '
 						+ response.filterColumn + ' between ' + response.from
 						+ ' and ' + response.to);
-			}
+			}*/
 		//Color scale
 		var labels = data.map(function(datum){
             return datum.xData;

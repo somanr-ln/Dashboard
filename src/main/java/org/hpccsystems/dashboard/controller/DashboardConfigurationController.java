@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
@@ -16,6 +17,7 @@ import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
+import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Radio;
 import org.zkoss.zul.Radiogroup;
 import org.zkoss.zul.Textbox;
@@ -33,6 +35,8 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	Radiogroup layoutRadiogroup;
 	@Wire
 	Textbox nameTextbox;
+    @Wire
+    Checkbox commonFiltersCheckbox;
 	
 	private Component parent;
 	private Dashboard dashboard; 
@@ -41,7 +45,7 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	public void doAfterCompose(Component comp) throws Exception {
 		super.doAfterCompose(comp);
 		   
-		parent = (Component) Executions.getCurrent().getArg().get(Constants.PARENT);
+		parent = (Component) Executions.getCurrent().getArg().get(Constants.PARENT);		
 		
 		if(parent instanceof Window) {
 			//Dashboard already created
@@ -50,14 +54,17 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 			
 			nameTextbox.setValue(dashboard.getName());
 			
+			if(dashboard.isShowFiltersPanel()){
+				commonFiltersCheckbox.setChecked(true);
+			}
+			
 			try {
 				radioList.get(dashboard.getColumnCount() - 1).setSelected(true);
 			} catch (ArrayIndexOutOfBoundsException e) {
-				Clients.showNotification("No widgets are present in Dashboard. Choose a layout.", "info", getSelf(), "middle_center", 3000, true);
+				Clients.showNotification(Labels.getLabel("noWidgetException"), "info", getSelf(), "middle_center", 3000, true);
 			}
 		} else {
-			//Creating a new Dashboard 
-			
+			//Creating a new Dashboard 			
 			//Setting two column layout as default
 			radioList.get(1).setSelected(true);
 		}
@@ -67,10 +74,13 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 	@Listen("onClick = #dashConfigDoneButton")
 	public void done() {
 		if(parent instanceof Window) {
-			dashboard.setName(nameTextbox.getValue());		
-			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));
+			//Changing configuration of existing board
+			dashboard.setName(nameTextbox.getValue());
+			dashboard.setShowFiltersPanel(commonFiltersCheckbox.isChecked());
+			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));			
 			Events.sendEvent("onLayoutChange", parent, null);
 		} else {
+			//Creating new Board
 			Dashboard dashboard = new Dashboard();
 			dashboard.setName(nameTextbox.getValue());
 			dashboard.setColumnCount(Integer.parseInt(layoutRadiogroup.getSelectedItem().getValue().toString()));
@@ -106,4 +116,5 @@ public class DashboardConfigurationController extends SelectorComposer<Component
 		
 		this.getSelf().detach();
 	}
+	
 }

@@ -5,11 +5,11 @@
 		>
 		
 		<hlayout zclass="form-group">
-			<label zclass="label" value="${labels.userName}"></label>
+			<label zclass="label" value="${labels.lblUserName}"></label>
 			<textbox id="username" value="generic_dashboard" zclass="form-control"></textbox>
 		</hlayout>
 		<hlayout zclass="form-group">
-			<label zclass="label" value="${labels.password}"></label>
+			<label zclass="label" value="${labels.lblPassword}"></label>
 			<textbox id="password" type="password" value ="Lexis123!" zclass="form-control"></textbox>
 		</hlayout>
 		<hlayout zclass="form-group" hflex="1">
@@ -17,8 +17,8 @@
 			<textbox id="URL" constraint="no empty : Please enter valid HPCCSystems ip." value="216.19.105.2" zclass="form-control"></textbox>
 		</hlayout>
 		<hlayout zclass="form-group" hflex="0">
-			<label zclass="label" value="Connection Type"></label>
-			<checkbox style="margin-top: 4px; margin-left: 10px;" id="sslCheckbox" label="SSL" checked="true" ></checkbox>
+			<label zclass="label" value="${labels.connectionType}"></label>
+			<checkbox style="margin: 5px;" zclass="checkbox" id="sslCheckbox" label="SSL" checked="true" ></checkbox>
 		</hlayout>
 		<hlayout zclass="form-group" >
 			<button id="submitBtn" label="${labels.fetchFields}" style="margin-top:10px;"	zclass="btn btn-primary" width="135px" />
@@ -44,9 +44,9 @@
         	<treefooter>
 				<hbox hflex="1" spacing="0px">
 					<box hflex="1" vflex="1" pack="center" align="center">
-						<label id="selectedFileName"> No file selected </label>
+						<label id="selectedFileName"> ${labels.noFileSelected} </label>
 					</box>
-					<button label="Visualise" zclass="btn btn-success" id="visualizeBtn" ></button>
+					<button label="${labels.visualize}" zclass="btn btn-success" id="visualizeBtn" ></button>
 				</hbox>        		
         	</treefooter>
         </treefoot>        

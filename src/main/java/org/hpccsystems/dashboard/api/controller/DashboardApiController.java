@@ -1,14 +1,12 @@
 package org.hpccsystems.dashboard.api.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.IOException;  
+import java.util.ArrayList; 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.api.entity.ChartConfiguration;
@@ -17,6 +15,7 @@ import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.ChartDetails;
 import org.hpccsystems.dashboard.entity.Dashboard;
 import org.hpccsystems.dashboard.entity.Portlet;
+import org.hpccsystems.dashboard.entity.chart.Attribute;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Measure;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.zkoss.json.JSONArray;
 import org.zkoss.json.JSONObject;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -114,6 +112,9 @@ public void getChartList(HttpServletRequest request, HttpServletResponse respons
 				JsonArray jsonArray = new JsonArray();
 				Map<Integer, ChartDetails> chartdetailsMap = Constants.CHART_MAP;
 				for (Map.Entry<Integer, ChartDetails> entry : chartdetailsMap.entrySet()) {
+					//Excluding Tree Layout
+					if(entry.getKey().equals(Constants.TREE_LAYOUT))
+						continue;
 					
 					jsonObject = new JsonObject();
 					jsonObject.addProperty(Constants.VALUE, entry.getValue().getChartId());
@@ -188,7 +189,7 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 		try {
 			
 			XYChartData chartData = null;
-			List<String> xColumnList = null;
+			List<Attribute> xColumnList = null;
 			List<Measure> yColumnList = null;
 			String filterColumn = null;
 			Integer filterDataType = 0;
@@ -204,14 +205,14 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 				for (Portlet portlet : portletList) {
 					chartData = chartRenderer.parseXML(portlet.getChartDataXML());
 					if (chartData != null) {
-						xColumnList = chartData.getXColumnNames();
+						xColumnList = chartData.getxColumnNames();
 						yColumnList = chartData.getYColumns();
 						// For XAxis & YAxis Validation
 						xColumnValidation(failedValColumnList, xColumnList,	chartConfiguration);
 						yColumnValidation(failedValColumnList, yColumnList,	chartConfiguration);
 						// Filter Column Validation
 						if (chartData.getIsFiltered()) {
-							for (Filter filter : chartData.getFilterList()) {
+							for (Filter filter : chartData.getFilterSet()) {
 								filterColumn = filter.getColumn();
 								filterDataType = filter.getType();
 								filterColumnValidation(failedValColumnList,	filterColumn, filterDataType, chartConfiguration);
@@ -267,18 +268,18 @@ public void searchDashboard(HttpServletRequest request, HttpServletResponse resp
 	 * @return
 	 */
 	private void xColumnValidation(List<String> failedColumnList,
-			List<String> xColumnList, ChartConfiguration configuration) {
+			List<Attribute> xColumnList, ChartConfiguration configuration) {
 		Boolean xAxisValStatus = false;
 		if(xColumnList != null){
-		for (String fieldValue : xColumnList) {
+		for (Attribute fieldValue : xColumnList) {
 			for (Field entry : configuration.getFields()) {
-				if (fieldValue.equals(entry.getColumnName().trim())) {
+				if (fieldValue.getColumnName().equals(entry.getColumnName().trim())) {
 					xAxisValStatus = true;
 					break;
 				}
 			}
-			if (!xAxisValStatus && !failedColumnList.contains(fieldValue.trim())) {
-				failedColumnList.add(fieldValue.trim());
+			if (!xAxisValStatus && !failedColumnList.contains(fieldValue)) {
+				failedColumnList.add(fieldValue.getColumnName());
 			}
 			xAxisValStatus = false;
 		  }

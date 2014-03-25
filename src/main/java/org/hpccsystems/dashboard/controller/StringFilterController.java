@@ -13,6 +13,7 @@ import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.utils.ChartRenderer;
 import org.hpccsystems.dashboard.services.AuthenticationService;
 import org.hpccsystems.dashboard.services.HPCCService;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.select.SelectorComposer;
@@ -67,13 +68,13 @@ public class StringFilterController extends SelectorComposer<Component>{
 		try	{
 			// If filter column is already used to plot graph, then distinct values are filtered as well
 			// String Filters are checked against X Columns only
-			if(chartData.getXColumnNames().contains(filter.getColumn())) {
+			if(chartData.getxColumnNames().contains(filter.getColumn())) {
 				valueList = hpccService.getDistinctValues(filter.getColumn(), chartData, true);
 			} else {
 				valueList = hpccService.getDistinctValues(filter.getColumn(), chartData, false);
 			}
 		} catch(Exception e) {
-			Clients.showNotification("Unable to fetch data for the Filter column", "error", 
+			Clients.showNotification(Labels.getLabel("unableToFetchFilterColumn"), "error", 
 					doneButton.getParent().getParent().getParent(), "top_left", 3000, true);
 			LOG.error("Exception while fetching data from Hpcc for selected String filter", e);
 		}
@@ -105,11 +106,10 @@ public class StringFilterController extends SelectorComposer<Component>{
 			}
 		}
 		
-		chartData.getFilterList().add(filter);
 	}
-	
+	 
 	@Listen("onClick = button#filtersSelectedBtn")
-	public void onfiltersSelected() {
+	public void onfiltersSelected() { 
 		List<String> selectedValues = new ArrayList<String>();
 		
 		Set<Listitem> selectedSet =  filterListBox.getSelectedItems();
@@ -120,7 +120,7 @@ public class StringFilterController extends SelectorComposer<Component>{
 		
 		// Check for no values selected
 		if(selectedValues.size() < 1) {
-			Clients.showNotification("No filter values are selected. Please select some Values to filter", "error", 
+			Clients.showNotification(Labels.getLabel("noFilterareSelected"), "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
 			return;
 		}
@@ -128,15 +128,15 @@ public class StringFilterController extends SelectorComposer<Component>{
 		filter.setValues(selectedValues);
 
 		chartData.setIsFiltered(true);
-		if(!chartData.getFilterList().contains(filter)){
-			chartData.getFilterList().add(filter);
+		if(!chartData.getFilterSet().contains(filter)){
+			chartData.getFilterSet().add(filter);
 		
 		}
 		try {
 			chartRenderer.constructChartJSON(chartData, portlet, true);
 			chartRenderer.drawChart(chartData, Constants.EDIT_WINDOW_CHART_DIV, portlet);
 		} catch(Exception ex) {
-			Clients.showNotification("Unable to fetch column data from HPCC", "error", 
+			Clients.showNotification(Labels.getLabel("unableToFetchColumnData"), "error", 
 					doneButton.getParent().getParent().getParent(), "middle_center", 3000, true);
 			LOG.error("Exception while fetching column data from Hpcc", ex);
 			return;

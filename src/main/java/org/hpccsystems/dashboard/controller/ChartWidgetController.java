@@ -2,7 +2,6 @@ package org.hpccsystems.dashboard.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
@@ -11,7 +10,6 @@ import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.services.WidgetService;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -42,6 +40,11 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 	@Wire
 	Button tableWidget;
 	@Wire
+	Button treeLayout;
+	@Wire
+	Button bubbleChartButton;
+	Button chordDiagram;
+	@Wire
 	Window idWindow;
 	
 		
@@ -52,6 +55,10 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 		lineChartButton.setAttribute(Constants.CHART_TYPE, Constants.LINE_CHART);
 		pieChartButton.setAttribute(Constants.CHART_TYPE, Constants.PIE_CHART);
 		tableWidget.setAttribute(Constants.CHART_TYPE, Constants.TABLE_WIDGET);
+		treeLayout.setAttribute(Constants.CHART_TYPE, Constants.TREE_LAYOUT);
+		bubbleChartButton.setAttribute(Constants.CHART_TYPE, Constants.BUBBLE_CHART);
+		chordDiagram.setAttribute(Constants.CHART_TYPE, Constants.CHORD_DIAGRAM);
+		
 		final Portlet portlet = (Portlet) Executions.getCurrent().getArg()
 				.get(Constants.PORTLET);
 		if(LOG.isDebugEnabled()){
@@ -82,13 +89,15 @@ public class ChartWidgetController extends GenericForwardComposer<Component> {
 				Events.sendEvent(new Event("onCloseDialog", parentDiv, 
 						paramMap));
 				idWindow.detach();
-				
 			}
 		};		
 		barChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		lineChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		pieChartButton.addEventListener(Events.ON_CLICK, closeClick);
 		tableWidget.addEventListener(Events.ON_CLICK, closeClick);
+		treeLayout.addEventListener(Events.ON_CLICK, closeClick);
+		bubbleChartButton.addEventListener(Events.ON_CLICK, closeClick);
+		chordDiagram.addEventListener(Events.ON_CLICK, closeClick);
 	}
 
 }

@@ -2,40 +2,43 @@ package org.hpccsystems.dashboard.entity.chart.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.StringWriter; 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hpccsystems.dashboard.common.Constants;
 import org.hpccsystems.dashboard.entity.Portlet;
 import org.hpccsystems.dashboard.entity.chart.Filter;
 import org.hpccsystems.dashboard.entity.chart.Group;
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
 import org.hpccsystems.dashboard.entity.chart.Measure;
+import org.hpccsystems.dashboard.entity.chart.TreeData;
 import org.hpccsystems.dashboard.entity.chart.XYChartData;
 import org.hpccsystems.dashboard.entity.chart.XYModel;
+import org.hpccsystems.dashboard.entity.chart.tree.Node;
 import org.hpccsystems.dashboard.services.HPCCService;
 import org.hpccsystems.dashboard.util.EncryptDecrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
+import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
 import org.zkoss.zk.ui.util.Clients;
-
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonPrimitive; 
 
 
 @VariableResolver(org.zkoss.zkplus.spring.DelegatingVariableResolver.class)
@@ -68,23 +71,28 @@ public class ChartRenderer {
 		
 		final JsonObject header = new JsonObject();
 		StringBuilder yName = new StringBuilder();
-		StringBuilder title = new StringBuilder();
 		StringBuilder filterDescription = new StringBuilder();
 		
 		
 		if(chartData.getYColumns().size() > 0 && 
-				chartData.getXColumnNames().size() > 0) {
-			header.addProperty("xName", chartData.getXColumnNames().get(0));
+				chartData.getxColumnNames().size() > 0) {
 			
+			if (chartData.getxColumnNames().get(0).getDisplayName() == null) {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getColumnName());
+			} else {
+				header.addProperty("xName", chartData.getxColumnNames().get(0).getDisplayName());
+			}			
 			for (Measure measure : chartData.getYColumns()) {
-				yName.append(measure.getColumn() +  "_"  + measure.getAggregateFunction());
+				if (measure.getDisplayYColumnName() == null) {
+					yName.append(measure.getColumn() + "_" + measure.getAggregateFunction());
+				} else {
+					yName.append(measure.getDisplayYColumnName());
+				}
 				yName.append(" & ");
 			}
 			yName.replace(yName.lastIndexOf("&"), yName.length(), "");
 			header.addProperty("yName", yName.toString());
 		}
-		title.append(chartData.getXColumnNames().get(0) + " BY " + yName.toString());
-		
 		if(isEditWindow) {
 			header.addProperty("portletId", "e_" + portlet.getId());
 		} else {
@@ -97,9 +105,13 @@ public class ChartRenderer {
 		if(chartData.getIsFiltered())
 			filterDescription.append(" WHERE ");
 		
-		Iterator<Filter> filterIterator = chartData.getFilterList().iterator(); 
+		Iterator<Filter> filterIterator = chartData.getFilterSet().iterator(); 
 		while (filterIterator.hasNext()) {
 			Filter filter = (Filter) filterIterator.next();
+			if(LOG.isDebugEnabled()) {
+				LOG.debug("Filter -> " + filter);
+			}
+			
 			header.addProperty("isFiltered", true);
 			if(chartData.getIsFiltered() &&
 					Constants.STRING_DATA.equals(filter.getType())) {
@@ -134,14 +146,14 @@ public class ChartRenderer {
 		Iterator<XYModel> iterator =null;	
 		try	{
 			List<XYModel> list = null;
-			if(chartData.getXColumnNames().size() > 1) {
+			if(chartData.getxColumnNames().size() > 1) {
 				list = refactorResult(hpccService.getChartData(chartData), chartData);
 			}else {
 				list = hpccService.getChartData(chartData);
 			}
 			iterator = list.iterator();	
 		}catch(Exception e)	{
-			LOG.error("Error while retriving data", e);
+			LOG.error(Labels.getLabel("exceptionWhileRetrievingData"), e);
 			throw e;
 		}
 		
@@ -205,7 +217,6 @@ public class ChartRenderer {
 			//Adding a default pading of 5 and 10px per digit
 			header.addProperty("yWidth", (yLength<2)? yLength*10 + 30:(yLength<3)? yLength*10 + 10: yLength*10);
 			header.addProperty("xWidth", xLength*15 + 5);
-			header.addProperty("title", title.toString());
 			header.addProperty("filterDescription", filterDescription.toString());
 			
 			header.add("chartData", array);
@@ -218,13 +229,17 @@ public class ChartRenderer {
 			JsonArray rows = new JsonArray();
 			JsonArray row = new JsonArray();
 			
-			if(chartData.getXColumnNames().size() > 1 ){
+			if(chartData.getxColumnNames().size() > 1 ){
 				for (String colName : chartData.getGroup().getyColumnNames()) {
 					row.add(new JsonPrimitive(colName));
 				}
 			} else {
 				for (Measure measure : chartData.getYColumns()) {
-					row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					if(measure.getDisplayYColumnName()==null){
+						row.add(new JsonPrimitive(measure.getColumn() +  "_"  + measure.getAggregateFunction()));
+					}else{
+						row.add(new JsonPrimitive(measure.getDisplayYColumnName()));
+					}
 				}
 			}
 			
@@ -242,12 +257,16 @@ public class ChartRenderer {
 					rows.add(row);
 					
 					List<String> yColumnNames;
-					if(chartData.getXColumnNames().size() > 1){
+					if(chartData.getxColumnNames().size() > 1){
 						yColumnNames = chartData.getGroup().getyColumnNames();
 					} else {
 						yColumnNames = new ArrayList<String>();
 						for (Measure measure : chartData.getYColumns()) {
-							yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							if(measure.getDisplayYColumnName()==null){
+								yColumnNames.add(measure.getColumn() + "_" + measure.getAggregateFunction());
+							}else{
+								yColumnNames.add(measure.getDisplayYColumnName());
+							}
 						}
 					}
 					
@@ -265,14 +284,12 @@ public class ChartRenderer {
 				}
 			}
 				
-			header.addProperty("title", title.toString());
 			header.addProperty("filterDescription", filterDescription.toString());
 			
 			header.add("yValues", rows);
 			header.add("xValues", xValues);
 			
 			final String data = header.toString();
-			
 			portlet.setChartDataJSON(data);
 		}
 	}
@@ -282,17 +299,17 @@ public class ChartRenderer {
 		List<XYModel> result = new ArrayList<XYModel>();
 		
 		List<String> xLabels = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(0), //First X column is being displayed as labels  
+				chartData.getxColumnNames().get(0).getColumnName(), //First X column is being displayed as labels  
 				chartData, true);
 		
 		List<String> groupedList = hpccService.getDistinctValues(
-				chartData.getXColumnNames().get(1), //Second X column is grouped
+				chartData.getxColumnNames().get(1).getColumnName(), //Second X column is grouped
 				chartData, true); 
 				
 		//Constructing Group Object
 		Group group = new Group();
 		List<String> newCols = new ArrayList<String>();
-		newCols.add(chartData.getXColumnNames().get(0));
+		newCols.add(chartData.getxColumnNames().get(0).getColumnName());
 		group.setxColumnNames(newCols);
 		group.setyColumnNames(groupedList);
 		chartData.setGroup(group);
@@ -385,9 +402,9 @@ public class ChartRenderer {
 			decryptedPassword = decrypter.decrypt(encryptedpassWord);
 			chartData.getHpccConnection().setPassword(decryptedPassword);
 		} catch (JAXBException e) {
-			LOG.error("EXCEPTION: JAXBException in ChartRenderer",e);
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
 		} catch (Exception e) {
-			LOG.error("EXCEPTION in parseXML()",e);
+			LOG.error(Labels.getLabel("exceptioninParseXML()"),e);
 		}		
 		return chartData;
 	}
@@ -400,8 +417,10 @@ public class ChartRenderer {
 	public String convertToXML(XYChartData chartData) {
 		
 		//encrypt password
+		String rawPassword = chartData.getHpccConnection().getPassword();
+		
 		EncryptDecrypt encrypter = new EncryptDecrypt("");
-		String encrypted = encrypter.encrypt(chartData.getHpccConnection().getPassword());
+		String encrypted = encrypter.encrypt(rawPassword);
 		chartData.getHpccConnection().setPassword(encrypted);
 		java.io.StringWriter sw = new StringWriter();
 		JAXBContext jaxbContext;
@@ -411,8 +430,124 @@ public class ChartRenderer {
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 			marshaller.marshal(chartData, sw);
 		} catch (JAXBException e) {
-			LOG.error("EXCEPTION: JAXBException in ChartRenderer",e);
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
 		}
+		
+		//reset raw password again to the object
+		chartData.getHpccConnection().setPassword(rawPassword);
+		
 	    return sw.toString();
+	}
+	
+	/**
+	 * Constructs XML string from the TreeData Object
+	 * @param chartData
+	 * @return String
+	 */
+	public String convertTreeDataToXML(TreeData treeData) {		
+		//encrypt password
+		String rawPassword = treeData.getHpccConnection().getPassword();
+		
+		EncryptDecrypt encrypter = new EncryptDecrypt("");
+		String encrypted = encrypter.encrypt(rawPassword);
+		treeData.getHpccConnection().setPassword(encrypted);
+		java.io.StringWriter sw = new StringWriter();
+		JAXBContext jaxbContext;
+		try {
+			jaxbContext = JAXBContext.newInstance(TreeData.class);
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			marshaller.marshal(treeData, sw);
+		} catch (JAXBException e) {
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
+		}
+		//reset raw password again to the object
+		treeData.getHpccConnection().setPassword(rawPassword);
+	    return sw.toString();		
+	}
+
+	/**
+	 * Parses the XML string and returns as TreeData Object
+	 * @param xml
+	 * @return
+	 * 	TreeData object
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
+	 */
+	public TreeData parseXMLToTreeData(String xml) throws ParserConfigurationException, SAXException, IOException {
+		String encryptedpassWord="";
+		String decryptedPassword="";
+		EncryptDecrypt decrypter = new EncryptDecrypt("");
+		TreeData treeData = null;
+		JAXBContext jaxbContext;
+		try {
+			jaxbContext = JAXBContext.newInstance(TreeData.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			treeData = (TreeData) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+			//decrypt password
+			encryptedpassWord = treeData.getHpccConnection().getPassword();
+			decryptedPassword = decrypter.decrypt(encryptedpassWord);
+			treeData.getHpccConnection().setPassword(decryptedPassword);
+		} catch (JAXBException e) {
+			LOG.error(Labels.getLabel("exceptioninJAXB"),e);
+		} catch (Exception e) {
+			LOG.error(Labels.getLabel("exceptioninParseXML()"),e);
+		}		
+		return treeData;
+	}
+	/**
+	 * Method to construct JSON data to draw tree layout
+	 * @param fName
+	 * @param lName
+	 * @param hpccConnection
+	 * @return String
+	 * @throws Exception
+	 */
+	public String constructTreeJSON(String fName, String lName,
+			HpccConnection hpccConnection) throws Exception {
+		
+		if(LOG.isDebugEnabled()){
+		LOG.debug("fName : "+fName+" lName : "+lName+" hpccConnection : "+hpccConnection);
+		}
+		Node parent = new Node(fName + " " + lName);		
+		List<List<String>> childrenL1 = hpccService.getFirstLevel(fName, lName,hpccConnection);
+		List<Node> nodeChildrenL1 = new ArrayList<Node>();
+		
+		StringBuilder nameBuilder;
+		for (List<String> list : childrenL1) {
+			nameBuilder = new StringBuilder();
+			ListIterator<String> iterator = list.listIterator();
+			while(iterator.hasNext()){
+				nameBuilder.append(iterator.next());
+				if(iterator.hasNext()){
+					nameBuilder.append(", ");
+				}
+			}				
+			nodeChildrenL1.add(new Node(nameBuilder.toString()));
+		}
+		parent.setChildren(nodeChildrenL1);
+
+		List<List<String>> childrenL2;
+		List<Node> nodeChildrenL2;
+		int i = 0;
+		for (List<String> list : childrenL1) {
+			childrenL2 = hpccService.getSecondLevel(list.get(0), list.get(1),hpccConnection);
+
+			nodeChildrenL2 = new ArrayList<Node>();
+			for (List<String> list2 : childrenL2) {
+				nameBuilder = new StringBuilder();
+				for (String string : list2) {
+					nameBuilder.append(string);
+				}
+				nodeChildrenL2.add(new Node(nameBuilder.toString()));
+			}
+			nodeChildrenL1.get(i).setChildren(nodeChildrenL2);
+			i++;
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Coverted JSON -> " + new Gson().toJson(parent));
+		}
+		return new Gson().toJson(parent);
 	}
 }

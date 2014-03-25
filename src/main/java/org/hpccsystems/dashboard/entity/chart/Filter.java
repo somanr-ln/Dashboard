@@ -1,6 +1,7 @@
 package org.hpccsystems.dashboard.entity.chart;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.List; 
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -10,14 +11,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Filter {
 	private Integer type;
 	private String column;
-	
-	@Override
-	public String toString() {
-		return "Filter [type=" + type + ", column=" + column + ", values="
-				+ values + ", StartValue=" + StartValue + ", EndValue="
-				+ EndValue + "]";
-	}
-
 	/**
 	 *  Present only got String Filter
 	 */
@@ -26,8 +19,11 @@ public class Filter {
 	/**
 	 * Present only for Numeric Filter
 	 */
-	private Double StartValue;
-	private Double EndValue;
+	private BigDecimal StartValue;
+	private BigDecimal EndValue;
+	
+	private boolean isCommonFilter = false;
+	
 	
 	@XmlAttribute
 	public Integer getType() {
@@ -48,20 +44,20 @@ public class Filter {
 	}
 	
 	@XmlElement
-	public Double getStartValue() {
+	public BigDecimal getStartValue() {
 		return StartValue;
 	}
 	
-	public void setStartValue(Double startValue) {
+	public void setStartValue(BigDecimal startValue) {
 		StartValue = startValue;
 	}
 	
 	@XmlElement
-	public Double getEndValue() {
+	public BigDecimal getEndValue() {
 		return EndValue;
 	}
 	
-	public void setEndValue(Double endValue) {
+	public void setEndValue(BigDecimal endValue) {
 		EndValue = endValue;
 	}
 	
@@ -72,6 +68,15 @@ public class Filter {
 	
 	public void setColumn(String column) {
 		this.column = column;
+	}
+	
+	@XmlElement
+	public boolean getIsCommonFilter() {
+		return isCommonFilter;
+	}
+	
+	public void setIsCommonFilter(boolean isGlobalFilter) {
+		this.isCommonFilter = isGlobalFilter;
 	}
 	
 	@Override
@@ -92,4 +97,13 @@ public class Filter {
 	public int hashCode() {
 		return this.column.hashCode();
 	}
+
+	@Override
+	public String toString() {
+		return "Filter [type=" + type + ", column=" + column + ", values="
+				+ values + ", StartValue=" + StartValue + ", EndValue="
+				+ EndValue + ", isGlobalFilter=" + isCommonFilter + "]";
+	}
+	
+	
 }

@@ -1,7 +1,9 @@
 package org.hpccsystems.dashboard.util;
 
-public class DashboardUtil {
-	private static final long serialVersionUID = 1L;	
+import org.hpccsystems.dashboard.entity.chart.HpccConnection;
+
+
+public class DashboardUtil {	
 	/**
 	 * Checks whether a column is numeric
 	 * @param column
@@ -18,6 +20,16 @@ public class DashboardUtil {
 				numericColumn = true;
 			}
 		return numericColumn;
+	}
+	/**Method constructs Hpcc Object
+	 * @return HpccConnection
+	 */
+	public HpccConnection constructHpccObj(){
+		HpccConnection hpccConnection = new HpccConnection(
+				"216.19.105.2", 18010, "", "generic_dashboard",
+				"Lexis123!", true, false);	
+		return hpccConnection;
+			
 	}
 
 }
